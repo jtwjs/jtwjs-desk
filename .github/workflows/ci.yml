@@ -1,0 +1,35 @@
+# harness-init 이 harness.json.verify 에서 실제로 통과한 명령만 채운다.
+# 비어 있는 단계는 넣지 않는다 — 없는 명령을 적으면 첫날부터 red 가 뜬다.
+# 플레이스홀더 {{…}} 는 7개. 출처와 비었을 때 규칙은 harness-init SKILL.md §4 표.
+# 채운 뒤 플레이스홀더({{대문자}})가 남아 있으면 안 된다 — 빈 run: 은 워크플로 자체가 거부된다.
+# (GitHub 식 ${{ github.… }} 는 플레이스홀더가 아니다. 검사는 grep -cE '\{\{[A-Z_]+\}\}')
+#
+# 형태 둘 — harness.json verify 형태를 따른다:
+#   단일 앱 (verify 가 키→명령 문자열)  → 아래 jobs.verify 그대로
+#   앱별   (verify 가 { "<root>": {…} }) → 맨 아래 주석 블록 형태로 바꾼다 (앱별 잡 + paths 필터 + ci-gate)
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+# 같은 PR 에 새 push 가 오면 이전 실행을 취소한다. 기준 브랜치 push 는 취소하지 않는다.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 🔴 test 는 건너뛰지 않는다.
+      #    harness.json 의 ci.test 가 "deferred" 면 이 단계를 넣되 아래처럼 사실을 남긴다.
+      #    조용히 빼면 "테스트가 없다"가 아니라 "테스트가 있는 줄" 알게 된다.
+      #    deferred 일 때 harness-init 이 넣는 줄:
+      #      run: echo "test deferred — .claude/harness.json ci.test 참고"
+      - name: test
+        run: echo "test deferred — .claude/harness.json ci.test 참고"
+

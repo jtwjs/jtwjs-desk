@@ -1,0 +1,19 @@
+# ── 하네스 (harness-init 이 추가) ────────────────────────────────────────────
+# 훅이 남기는 로컬 상태. 커밋하면 안 된다 — 사람마다 다르고 매 세션 바뀐다.
+.claude/.last-*
+
+# 채점 리포트(weekly-readiness-check). 추세는 로컬에서만 본다.
+.claude/reports/
+
+# _brain/internal/ 이중 차단 — _brain/.gitignore 에도 있지만, 나중에 _brain/ 을 커밋으로 전환할 때 같이 열리지 않게.
+# _brain/ 이 없는 레포에서는 아무 효과가 없다.
+_brain/internal/
+
+# 디자인 레퍼런스 캡처(남의 화면) — 로컬 전용. 출처·목록을 적은 README 만 커밋한다(design-brief §0.5).
+# 캔버스 소스 .claude/design/canvas/ 는 ignore 하지 않는다 — 레포와 같이 버전관리하는 자산이다.
+.claude/design/references/*
+!.claude/design/references/README.md
+
+# ⚠️ 아래는 ignore 하지 않는다 — 이것들이 자산이다:
+#   .claude/harness.json  .claude/README.md  .claude/rules/  .claude/references/
+#   .gitignore 에 넣고 혼자 쓰면 자산이 아니라 dotfiles 다.

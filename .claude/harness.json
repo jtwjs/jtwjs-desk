@@ -1,0 +1,60 @@
+{
+  "$comment": "harness-init 이 실제로 돌려보고 통과한 것만 채운다. 없는 키는 비워 둔다 — 지어내지 않는다.",
+  "harness": {
+    "$comment": "이 파일을 만든 플러그인 버전. harness-init 이 ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json 의 version 으로 채우고, harness-doctor 검사 0 이 현재 플러그인과 비교해 스키마 표류를 잡는다. (2026-10-08 — 실레포 9개의 키 모양이 4종으로 갈라져 있었는데 어느 버전으로 깔렸는지 알 길이 없었다.)",
+    "version": "0.34.0"
+  },
+  "stacks": {
+    "$comment": "harness-init 이 빌드 파일로 판정한 스택 팩. 예: [{ \"pack\": \"kotlin-spring\", \"root\": \".\" }]. 비어 있으면 팩 없음. kitRef 는 project-new 가 degit 한 kit 과 고정 ref(예: \"jtwjs/stack-kits/fullstack#v0.2.1\"). kit 없이 깔았으면 비운다.",
+    "packs": [],
+    "kitRef": ""
+  },
+  "git": {
+    "$comment": "baseBranch 는 harness-init 이 git symbolic-ref refs/remotes/origin/HEAD 에서 채운다. commitScope=false 면 'feat(x):' 괄호 스코프를 쓰지 않고 영역은 본문에 적는다. branchPattern 은 SDD 러너가 만드는 브랜치 이름 규칙({task} 필수, 예: feature/{task}). 비우면 feat-{task}. 적어 두면 이미 규칙 앞부분(feature/)에 맞는 브랜치에 있을 때 그대로 쓴다.",
+    "baseBranch": "main",
+    "branchPattern": "feature/{task}",
+    "commitScope": false
+  },
+  "packageManager": "",
+  "verifyAffects": {
+    "$comment": "앱별 verify 일 때만 쓴다. SDD 러너 판정 6은 step 이 바꾼 파일이 든 앱만 돌리고(앱 밖 파일·phase 마지막 step 이면 전부), 여기 걸린 경로가 바뀌면 적힌 앱도 같이 돌린다. 예: { \"server/src/main/resources/openapi/**\": [\"web\"] }. harness-init 이 계약 경로·CI paths 필터를 보고 제안한다."
+  },
+  "verify": {
+    "$comment": "format 은 반드시 읽기 전용(--check 계열). 포맷 적용은 auto-format 훅이 편집 직후에 한다. 형태 둘: ① 단일 앱 — 지금처럼 키→명령 문자열, 레포 루트에서 실행. ② 앱별 — { \"<root>\": { \"format\": \"…\", \"lint\": \"…\", \"typecheck\": \"…\", \"test\": \"…\", \"build\": \"…\" } }, root 는 stacks.packs[].root 와 같은 값이고 명령은 그 폴더에서 실행한다. 앱별이면 아래 단일 앱 키 5개는 지운다(섞으면 앱별만 읽힌다). step 명령(선택): 앱(단일 앱이면 여기)에 \"$step\": { \"test\": \"vitest run --changed {since}\" } 처럼 두면 SDD 러너가 step 중간에는 이것을, phase 마지막·재개·앱 밖 파일 step 에는 전체 명령을 쓴다. {since} = 그 step 시작 커밋, 명령이 바뀐 파일로 영향받은 테스트만 고른다. — 이 레포: test 비어 있음. 빈 레포에서 python3 -m unittest discover -s tests 는 테스트 0개라 exit 5(2026-11-02 실측). sdd 첫 step 이 첫 테스트와 함께 채운다.",
+    "format": "",
+    "lint": "",
+    "typecheck": "",
+    "test": "",
+    "build": ""
+  },
+  "test": {
+    "$comment": "bddAlias 가 false 면 러너 step·test-writer 는 별칭 파일을 심지 않고 중첩 describe 로 3계층을 만든다.",
+    "runner": "unittest",
+    "bddAlias": false
+  },
+  "ci": {
+    "$comment": "test 게이트가 없으면 'deferred'. 비워 두지 말고 deferred 라고 적어야 매번 보고된다.",
+    "test": "deferred"
+  },
+  "tdd": {
+    "$comment": "exclude 는 .claude/rules/testing.md §0 과 같은 내용을 가리켜야 한다. 어긋나면 막는 것과 적힌 것이 달라진다. — 이 레포: enabled false. tdd-guard 훅은 짝 테스트를 foo.test.py 로만 찾는데 Python unittest 는 그 이름을 import 못 한다(2026-11-02 harness-init). RED/GREEN 판정은 sdd_runner judge 가 git 기록으로 따로 한다.",
+    "enabled": false,
+    "include": [
+      "hooks/**/*.py",
+      "scripts/**/*.py",
+      "page/**/*.py"
+    ],
+    "exclude": [
+      "tests/**"
+    ]
+  },
+  "release": {
+    "$comment": "null 이면 changeset 스킬이 스스로 skip 한다.",
+    "tool": null
+  },
+  "brainSync": {
+    "$comment": "통합 wiki 경로와 대상 폴더. brain-sync 가 처음 실행될 때 물어서 캐시한다.",
+    "wikiPath": "",
+    "targetFolder": ""
+  }
+}
