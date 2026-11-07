@@ -3,7 +3,8 @@
 ## 읽어야 할 파일
 
 - `CLAUDE.md`, `docs/desk-2026-11-03/{PRD,ARCHITECTURE,ADR}.md` — 특히 ADR-003(서버 생애주기) · ADR-004(토큰+Origin+Host)
-- `desk/paths.py`·`desk/atomic.py`·`desk/sort.py`(step 1 산출물)
+- `desk/paths.py`·`desk/atomic.py`·`desk/sort.py`·`desk/validate.py`(step 1 산출물) — `validate_pick`이 `at`을 문자열로만 받는다(코드 확인)
+- `scripts/desk.py`의 `cmd_picks_new`(step 3 산출물) — `pick["at"]`을 `datetime.fromisoformat(at)`로 파싱한다. **이 step이 쓰는 pick의 `at` 형식이 여기 맞아야 한다**(string ISO-8601, `time.time()` float 금지)
 - `~/dev/jtwjs/claude-harness/.claude-plugin/plugin.json`(형식 참고 — 이 레포에 없는 `name`·`version`·`author`·`description`·`keywords` 필드 구성을 그대로 본뜬다)
 - `.claude/rules/testing.md` §0·§5
 
@@ -33,7 +34,7 @@
     4. 대상 `<repo>/<id>.json`(ask)이 없으면 `404`
     5. `<repo>/<id>.applied.json`이 **있으면 `409`**(반영된 판정은 잠긴다 — PRD `desk-repick`, ADR-004)
     6. `desk.validate.validate_pick`로 필드 검증 — 틀리면 `400` + 틀린 필드 목록
-    7. 통과하면 `at=time.time()`을 더해 `<repo>/<id>.pick.json`에 원자적으로 쓴다(이미 있으면 덮어씀 — 반영 전 재선택 허용). `200`
+    7. 통과하면 `at=datetime.now().isoformat()`(**문자열, `time.time()` 아님** — `desk/validate.py`의 `validate_pick`이 `at`을 non-empty string으로만 받고, step 3의 `cmd_picks_new`가 `datetime.fromisoformat(at)`로 파싱한다. 여기서 float를 쓰면 step 3이 깨진다)을 더해 `<repo>/<id>.pick.json`에 원자적으로 쓴다(이미 있으면 덮어씀 — 반영 전 재선택 허용). `200`
   - `POST /shutdown` → `X-Desk-Token` 일치해야 함(아니면 `403`). 일치하면 응답 후 서버를 정지한다(ADR-003 "버전이 다르면 POST /shutdown 뒤 다시 띄운다").
   - `GET /` → `page/index.html`을 읽어, 그 안의 **리터럴 문자열 `__DESK_TOKEN__`을 실제 토큰으로 치환**해 응답한다(ADR-004 "자기가 내주는 index.html에 심는다"). **이 step은 그 자리표시자만 가진 최소 `page/index.html`을 만든다**(`<script>const DESK_TOKEN = "__DESK_TOKEN__";</script>` 한 줄 수준) — 실제 탭 UI는 step 5가 이 자리표시자를 보존한 채 채운다. 자리표시자 문자열을 바꾸면 step 5와 어긋난다.
 - `serve_forever(port: int | None = None) -> None`: 포트(기본 47615, `DESK_PORT`로 재정의 — ADR-003)에 `bind_or_exit` → 실패면 `return`. 성공하면 토큰 생성 → `write_server_meta` → HTTP 서버 루프.
@@ -47,6 +48,7 @@
 - `.claude/harness.json`의 `verify.test` 통과.
 - 임시 포트로 서버를 띄운 통합 테스트(ARCHITECTURE 테스트 전략 "서버를 임시 포트로 띄워 GET/POST"): `GET /version`, `GET /sessions`(빈 상태 → `[]`), `POST /pick` 토큰 누락(`403`)·Origin 다름(`403`)·ask 없음(`404`)·정상(`200`)·반영된 id(`409`) 전부 확인.
 - 포트 충돌 시나리오: 같은 포트로 두 번째 `bind_or_exit`를 호출하면 `None`(실제 소켓을 먼저 bind해 둔 채 테스트).
+- `POST /pick` 정상 응답 뒤 쓰인 `<id>.pick.json`의 `at`이 `desk.validate.validate_pick([그 dict])`를 통과하는 **문자열**인지, `scripts.desk.cmd_picks_new`가 그 파일을 실제로 읽어 `--since` 필터를 통과시키는지까지 확인(단순 "파일이 생겼다"보다 한 단계 더 — step 3과의 형식 계약 검증).
 
 ## 검증 절차
 
