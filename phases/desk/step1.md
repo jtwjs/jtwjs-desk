@@ -3,7 +3,7 @@
 ## 읽어야 할 파일
 
 - `CLAUDE.md`, `docs/desk-2026-11-03/{PRD,ARCHITECTURE,ADR}.md`
-- `.claude/harness.json` (`verify` 절 — 지금 `test`가 빈 문자열이다. 이 step이 처음 채운다)
+- `.claude/harness.json` (`verify.test` = `python3 -m unittest discover -s tests` — `sdd_runner.py start`가 tdd step 선행 점검으로 문자열 존재를 요구해 미리 채워 뒀다. 지금은 `tests/`가 비어 있어 이 명령이 exit 5다)
 - `.claude/rules/testing.md` (BDD 3계층 · 엣지 5축 · colocation 원칙)
 - 참고용 유사 패턴 없음(이 레포 첫 코드). `desk/`는 아래 step들이 전부 import하는 공용 모듈이므로 다른 패턴을 베끼지 말고 이 파일의 시그니처를 그대로 따른다.
 
@@ -36,7 +36,7 @@
 
 ## Acceptance Criteria
 
-- `python3 -m unittest discover -s tests` 통과. **이 step 시작 시점엔 테스트가 0개라 exit 5다** — 이 step이 `tests/test_desk_core.py`(최소)를 추가하고 나서 `.claude/harness.json`의 `verify.test`를 `"python3 -m unittest discover -s tests"`로 채운다(지금 빈 문자열인 이유: `harness.json` 주석 "sdd 첫 step 이 첫 테스트와 함께 채운다"). 채운 뒤 같은 명령이 통과해야 한다.
+- `python3 -m unittest discover -s tests`(`.claude/harness.json` `verify.test`, 이미 채워져 있다) 통과. **이 step 시작 시점엔 테스트가 0개라 exit 5다** — `tests/test_desk_core.py`(최소)를 추가하면 같은 명령이 통과해야 한다.
 - `verify.lint`·`verify.typecheck`·`verify.build`는 비어 있다 — 채우지 않는다(외부 패키지 없음, 린터 없음. PRD 범위 결정).
 
 ## 검증 절차

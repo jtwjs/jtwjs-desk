@@ -20,11 +20,11 @@
     "$comment": "앱별 verify 일 때만 쓴다. SDD 러너 판정 6은 step 이 바꾼 파일이 든 앱만 돌리고(앱 밖 파일·phase 마지막 step 이면 전부), 여기 걸린 경로가 바뀌면 적힌 앱도 같이 돌린다. 예: { \"server/src/main/resources/openapi/**\": [\"web\"] }. harness-init 이 계약 경로·CI paths 필터를 보고 제안한다."
   },
   "verify": {
-    "$comment": "format 은 반드시 읽기 전용(--check 계열). 포맷 적용은 auto-format 훅이 편집 직후에 한다. 형태 둘: ① 단일 앱 — 지금처럼 키→명령 문자열, 레포 루트에서 실행. ② 앱별 — { \"<root>\": { \"format\": \"…\", \"lint\": \"…\", \"typecheck\": \"…\", \"test\": \"…\", \"build\": \"…\" } }, root 는 stacks.packs[].root 와 같은 값이고 명령은 그 폴더에서 실행한다. 앱별이면 아래 단일 앱 키 5개는 지운다(섞으면 앱별만 읽힌다). step 명령(선택): 앱(단일 앱이면 여기)에 \"$step\": { \"test\": \"vitest run --changed {since}\" } 처럼 두면 SDD 러너가 step 중간에는 이것을, phase 마지막·재개·앱 밖 파일 step 에는 전체 명령을 쓴다. {since} = 그 step 시작 커밋, 명령이 바뀐 파일로 영향받은 테스트만 고른다. — 이 레포: test 비어 있음. 빈 레포에서 python3 -m unittest discover -s tests 는 테스트 0개라 exit 5(2026-11-02 실측). sdd 첫 step 이 첫 테스트와 함께 채운다.",
+    "$comment": "format 은 반드시 읽기 전용(--check 계열). 포맷 적용은 auto-format 훅이 편집 직후에 한다. 형태 둘: ① 단일 앱 — 지금처럼 키→명령 문자열, 레포 루트에서 실행. ② 앱별 — { \"<root>\": { \"format\": \"…\", \"lint\": \"…\", \"typecheck\": \"…\", \"test\": \"…\", \"build\": \"…\" } }, root 는 stacks.packs[].root 와 같은 값이고 명령은 그 폴더에서 실행한다. 앱별이면 아래 단일 앱 키 5개는 지운다(섞으면 앱별만 읽힌다). step 명령(선택): 앱(단일 앱이면 여기)에 \"$step\": { \"test\": \"vitest run --changed {since}\" } 처럼 두면 SDD 러너가 step 중간에는 이것을, phase 마지막·재개·앱 밖 파일 step 에는 전체 명령을 쓴다. {since} = 그 step 시작 커밋, 명령이 바뀐 파일로 영향받은 테스트만 고른다. — 2026-11-07 수정: sdd_runner.py start 가 tdd:true step 이 있으면 verify.test 가 비어 있지 않은지(문자열만, 실행은 안 함) 선행 점검한다 — 그래서 phase desk 시작 전에 미리 채웠다. 빈 tests/ 에서 이 명령은 exit 5(테스트 0개, 2026-11-02 실측) — step 1이 첫 테스트를 추가하면 정상화된다.",
     "format": "",
     "lint": "",
     "typecheck": "",
-    "test": "",
+    "test": "python3 -m unittest discover -s tests",
     "build": ""
   },
   "test": {
