@@ -36,8 +36,11 @@
     {
       "step": 3,
       "name": "desk-script",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T19:10:05+0900",
+      "summary": "scripts/{__init__,desk}.py 생성 — cmd_ask/cmd_picks_new/cmd_applied/cmd_prune 4개 서브커맨드. raw 인자는 항상 파일 경로 또는 '-'만 받고(JSON 텍스트 직접 금지), picks --new의 --since(float, epoch)는 pick.at(ISO 문자열)을 datetime.fromisoformat(...).timestamp()로 변환해 비교한다. applied는 재반영을 덮어쓰기로 허용(취소 수단이 없어서), prune은 세 파일(.json/.pick.json/.applied.json)을 없는 것은 무시하며 지운다. scripts/는 desk/만 import(hooks/·page/ 없음), 모든 쓰기는 write_json_atomic 경유. tests/test_desk_script.py 26개 추가, 전체 108개 통과.",
+      "completed_at": "2026-11-07T19:18:00+0900"
     },
     {
       "step": 4,
