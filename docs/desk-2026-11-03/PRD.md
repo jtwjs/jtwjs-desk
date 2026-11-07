@@ -87,6 +87,7 @@ flowchart TB
 | desk-server-lifecycle | 플러그인 경로는 버전마다 바뀐다 | 아무 세션의 SessionStart 훅이 서버가 없거나 버전이 다르면 띄운다 | AI 추천 수용 | launchd 상시: 업데이트 때 옛 경로 |
 | desk-repick | 잘못 누른 선택을 채팅 우회 없이 고친다. 반영된 뒤 바뀌면 이슈와 화면이 어긋난다 | 반영 전까지는 다시 고를 수 있고, 반영되면 잠긴다 | Finn | 한 번 고르면 끝(채팅 우회가 돌아옴) · 언제든 다시(이슈와 어긋남) |
 | desk-language | 훅은 설치 없이 빨리 떠야 한다 | Python 표준 라이브러리 | Finn (이유 미기록) | Node + TS · 섞기 |
+| desk-prune-days | 반영된 판정을 얼마나 보관하나 정한다 | 기본 7일(`desk.py prune --days 7`) | Finn | 14일·30일: 혼자 쓰는 도구라 과거 판정을 오래 뒤적일 일이 적다 |
 
 ## 수용 조건
 
@@ -112,6 +113,6 @@ flowchart TB
 
 ## 남은 ⚠️
 
-- ⚠️ 정리 기간(반영 뒤 며칠): 막지 않음. 계획 단계에서 정한다
+- ~~정리 기간(반영 뒤 며칠)~~ → desk-prune-days(기본 7일)
 - ~~포트 번호 · 페이지 토큰 전달 방식~~ → ADR-003(포트 47615 · bind로 단일 실행) · ADR-004(토큰 + Origin + Host)
 - ~~ntfy 토픽~~ → ADR-005(routine과 따로)
