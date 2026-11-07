@@ -21,6 +21,7 @@
 
 - **[셸 · 검증]** 검증 명령을 `| grep`·`| tail`에 물린 채 `$?`로 통과를 판정하지 않는다 — 파이프 끝 명령의 종료 코드가 나와, 빌드가 성공했는데 grep이 못 찾아 `1`이 찍혔다. `set -o pipefail` 또는 `${PIPESTATUS[0]}`, 아니면 출력은 파일로 돌리고 종료 코드를 따로 본다. (2026-10-07 실측)
 - **[셸 · zsh]** 변수에 담은 여러 단어 명령(`TASKS="compileKotlin compileTestKotlin"; ./gradlew $TASKS`)은 zsh에서 쪼개지지 않아 한 인자로 넘어간다. 배열이나 `${=TASKS}`를 쓴다. (2026-09-29 실측)
+- **[sdd_runner · git]** `judge`는 RED 커밋 시점 검증 때 detached checkout → `feature/{task}` 브랜치로 되돌아오는데, 이 `git checkout <branch>`가 **`phases/{task}/`의 미커밋 변경(step*.md 포함)까지 통째로 버린다** — 제외 대상(`:(exclude)phases/{task}`)은 러너의 `add -A`에만 적용되지, 브랜치 체크아웃의 파일 되돌림에는 적용 안 됨. step*.md를 러너 가동 중에 고치면 **고친 즉시 커밋**한다(judge 호출 전). (2026-11-07 실측 — step4.md 수정이 step3 judge 1회 호출로 통째로 사라짐)
 
 ---
 
