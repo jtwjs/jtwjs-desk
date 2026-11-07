@@ -2,11 +2,667 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>지휘 책상</title>
+<style>
+  :root {
+    --bg: #f5f5f4;
+    --panel: #ffffff;
+    --text: #1c1c1a;
+    --muted: #6b6b66;
+    --border: #ddd9d2;
+    --accent: #2563eb;
+    --accent-bg: #eaf1ff;
+    --warn: #b45309;
+    --warn-bg: #fff3e0;
+    --danger: #b91c1c;
+    --danger-bg: #fdecec;
+    --locked-bg: #f0f0ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17171a;
+      --panel: #212125;
+      --text: #ededec;
+      --muted: #9a9a97;
+      --border: #35353a;
+      --accent: #60a5fa;
+      --accent-bg: #16233b;
+      --warn: #fbbf24;
+      --warn-bg: #3a2a0d;
+      --danger: #f87171;
+      --danger-bg: #3a1414;
+      --locked-bg: #27272b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  header {
+    display: flex;
+    gap: 4px;
+    padding: 10px 16px 0;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-size: 15px;
+    margin: 0 16px 10px 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+  .tab-btn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tab-btn.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  .tab-panel[hidden] { display: none; }
+  .empty-msg {
+    color: var(--muted);
+    padding: 24px 8px;
+    text-align: center;
+  }
+  .repo-group {
+    margin-bottom: 18px;
+  }
+  .repo-group h2 {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 6px 2px;
+  }
+  .session-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  .session-row .status-icon { font-size: 16px; width: 22px; text-align: center; }
+  .session-row .status-text { font-weight: 600; min-width: 70px; }
+  .session-row .branch { color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .session-row .ago { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .session-row.idle { background: var(--warn-bg); }
+  .session-row.waiting { background: var(--accent-bg); }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .card.locked { background: var(--locked-bg); }
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .card-meta .repo-chip {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-weight: 600;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .badge.premise { background: var(--warn-bg); color: var(--warn); }
+  .badge.applied { background: #dcfce7; color: #15803d; }
+  @media (prefers-color-scheme: dark) {
+    .badge.applied { background: #0f3b22; color: #4ade80; }
+  }
+  .card h3 {
+    margin: 4px 0 2px;
+    font-size: 16px;
+  }
+  .card .why {
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  .card .see {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0 0 10px;
+  }
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .option-btn {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .option-btn.recommended { border-color: var(--accent); }
+  .option-btn.recommended .rec-badge {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+  .option-btn.picked { outline: 2px solid var(--accent); }
+  .option-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+
+  .ai-decided {
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  .ai-decided .title { font-weight: 600; margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+
+  .custom-area {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .custom-area textarea {
+    width: 100%;
+    min-height: 54px;
+    resize: vertical;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 6px 8px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .note-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .note-row input, .note-row select {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  .note-row input[type="text"] { flex: 1; min-width: 140px; }
+  .custom-area button, .submit-row button {
+    margin-top: 6px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .custom-area button:disabled, .submit-row button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .current-pick {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .card-error {
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .applied-info {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .applied-info a { color: var(--accent); }
+
+  #banner {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    max-width: 90vw;
+  }
+  #banner[hidden] { display: none; }
+</style>
 </head>
 <body>
+<header>
+  <h1>지휘 책상</h1>
+  <button type="button" class="tab-btn active" data-tab="track">트랙</button>
+  <button type="button" class="tab-btn" data-tab="judge">판정</button>
+</header>
+<main>
+  <section id="tab-track" class="tab-panel">
+    <div id="track-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-judge" class="tab-panel" hidden>
+    <div id="judge-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+</main>
+<div id="banner" hidden></div>
 <script>
 const DESK_TOKEN = "__DESK_TOKEN__";
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var POLL_MS = 15000;
+
+  var STATUS_ICON = {
+    "승인 대기": "🔔",
+    "신호 없음": "💤",
+    "입력 대기": "⌨️",
+    "작업 중": "⚙️",
+    "완료": "✅"
+  };
+
+  var NOTE_KIND_LABEL = {
+    reason: "이유",
+    scope: "범위 바뀜",
+    new: "새 일"
+  };
+
+  // ---- 탭 전환(클라이언트 쪽에서만, 새 요청 없음) ----
+
+  var tabButtons = document.querySelectorAll(".tab-btn");
+  var panels = {
+    track: document.getElementById("tab-track"),
+    judge: document.getElementById("tab-judge")
+  };
+
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = btn.getAttribute("data-tab");
+      tabButtons.forEach(function (b) {
+        b.classList.toggle("active", b === btn);
+      });
+      Object.keys(panels).forEach(function (key) {
+        panels[key].hidden = key !== target;
+      });
+    });
+  });
+
+  // ---- 배너(에러 안내) ----
+
+  var bannerEl = document.getElementById("banner");
+  var bannerTimer = null;
+
+  function showBanner(text, ms) {
+    bannerEl.textContent = text;
+    bannerEl.hidden = false;
+    if (bannerTimer) clearTimeout(bannerTimer);
+    if (ms !== 0) {
+      bannerTimer = setTimeout(function () {
+        bannerEl.hidden = true;
+      }, ms || 6000);
+    }
+  }
+
+  // ---- 공용 ----
+
+  function minutesAgoText(lastAt) {
+    if (typeof lastAt !== "number") return "";
+    var secs = Date.now() / 1000 - lastAt;
+    if (secs < 0) secs = 0;
+    var mins = Math.floor(secs / 60);
+    if (mins < 1) return "방금 전";
+    return mins + "분 전";
+  }
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        if (k === "class") node.className = attrs[k];
+        else if (k === "text") node.textContent = attrs[k];
+        else node.setAttribute(k, attrs[k]);
+      });
+    }
+    (children || []).forEach(function (c) {
+      if (c) node.appendChild(c);
+    });
+    return node;
+  }
+
+  // ---- 트랙 탭 ----
+  // 서버(desk.sort.sort_sessions)가 이미 정렬한 순서를 그대로 쓴다.
+  // 여기서는 레포별로 묶기만 하고, 각 레포 안 순서·레포 등장 순서는
+  // 서버가 준 배열의 순서를 그대로 보존한다(재정렬하지 않음).
+
+  function groupByRepoPreservingOrder(sessions) {
+    var order = [];
+    var groups = {};
+    sessions.forEach(function (s) {
+      var repo = s.repo || "(알수없음)";
+      if (!groups[repo]) {
+        groups[repo] = [];
+        order.push(repo);
+      }
+      groups[repo].push(s);
+    });
+    return order.map(function (repo) {
+      return { repo: repo, sessions: groups[repo] };
+    });
+  }
+
+  function renderSessions(sessions) {
+    var container = document.getElementById("track-content");
+    container.innerHTML = "";
+
+    if (!sessions || sessions.length === 0) {
+      container.appendChild(el("p", { class: "empty-msg", text: "실행 중인 세션이 없습니다." }));
+      return;
+    }
+
+    var groups = groupByRepoPreservingOrder(sessions);
+    groups.forEach(function (g) {
+      var groupEl = el("div", { class: "repo-group" });
+      groupEl.appendChild(el("h2", { text: g.repo }));
+      g.sessions.forEach(function (s) {
+        var effStatus = s.effectiveStatus || s.status || "";
+        var rowClass = "session-row";
+        if (effStatus === "신호 없음") rowClass += " idle";
+        if (effStatus === "승인 대기") rowClass += " waiting";
+        var row = el("div", { class: rowClass });
+        row.appendChild(el("span", { class: "status-icon", text: STATUS_ICON[effStatus] || "" }));
+        row.appendChild(el("span", { class: "status-text", text: effStatus }));
+        row.appendChild(el("span", { class: "branch", text: s.branch || "" }));
+        row.appendChild(el("span", { class: "ago", text: minutesAgoText(s.lastAt) }));
+        groupEl.appendChild(row);
+      });
+      container.appendChild(groupEl);
+    });
+  }
+
+  function fetchSessions() {
+    fetch("/sessions")
+      .then(function (res) {
+        if (!res.ok) throw new Error("sessions " + res.status);
+        return res.json();
+      })
+      .then(renderSessions)
+      .catch(function () {
+        // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+      });
+  }
+
+  // ---- 판정 탭 ----
+
+  function buildOptionButton(card, opt, locked) {
+    var classes = "option-btn";
+    if (opt.recommended) classes += " recommended";
+    var currentChoice = card.pick && card.pick.choice;
+    if (currentChoice === opt.key) classes += " picked";
+
+    var children = [el("span", { text: opt.label })];
+    if (opt.recommended) {
+      children.push(el("span", { class: "rec-badge", text: "지휘 추천" }));
+    }
+    var btn = el("button", { class: classes, type: "button" }, children);
+    btn.disabled = locked;
+    // 클릭 핸들러는 buildCard에서 메모 입력칸과 함께 한 번만 붙인다.
+    return btn;
+  }
+
+  function buildAiDecided(aiDecided) {
+    if (!aiDecided || aiDecided.length === 0) return null;
+    var box = el("div", { class: "ai-decided" });
+    box.appendChild(el("div", { class: "title", text: "AI가 정한 것" }));
+    aiDecided.forEach(function (entry) {
+      box.appendChild(el("div", { text: entry.label }));
+    });
+    return box;
+  }
+
+  function currentPickSummary(card) {
+    if (!card.pick) return null;
+    var text = "현재 선택: ";
+    if (card.pick.choice === "custom") {
+      text += "직접 답 — " + (card.pick.customText || "");
+    } else {
+      var opt = (card.options || []).find(function (o) { return o.key === card.pick.choice; });
+      text += opt ? opt.label : card.pick.choice;
+    }
+    if (card.pick.note) {
+      text += " (메모: " + card.pick.note + ")";
+    }
+    return el("div", { class: "current-pick", text: text });
+  }
+
+  function buildAppliedInfo(applied) {
+    var box = el("div", { class: "applied-info" });
+    box.appendChild(el("span", { text: "반영됨" }));
+    if (applied.issue) {
+      box.appendChild(document.createTextNode(" · "));
+      var link = el("a", { href: applied.issue, target: "_blank", rel: "noopener", text: applied.issue });
+      box.appendChild(link);
+    }
+    return box;
+  }
+
+  function buildCard(card) {
+    var locked = !!card.applied;
+    var cardEl = el("div", { class: locked ? "card locked" : "card" });
+
+    var meta = el("div", { class: "card-meta" });
+    meta.appendChild(el("span", { class: "repo-chip", text: card.repo }));
+    if (card.area) meta.appendChild(el("span", { text: card.area }));
+    if (card.premiseOpen) {
+      meta.appendChild(el("span", { class: "badge premise", text: "전제 열림" }));
+    }
+    if (locked) {
+      meta.appendChild(el("span", { class: "badge applied", text: "반영됨" }));
+    }
+    cardEl.appendChild(meta);
+
+    cardEl.appendChild(el("h3", { text: card.question || "" }));
+    if (card.why) {
+      cardEl.appendChild(el("p", { class: "why", text: card.why }));
+    }
+    if (card.see && card.see.length > 0) {
+      cardEl.appendChild(el("p", { class: "see", text: "참고: " + card.see.join(", ") }));
+    }
+
+    var pickSummary = currentPickSummary(card);
+    if (pickSummary) cardEl.appendChild(pickSummary);
+
+    var aiBox = buildAiDecided(card.aiDecided);
+    if (aiBox) cardEl.appendChild(aiBox);
+
+    var optionsEl = el("div", { class: "options" });
+    (card.options || []).forEach(function (opt) {
+      optionsEl.appendChild(buildOptionButton(card, opt, locked));
+    });
+    cardEl.appendChild(optionsEl);
+
+    var errorEl = el("div", { class: "card-error" });
+
+    var customArea = el("div", { class: "custom-area" });
+    var textarea = el("textarea", { placeholder: "직접 쓰기" });
+    textarea.disabled = locked;
+    if (!locked && card.pick && card.pick.choice === "custom") {
+      textarea.value = card.pick.customText || "";
+    }
+    customArea.appendChild(textarea);
+
+    var noteRow = el("div", { class: "note-row" });
+    var noteInput = el("input", { type: "text", placeholder: "메모(선택)" });
+    noteInput.disabled = locked;
+    if (!locked && card.pick && card.pick.note) {
+      noteInput.value = card.pick.note;
+    }
+    var noteKindSelect = el("select", {});
+    noteKindSelect.disabled = locked;
+    [["", "메모 종류"], ["reason", "이유"], ["scope", "범위 바뀜"], ["new", "새 일"]].forEach(function (pair) {
+      var opt = el("option", { value: pair[0], text: pair[1] });
+      noteKindSelect.appendChild(opt);
+    });
+    if (!locked && card.pick && card.pick.noteKind) {
+      noteKindSelect.value = card.pick.noteKind;
+    }
+    noteRow.appendChild(noteInput);
+    noteRow.appendChild(noteKindSelect);
+    customArea.appendChild(noteRow);
+
+    var submitBtn = el("button", { type: "button", text: "직접 답 제출" });
+    submitBtn.disabled = locked;
+    submitBtn.addEventListener("click", function () {
+      var text = textarea.value.trim();
+      if (!text) {
+        errorEl.textContent = "직접 쓰기 칸이 비어 있습니다.";
+        return;
+      }
+      submitPick(card, { choice: "custom", customText: text }, noteInput, noteKindSelect, errorEl);
+    });
+    customArea.appendChild(submitBtn);
+    cardEl.appendChild(customArea);
+
+    // 옵션 클릭에도 같은 메모 칸을 쓴다 — 클로저로 재참조한다.
+    optionsEl.querySelectorAll(".option-btn").forEach(function (btn, idx) {
+      btn.addEventListener("click", function () {
+        var opt = (card.options || [])[idx];
+        if (!opt) return;
+        submitPick(card, { choice: opt.key }, noteInput, noteKindSelect, errorEl);
+      }, { once: false });
+    });
+
+    cardEl.appendChild(errorEl);
+
+    if (locked) {
+      cardEl.appendChild(buildAppliedInfo(card.applied));
+    }
+
+    return cardEl;
+  }
+
+  function submitPick(card, fields, noteInput, noteKindSelect, errorEl) {
+    var body = { repo: card.repo, id: card.id, choice: fields.choice };
+    if (fields.customText !== undefined) body.customText = fields.customText;
+
+    var noteVal = noteInput ? noteInput.value.trim() : "";
+    if (noteVal) {
+      body.note = noteVal;
+      body.noteKind = noteKindSelect ? noteKindSelect.value : "";
+    }
+
+    fetch("/pick", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Desk-Token": DESK_TOKEN
+      },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        if (res.status === 200) {
+          fetchJudgments();
+          return;
+        }
+        if (res.status === 409) {
+          showBanner("이미 반영된 판정입니다 — 화면을 새로 불러옵니다.");
+          fetchJudgments();
+          return;
+        }
+        if (res.status === 403) {
+          showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
+          return;
+        }
+        return res.json().then(function (data) {
+          var msg = (data && data.violations && data.violations.join(", ")) || "저장하지 못했습니다.";
+          if (errorEl) errorEl.textContent = msg;
+          else showBanner(msg);
+        });
+      })
+      .catch(function () {
+        showBanner("네트워크 오류로 저장하지 못했습니다.");
+      });
+  }
+
+  function renderJudgments(cards) {
+    var container = document.getElementById("judge-content");
+    container.innerHTML = "";
+
+    if (!cards || cards.length === 0) {
+      container.appendChild(el("p", { class: "empty-msg", text: "판정 대기 중인 카드가 없습니다." }));
+      return;
+    }
+
+    cards.forEach(function (card) {
+      container.appendChild(buildCard(card));
+    });
+  }
+
+  function fetchJudgments() {
+    fetch("/judgments")
+      .then(function (res) {
+        if (!res.ok) throw new Error("judgments " + res.status);
+        return res.json();
+      })
+      .then(renderJudgments)
+      .catch(function () {
+        // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+      });
+  }
+
+  // ---- 시작 ----
+
+  fetchSessions();
+  fetchJudgments();
+  setInterval(fetchSessions, POLL_MS);
+  setInterval(fetchJudgments, POLL_MS);
+})();
 </script>
 </body>
 </html>
