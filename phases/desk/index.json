@@ -45,8 +45,11 @@
     {
       "step": 4,
       "name": "desk-server",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T19:20:33+0900",
+      "summary": ".claude-plugin/plugin.json(version 0.1.0) · page/{__init__,server}.py · page/index.html 생성 — http.server(ThreadingHTTPServer) 표준 라이브러리만, page/는 desk/만 import(hooks/·scripts/ 없음). bind_or_exit(port)가 실제 소켓을 bind해 돌려주고 OSError면 None(ADR-003, 이미 떠 있음), serve_forever(port=None)가 bind 실패 시 즉시 return. check_host(headers, port)는 순수 함수로 Host 헤더만 본다. GET /version은 인증·host체크 없음, GET /sessions·/judgments는 check_host 통과해야 200(아니면 403). POST /pick은 토큰→Origin→check_host→ask존재→applied존재(409로 잠금)→validate_pick 순서로 검사하고, 통과하면 spawn_pick_candidate가 body에서 repo/id를 뺀 나머지+at=datetime.now().isoformat()(문자열, time.time() 아님)을 pick.json에 원자적으로 쓴다 — 이미 있으면 덮어써 반영 전 재선택을 허용한다. POST /shutdown은 토큰만 확인 후 self.server.shutdown(). GET /는 index.html의 __DESK_TOKEN__ 리터럴을 실제 토큰으로 치환(step 5가 이 자리표시자를 보존한 채 UI를 채운다). 모든 응답에 CORS 헤더 없음(grep 확인), server.json은 os.chmod 0600. tests/test_desk_server.py 27개 추가(스레드로 임시 포트에 실제 서버 띄워 GET/POST 통합 테스트 포함, POST /pick 성공 후 쓰인 pick.json이 desk.validate.validate_pick 통과 + scripts.desk.cmd_picks_new --since 필터까지 실제로 통과하는지 검증), 전체 135개 통과.",
+      "completed_at": "2026-11-07T20:08:50+0900"
     },
     {
       "step": 5,
