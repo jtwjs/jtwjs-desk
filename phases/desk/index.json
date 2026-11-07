@@ -16,8 +16,22 @@
     {
       "step": 2,
       "name": "desk-hook",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T18:45:51+0900",
+      "summary": "hooks/{__init__,desk_hook,hooks}.py(.json) 생성 — ADR-002 이벤트→상태 표를 map_status/needs_server_check/needs_ntfy 순수 함수로, derive_repo/derive_branch/check_server_version/spawn_server/send_ntfy/ensure_server는 가변 쉘로 분리. ensure_server는 spec 그대로 check_fn=check_server_version, spawn_fn=spawn_server를 기본값으로 받고, main()은 인자 없이 ensure_server()·send_ntfy(...)를 호출해 테스트가 module-attribute patch로 가로챈다(default-binding 문제 없음, 둘 다 함수 바디 안의 bare global 참조라 호출 시점 조회). main은 전체를 try/except Exception으로 감싸 항상 exit 0, stdout/stderr 무출력. page/server.py 아직 없음(step 4 예정) — spawn_server는 경로만 참조. tests/test_desk_hook.py 30개 추가, 전체 82개 통과.",
+      "completed_at": "2026-11-07T18:58:32+0900",
+      "attempts": [
+        {
+          "at": "2026-11-07T18:56:52+0900",
+          "error": "GREEN: 테스트 파일을 고쳤다(되돌림): tests/__pycache__/test_desk_core.cpython-314.pyc, tests/__pycache__/test_desk_hook.cpython-314.pyc — 테스트는 그대로 두고 구현을 고친다"
+        },
+        {
+          "at": "2026-11-07T18:58:08+0900",
+          "error": "에이전트가 index.json 의 status 를 갱신하지 않음"
+        }
+      ],
+      "retries": 2
     },
     {
       "step": 3,
