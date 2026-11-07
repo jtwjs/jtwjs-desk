@@ -63,8 +63,11 @@
     {
       "step": 6,
       "name": "desk-skill-doc",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-07T20:16:30+0900",
+      "summary": "skills/decision-inbox/SKILL.md 생성(frontmatter name: decision-inbox + Use when 절) — ask · picks --new --repo/--since · applied --issue를 ${CLAUDE_PLUGIN_ROOT}/scripts/desk.py CLI 호출로만 절차화(ADR-006, PRD 사용자 시나리오 ③), desk/·page/ import 없음·내부 구현 재서술 없음. 서브커맨드 이름(ask/picks/applied)을 step 3 scripts/desk.py의 add_parser 호출과 grep 대조해 일치 확인. 코드 변경 없음(tdd:false) — python3 -m unittest discover -s tests 135개 전부 통과(verify 전체, phase 마지막 step).",
+      "completed_at": "2026-11-07T22:40:55+0900"
     }
   ]
 }
