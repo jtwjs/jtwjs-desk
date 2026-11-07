@@ -1,0 +1,9 @@
+{
+  "name": "jtwjs-desk",
+  "description": "지휘 책상: 판정 대기함 + 트랙 페이지",
+  "version": "0.1.0",
+  "author": {
+    "name": "jtwjs"
+  },
+  "keywords": ["desk", "sdd", "track", "decision-inbox"]
+}
