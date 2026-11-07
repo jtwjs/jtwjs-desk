@@ -1,0 +1,14 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk",
+  "docs": "docs/desk-2026-11-03",
+  "after": [],
+  "steps": [
+    { "step": 1, "name": "desk-core", "status": "pending", "tdd": true },
+    { "step": 2, "name": "desk-hook", "status": "pending", "tdd": true },
+    { "step": 3, "name": "desk-script", "status": "pending", "tdd": true },
+    { "step": 4, "name": "desk-server", "status": "pending", "tdd": true },
+    { "step": 5, "name": "desk-page", "status": "pending", "tdd": false },
+    { "step": 6, "name": "desk-skill-doc", "status": "pending", "tdd": false }
+  ]
+}
