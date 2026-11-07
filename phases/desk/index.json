@@ -4,11 +4,44 @@
   "docs": "docs/desk-2026-11-03",
   "after": [],
   "steps": [
-    { "step": 1, "name": "desk-core", "status": "pending", "tdd": true },
-    { "step": 2, "name": "desk-hook", "status": "pending", "tdd": true },
-    { "step": 3, "name": "desk-script", "status": "pending", "tdd": true },
-    { "step": 4, "name": "desk-server", "status": "pending", "tdd": true },
-    { "step": 5, "name": "desk-page", "status": "pending", "tdd": false },
-    { "step": 6, "name": "desk-skill-doc", "status": "pending", "tdd": false }
+    {
+      "step": 1,
+      "name": "desk-core",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T18:37:28+0900",
+      "summary": "desk/{paths,atomic,validate,sort}.py 생성 — 경로는 DESK_RUN/DESK_HOME을 호출 시점에 읽고, 쓰기는 write_json_atomic(os.replace) 하나, 검증은 ADR-006 필드 목록을 그대로 스키마로 삼아 실패를 리스트로 반환, 세션 dict 키는 status/lastAt(camelCase)이고 sort_sessions가 effectiveStatus를 덧붙여 정렬한다. tests/test_desk_core.py 52개 통과.",
+      "completed_at": "2026-11-07T18:45:39+0900"
+    },
+    {
+      "step": 2,
+      "name": "desk-hook",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 3,
+      "name": "desk-script",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 4,
+      "name": "desk-server",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 5,
+      "name": "desk-page",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 6,
+      "name": "desk-skill-doc",
+      "status": "pending",
+      "tdd": false
+    }
   ]
 }
