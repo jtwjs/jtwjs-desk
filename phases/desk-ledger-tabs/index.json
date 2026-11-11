@@ -81,8 +81,11 @@
     {
       "step": 9,
       "name": "page-tabs",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-11T17:10:15+0900",
+      "summary": "page/index.html만 변경: 탭 6개+3역량 서브탭 3개, 보이는 탭 엔드포인트만 GET(탭 열 때+15초, 숨은 탭 무요청), config 한 줄·missing 행, 복습함 반영(POST /review/done)·공유함(POST /share/shared)·복사 버튼. 서버 응답 값은 전부 el()/textContent로 넣어 새 코드에 innerHTML 이어붙이기 없음(기존 container.innerHTML=\"\" 2곳만 남음), __DESK_TOKEN__ 1곳 유지, verify.test 269건 통과, JS 문법 node --check 통과. 수동 확인(브라우저 미실행) 전부 미확인: 탭·서브탭 전환, 네트워크 탭 숨은 탭 무요청, config 한 줄, missing 행, 복습 반영 버튼, 적극성 순서, 복사, 공유함 버튼",
+      "completed_at": "2026-11-11T18:16:02+0900"
     },
     {
       "step": 10,
