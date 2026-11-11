@@ -39,10 +39,20 @@ class AggregateTest(unittest.TestCase):
         self.assertEqual(r["present"], 2)
         self.assertEqual(r["missing"], [])
         self.assertEqual(r["sessions"], 6)
-        self.assertEqual(r["stuck"], 1)
+        self.assertEqual(r["stuck"], 0)  # 막힌 것은 합산이 아니라 마지막 기록 기준
         self.assertEqual(r["commits"], 8)
         self.assertEqual(r["cards"], 3)
         self.assertEqual(r["projects"], 2)
+
+    def test_stuck은_주_마지막_기록_개수이고_합산하지_않는다(self):
+        days = [("2026-01-01", {"stuck": 3}), ("2026-01-02", {"stuck": 3}),
+                ("2026-01-03", {"stuck": 2})]
+        self.assertEqual(rollup.aggregate(days)["stuck"], 2)
+
+    def test_stuck은_마지막_날이_없으면_그_앞_기록을_쓴다(self):
+        days = [("2026-01-01", {"stuck": 4}), ("2026-01-02", {"stuck": 1}),
+                ("2026-01-03", None)]
+        self.assertEqual(rollup.aggregate(days)["stuck"], 1)
 
     def test_missing_days(self):
         r = rollup.aggregate([("2026-01-01", None), ("2026-01-02", {"sessions": 1})])

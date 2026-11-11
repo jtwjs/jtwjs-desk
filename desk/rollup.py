@@ -20,7 +20,11 @@ def _list(value) -> list:
 
 
 def aggregate(days: list) -> dict:
-    """(날짜, 일간 JSON | None) 목록을 합친다."""
+    """(날짜, 일간 JSON | None) 목록을 합친다. 오래된 날부터 들어온다고 본다.
+
+    `stuck`은 그날 막힌 것의 스냅샷이라 합산하면 계속 막힌 항목을 매일 다시 센다.
+    기록이 있는 마지막 날의 값을 쓴다.
+    """
     missing = []
     present = sessions = stuck = cards = 0
     repos: dict[str, dict] = {}
@@ -30,7 +34,7 @@ def aggregate(days: list) -> dict:
             continue
         present += 1
         sessions += _int(data.get("sessions"))
-        stuck += _int(data.get("stuck"))
+        stuck = _int(data.get("stuck"))
         cards += sum(1 for c in _list(data.get("cards")) if isinstance(c, dict))
         for repo in _list(data.get("repos")):
             if not isinstance(repo, dict):
