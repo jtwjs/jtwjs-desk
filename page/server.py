@@ -20,7 +20,7 @@ import secrets
 import socket
 import sys
 import time
-from datetime import datetime
+from datetime import date, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, config, ledger, paths, sort, validate  # noqa: E402
+from desk import atomic, config, ledger, paths, rollup, sort, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
@@ -39,6 +39,7 @@ _TOKEN_PLACEHOLDER = "__DESK_TOKEN__"
 ALLOWED_REL = (".claude/observations.md", "_learn/inbox.md")
 _FRICTION_REL = "1_MyBrain/brain/friction/index.md"
 _REPO_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+_DAILY_NAME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _ITEM_KEY_RE = re.compile(r"^(phase|card)-[A-Za-z0-9._-]+$")
 
 
@@ -358,6 +359,54 @@ def build_proactive(cfg: dict) -> dict:
     }
 
 
+def _today() -> date:
+    """시계는 여기 한 곳 — 테스트가 이 함수를 바꿔 끼운다."""
+    return date.today()
+
+
+def _read_daily(daily_dir, date_str: str):
+    """`daily_dir/YYYY-MM-DD.json` 한 파일만. 이름 규칙 밖 · 없음 · 깨짐 · 객체 아님이면 None."""
+    if not _DAILY_NAME_RE.match(date_str):
+        return None
+    data = _read_json_or_none(Path(daily_dir) / f"{date_str}.json")
+    return data if isinstance(data, dict) else None
+
+
+def build_weekly(cfg: dict) -> dict:
+    """주간 롤업 응답 — 최근 7일 일간 JSON을 읽기만 한다(원문 키는 aggregate가 막는다)."""
+    days = [(d, _read_daily(cfg["daily_dir"], d)) for d in rollup.week_dates(_today())]
+    return {"config": config_block(cfg), "week": rollup.aggregate(days)}
+
+
+def build_repo_health(cfg: dict) -> dict:
+    """레포 건강도 응답 — 이미 쓰인 score JSON만 읽는다(채점을 실행하지 않는다)."""
+    today = _today()
+    rows = []
+    for root in cfg["repos"]:
+        repo = Path(root).name
+        if not Path(root).is_dir():
+            rows.append({"repo": repo, "missing": "경로 없음"})
+            continue
+        found = ledger.find_score_file(Path(root))
+        if found is None:
+            rows.append({"repo": repo, "missing": "채점 없음"})
+            continue
+        path, dated = found
+        try:
+            score = ledger.parse_score(path.read_text(encoding="utf-8"))
+            scored_on = (date.fromisoformat(dated) if dated
+                         else date.fromtimestamp(path.stat().st_mtime))
+        except (OSError, UnicodeDecodeError, ValueError):
+            score = None
+        if score is None:
+            rows.append({"repo": repo, "missing": "형식 확인 필요"})
+            continue
+        rows.append({"repo": repo, "total": score["total"], "grade": score["grade"],
+                     "scored_on": scored_on.isoformat(),
+                     "age_days": ledger.age_days(scored_on, today)})
+    return {"config": config_block(cfg), "repos": rows}
+
+
 def list_judgments(repo: str | None = None) -> list:
     """레포별 판정 카드 목록 — ask 내용 + 있으면 pick + 있으면 applied.
 
@@ -499,6 +548,21 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
                         "groups": {a: [] for a in _FULLSTACK_AREAS}, "missing": []})
                 else:
                     self._send_json(200, build_fullstack(cfg))
+            return
+
+        if parsed.path in ("/weekly", "/repo-health"):
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            cfg = config.load_config()
+            if cfg["source"] == "none":
+                empty = ({"week": rollup.aggregate([(d, None) for d in rollup.week_dates(_today())])}
+                         if parsed.path == "/weekly" else {"repos": []})
+                self._send_json(200, {"config": config_block(cfg), **empty})
+            elif parsed.path == "/weekly":
+                self._send_json(200, build_weekly(cfg))
+            else:
+                self._send_json(200, build_repo_health(cfg))
             return
 
         if parsed.path == "/":
