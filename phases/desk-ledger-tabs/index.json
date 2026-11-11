@@ -54,8 +54,11 @@
     {
       "step": 6,
       "name": "server-workflow-fullstack",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:03:14+0900",
+      "summary": "page/server.py에 build_workflow·build_fullstack + GET /competency/workflow·/competency/fullstack 추가(step 5 부품 재사용, 쓰기·subprocess 없음), tests/test_desk_server_workflow.py. missing_row what 값: observations·inbox·repo·friction(repo=(vault)); 설정 none이면 빈 rows/groups",
+      "completed_at": "2026-11-11T16:06:31+0900"
     },
     {
       "step": 7,
