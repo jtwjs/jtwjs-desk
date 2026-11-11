@@ -144,6 +144,17 @@
     color: var(--attention);
   }
   .badge-count:empty { display: none; }
+  .menu-item { position: relative; }
+  #menu.collapsed .menu-item[data-has-badge="1"]::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--attention);
+  }
   .sub-list {
     display: flex;
     flex-direction: column;
@@ -1659,15 +1670,53 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     fetchExtra(activeTab);
   }
 
+  // ---- 메뉴 배지 (ADR-014(임시)) — 메뉴는 항상 보이므로 탭 폴링과 별개로 부른다 ----
+
+  var navCounts = { judge: 0, review: 0 };
+
+  function renderNavBadges() {
+    ["judge", "review"].forEach(function (key) {
+      var badge = document.querySelector('[data-badge="' + key + '"]');
+      if (!badge) return;
+      var n = navCounts[key];
+      badge.textContent = n > 0 ? String(n) : "";
+      var item = badge.closest(".menu-item");
+      if (item) {
+        if (n > 0) item.setAttribute("data-has-badge", "1");
+        else item.removeAttribute("data-has-badge");
+      }
+    });
+  }
+
+  function fetchNavCounts() {
+    fetch("/nav-counts")
+      .then(function (res) {
+        if (res.status !== 200) throw new Error("nav-counts " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        ["judge", "review"].forEach(function (key) {
+          var v = data && data[key];
+          if (typeof v === "number" && isFinite(v) && v >= 0 && Math.floor(v) === v) {
+            navCounts[key] = v;
+          }
+        });
+        renderNavBadges();
+      })
+      .catch(function () { /* 배지는 부가 정보 — 마지막 값 유지, 에러 줄 없음 */ });
+  }
+
   // ---- 시작 ----
 
   renderTrack();
   renderJudge();
   fetchSessions();
   fetchJudgments();
+  fetchNavCounts();
   setInterval(fetchSessions, POLL_MS);
   setInterval(fetchJudgments, POLL_MS);
   setInterval(loadVisibleExtra, POLL_MS);
+  setInterval(fetchNavCounts, POLL_MS);
 })();
 </script>
 </body>
