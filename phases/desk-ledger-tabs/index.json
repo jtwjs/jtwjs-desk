@@ -36,8 +36,11 @@
     {
       "step": 4,
       "name": "rollup",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T15:59:01+0900",
+      "summary": "desk/rollup.py 신규(week_dates·aggregate, 순수 함수) + tests/test_desk_rollup.py. aggregate 반환 키 days·present·missing·sessions·stuck·commits·cards(개수만)·projects·repos, 새 dict라 원문 키 차단, 관대한 읽기",
+      "completed_at": "2026-11-11T16:00:28+0900"
     },
     {
       "step": 5,
