@@ -36,8 +36,11 @@
     {
       "step": 4,
       "name": "tokens-and-shell",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:44:41+0900",
+      "summary": "page/index.html만 수정: :root 다크 토큰(색 hex는 :root에만)·Pretendard @font-face·nav#menu(264/64 접기, 3역량 그룹, aria-label·툴팁, 배지 빈 span data-badge=judge|review)·selectTab/syncMenu로 data-tab/data-sub 보존, 기존 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T02:49:07+0900"
     },
     {
       "step": 5,
