@@ -15,6 +15,7 @@ JSON에 넣지 않는다 — `GET /judgments`·`GET /sessions`는 inbox·세션 
 
 import json
 import os
+import re
 import secrets
 import socket
 import sys
@@ -28,11 +29,17 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, paths, sort, validate  # noqa: E402
+from desk import atomic, config, ledger, paths, sort, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
 _TOKEN_PLACEHOLDER = "__DESK_TOKEN__"
+
+# 읽기 허용 목록(ADR-009) — 뒤 step이 항목을 추가한다. 이 밖의 레포 파일은 열지 않는다.
+ALLOWED_REL = (".claude/observations.md", "_learn/inbox.md")
+_FRICTION_REL = "1_MyBrain/brain/friction/index.md"
+_REPO_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+_ITEM_KEY_RE = re.compile(r"^(phase|card)-[A-Za-z0-9._-]+$")
 
 
 # ---- 코어(순수) ----
@@ -57,6 +64,19 @@ def read_plugin_version() -> str:
 def generate_token() -> str:
     """페이지 토큰(ADR-004) — 무작위 32자 16진수."""
     return secrets.token_hex(16)
+
+
+def missing_row(repo: str, what: str, reason: str) -> dict:
+    """읽을 파일이 없는 레포를 행으로 남긴다. reason: "경로 없음" | "파일 없음"."""
+    return {"repo": repo, "what": what, "missing": reason}
+
+
+def valid_repo_name(name) -> bool:
+    return isinstance(name, str) and name not in (".", "..") and bool(_REPO_NAME_RE.match(name))
+
+
+def valid_item_key(key) -> bool:
+    return isinstance(key, str) and bool(_ITEM_KEY_RE.match(key))
 
 
 # ---- 쉘(부수효과) ----
@@ -113,6 +133,74 @@ def list_sessions() -> list:
             if data is not None:
                 sessions.append(data)
     return sort.sort_sessions(sessions, now=time.time())
+
+
+def read_ledger(repo_root: Path, rel: str):
+    """허용 목록(ALLOWED_REL)의 원장만 연다. 목록 밖이면 ValueError, 파일이 없으면 None."""
+    if rel not in ALLOWED_REL:
+        raise ValueError(f"허용 목록 밖 경로: {rel}")
+    try:
+        return (Path(repo_root) / rel).read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+
+def list_phase_indexes(repo_root: Path) -> list:
+    """`phases/*/index.json`만 읽어 (task, dict). 깨진 JSON은 건너뛴다."""
+    out = []
+    pdir = Path(repo_root) / "phases"
+    if not pdir.is_dir():
+        return out
+    for d in sorted(pdir.iterdir()):
+        data = _read_json_or_none(d / "index.json")
+        if data is not None:
+            out.append((d.name, data))
+    return out
+
+
+def read_vault_friction(vault):
+    """`<vault>/1_MyBrain/brain/friction/index.md` 고정 한 경로만. 없으면 None."""
+    if vault is None:
+        return None
+    try:
+        return (Path(vault) / _FRICTION_REL).read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+
+def config_block(cfg: dict) -> dict:
+    live = [s.get("repo") for s in list_sessions() if isinstance(s.get("repo"), str)]
+    return {
+        "source": cfg["source"],
+        "unregistered": config.unregistered(live, cfg["repos"]),
+        "error": cfg.get("error"),
+    }
+
+
+def build_review(cfg: dict) -> dict:
+    """복습함 응답 — 원장은 읽기만 하고 아무 데도 저장하지 않는다(ADR-009)."""
+    items, missing = [], []
+    for root in cfg["repos"]:
+        repo = Path(root).name
+        if not Path(root).is_dir():
+            missing.append(missing_row(repo, "repo", "경로 없음"))
+            continue
+        done_dir = paths.review_dir(repo)
+        found = []
+        for task in ledger.skipped_phases(list_phase_indexes(root)):
+            found.append({"repo": repo, "kind": "phase",
+                          "key": ledger.phase_key(task), "title": task})
+        text = read_ledger(root, "_learn/inbox.md")
+        if text is None:
+            missing.append(missing_row(repo, "inbox", "파일 없음"))
+        else:
+            for c in ledger.review_cards(ledger.parse_inbox(text)):
+                found.append({"repo": repo, "kind": "card",
+                              "key": ledger.card_key(c["title"]), "title": c["title"],
+                              "card_kind": c["kind"], "status": c["status"],
+                              "where": c["where"], "summary": c["summary"]})
+        items.extend(i for i in found if not (done_dir / f"{i['key']}.done.json").exists())
+    return {"config": config_block(cfg), "items": items, "missing": missing}
 
 
 def list_judgments(repo: str | None = None) -> list:
@@ -211,6 +299,17 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._send_json(200, list_judgments(repo))
             return
 
+        if parsed.path == "/review":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            cfg = config.load_config()
+            if cfg["source"] == "none":
+                self._send_json(200, {"config": config_block(cfg), "items": [], "missing": []})
+                return
+            self._send_json(200, build_review(cfg))
+            return
+
         if parsed.path == "/":
             html = _INDEX_HTML_PATH.read_text(encoding="utf-8").replace(
                 _TOKEN_PLACEHOLDER, self._token()
@@ -229,6 +328,10 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._handle_pick()
             return
 
+        if parsed.path == "/review/done":
+            self._handle_review_done()
+            return
+
         if parsed.path == "/shutdown":
             self._handle_shutdown()
             return
@@ -241,6 +344,37 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
         if not raw:
             return {}
         return json.loads(raw.decode("utf-8"))
+
+    def _check_post_guard(self) -> bool:
+        """토큰 → Origin → Host 순. 실패하면 403을 보내고 False."""
+        if self.headers.get("X-Desk-Token") != self._token():
+            self._send_json(403, {"error": "bad token"})
+            return False
+        if self.headers.get("Origin") != f"http://127.0.0.1:{self._port()}":
+            self._send_json(403, {"error": "bad origin"})
+            return False
+        if not check_host(self.headers, self._port()):
+            self._send_json(403, {"error": "bad host"})
+            return False
+        return True
+
+    def _handle_review_done(self):
+        if not self._check_post_guard():
+            return
+        try:
+            body = self._read_json_body()
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._send_json(400, {"error": "bad json"})
+            return
+        repo, key = body.get("repo"), body.get("key")
+        if not valid_repo_name(repo) or not valid_item_key(key):
+            self._send_json(400, {"error": "bad repo/key"})
+            return
+        atomic.write_json_atomic(
+            paths.review_dir(repo) / f"{key}.done.json",
+            {"at": datetime.now().isoformat()},
+        )
+        self._send_json(200, {"ok": True})
 
     def _handle_pick(self):
         if self.headers.get("X-Desk-Token") != self._token():
