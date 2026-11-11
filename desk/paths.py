@@ -42,3 +42,25 @@ def hook_error_log_path() -> Path:
 def ntfy_topic_path() -> Path:
     """ntfy 토픽 파일. `DESK_HOME`과 무관하게 항상 이 경로(ADR-005)."""
     return Path.home() / ".config" / "jtwjs-desk" / "ntfy-topic"
+
+
+def config_path() -> Path:
+    """desk 설정 파일. `DESK_CONFIG`가 없으면 `~/.config/jtwjs-desk/config.json`(ADR-008)."""
+    return Path(
+        os.environ.get("DESK_CONFIG", str(Path.home() / ".config" / "jtwjs-desk" / "config.json"))
+    )
+
+
+def conductor_path() -> Path:
+    """폴백용 conductor 설정. `DESK_CONDUCTOR`가 없으면 `~/.claude/conductor.json`."""
+    return Path(os.environ.get("DESK_CONDUCTOR", str(Path.home() / ".claude" / "conductor.json")))
+
+
+def review_dir(repo: str) -> Path:
+    """복습 끝 마킹 디렉터리: `<DESK_HOME>/review/<repo>`."""
+    return desk_home_dir() / "review" / repo
+
+
+def share_dir(repo: str) -> Path:
+    """공유 파일 · 공유 끝 마킹 디렉터리: `<DESK_HOME>/share/<repo>`."""
+    return desk_home_dir() / "share" / repo
