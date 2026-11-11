@@ -1,0 +1,18 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-ledger-tabs",
+  "docs": "docs/desk-2026-11-11",
+  "after": ["desk"],
+  "steps": [
+    { "step": 1, "name": "desk-config", "status": "pending", "tdd": true },
+    { "step": 2, "name": "ledger-learn", "status": "pending", "tdd": true },
+    { "step": 3, "name": "ledger-signals", "status": "pending", "tdd": true },
+    { "step": 4, "name": "rollup", "status": "pending", "tdd": true },
+    { "step": 5, "name": "server-review", "status": "pending", "tdd": true },
+    { "step": 6, "name": "server-workflow-fullstack", "status": "pending", "tdd": true },
+    { "step": 7, "name": "server-proactive-share", "status": "pending", "tdd": true },
+    { "step": 8, "name": "server-weekly-health", "status": "pending", "tdd": true },
+    { "step": 9, "name": "page-tabs", "status": "pending", "tdd": false },
+    { "step": 10, "name": "guard-test", "status": "pending", "tdd": false }
+  ]
+}

@@ -6,7 +6,7 @@
 
 - 상태: 제안
 - 맥락: 새 탭 4개는 레포마다 원장을 열어야 하고 vault의 friction 파일도 연다. desk는 지금 레포를 세션 cwd에서만 알고, vault 경로는 아무 데도 없다. `~/.claude/conductor.json`(`{"seat", "repos"}`)은 이 머신에 아직 없고, 하네스 스킬이 "있으면"으로만 정의한 선택 설정이다
-- 결정: `~/.config/jtwjs-desk/config.json`에 `repos` · `vault` · `criteria_file` · `daily_dir`(기본 `~/.claude/daily`)를 손으로 둔다. 이 파일이 없을 때만 `conductor.json`의 `repos` · `seat`(→ vault)를 읽고, 화면에 "폴백 사용 중"을 띄운다. 폴백이 쓰이면 `criteria_file`은 비어 CPO 메모는 "설정 없음"이다. 서버는 살아 있는 세션의 레포 이름이 `repos`에 없으면 `unregistered`로 알린다(자동 추가는 안 한다). 경로는 `DESK_CONFIG`로 바꾼다
+- 결정: `~/.config/jtwjs-desk/config.json`에 `repos` · `vault` · `criteria_file` · `daily_dir`(기본 `~/.claude/daily`) · `evidence_globs`(레포 기준 경로 패턴 목록, 기본 빈 목록)를 손으로 둔다. `evidence_globs`는 임팩트②의 `evidence.md` · `cards/` 위치를 어디서도 못 찾아(PLAN 2026-11-11) 위치를 Finn이 정하도록 둔 키이고, 비어 있으면 화면에 "경로 미설정"으로 나온다(Finn 선택). 이 파일이 없을 때만 `conductor.json`의 `repos` · `seat`(→ vault)를 읽고, 화면에 "폴백 사용 중"을 띄운다. 폴백이 쓰이면 `criteria_file`은 비어 CPO 메모는 "설정 없음"이다. 서버는 살아 있는 세션의 레포 이름이 `repos`에 없으면 `unregistered`로 알린다(자동 추가는 안 한다). 경로는 `DESK_CONFIG`로 바꾼다
 - 결정 주체: AI 추천 수용. Finn의 처음 가설은 conductor.json 재사용(이유: 한 곳에서 관리)이었고, 추천(desk 소유 설정 + 폴백)을 받아 그렇게 갔다. 한 곳 관리라는 이유는 폴백으로 일부 살렸다
 - 대안: conductor.json 단독(파일이 없으면 새 탭 4개가 통째로 비고, 하네스가 필드 이름을 바꿔도 desk가 모른다. `desk-separate-repo` 결정이 막으려던 결합) · 훅이 cwd로 레포를 자동 학습(vault 경로는 cwd로 못 배워 설정 파일이 어차피 필요하고, 한 번도 안 연 레포는 안 보이고, 훅이 파일을 하나 더 쓴다)
 - 결과: 새 레포를 만들면 `repos`에 한 줄을 손으로 더해야 한다. 잊어도 `unregistered`가 알려줘서 조용히 빠지지는 않는다. 대가는 설정 파일 하나가 늘고, `config.py`가 conductor.json 스키마를 가정하는 지점이 한 곳 생기는 것. 하네스가 그 스키마를 바꾸면 폴백만 깨진다

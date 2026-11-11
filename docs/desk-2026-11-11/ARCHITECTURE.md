@@ -106,13 +106,13 @@ flowchart TB
 
 ## 읽기 규약
 
-- 설정 파일 키: `repos`(경로 목록) · `vault`(경로) · `criteria_file`(CPO 기준 파일 경로) · `daily_dir`(기본 `~/.claude/daily`). 환경 변수 `DESK_CONFIG`로 경로를 바꿔 테스트가 임시 파일을 쓴다
+- 설정 파일 키: `repos`(경로 목록) · `vault`(경로) · `criteria_file`(CPO 기준 파일 경로) · `daily_dir`(기본 `~/.claude/daily`) · `evidence_globs`(레포 기준 패턴 목록, 기본 빈 목록). 환경 변수 `DESK_CONFIG`(설정 파일) · `DESK_CONDUCTOR`(폴백 파일)로 경로를 바꿔 테스트가 임시 파일을 쓴다
 - 폴백: `config.json`이 없을 때만 `~/.claude/conductor.json`의 `repos` · `seat`(→ `vault`)를 읽는다. 이때 화면 위에 "폴백 사용 중"을 띄운다. `criteria_file`은 폴백이 못 채우므로 적극성의 CPO 메모는 "설정 없음"이 된다
 - 읽기 허용 목록(이 밖은 열지 않는다):
 
   | 대상 | 경로 |
   |---|---|
-  | 레포별 | `.claude/observations.md` · `_learn/inbox.md` · `phases/*/index.json` · `.claude/reports/*/ai-readiness-score.json` · PRD 왜 섹션 · `evidence.md` · `cards/` |
+  | 레포별 | `.claude/observations.md` · `_learn/inbox.md` · `phases/*/index.json` · `.claude/reports/*/ai-readiness-score.json` · 각 phase `docs` 폴더의 `PRD.md`(왜 섹션 링크용) · 설정 `evidence_globs`에 적힌 패턴에 걸린 파일(`..` · 절대경로 패턴은 무시) |
   | vault | `<vault>/1_MyBrain/brain/friction/index.md` 한 파일 |
   | 그 밖 | `criteria_file` · `<daily_dir>/YYYY-MM-DD.json` · `~/.jtwjs-desk/share/` |
 
@@ -138,5 +138,5 @@ flowchart TB
 
 - 원장 파서 형식: `observations.md` · `inbox.md`는 확정(ADR-013). friction 행은 실제 파일이 이 머신에 없어 가정형이다(ADR-013). 실제 파일이 생기면 파서와 픽스처를 한 번 맞춘다
 - ~~`ai-readiness-score.json` 경로~~ 확정(ADR-013): `.claude/reports/<날짜>/` · `docs/` · `.claude/` · 레포 루트 4곳
-- `evidence.md` · `cards/`가 있는 위치(레포 어디인지)
+- ~~`evidence.md` · `cards/` 위치~~ 못 찾음 → 설정 `evidence_globs`로 Finn이 정한다(ADR-008)
 - `criteria_file`이 가리킬 CPO 기준 파일에 사람 이름이 들어 있는지. 화면에 그대로 보이므로 Finn이 한 번 열어 본다
