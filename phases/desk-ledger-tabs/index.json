@@ -27,8 +27,11 @@
     {
       "step": 3,
       "name": "ledger-signals",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T15:57:09+0900",
+      "summary": "desk/ledger.py에 parse_observations·parse_friction·workflow_rows·parse_score·find_score_file·age_days 추가(순수 함수, find_score_file만 디렉터리 목록 조회), tests/test_desk_ledger_signals.py. friction 못 읽는 행은 원문 없이 {\"unparsed\":True}, score는 reports 최신 날짜 폴더→docs→.claude→루트 순",
+      "completed_at": "2026-11-11T15:58:55+0900"
     },
     {
       "step": 4,
