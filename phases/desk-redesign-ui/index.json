@@ -1,0 +1,16 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-redesign-ui",
+  "docs": "docs/desk-2026-11-12",
+  "after": ["desk-ledger-tabs"],
+  "steps": [
+    { "step": 1, "name": "nav-counts-endpoint", "status": "pending", "tdd": true },
+    { "step": 2, "name": "pretendard-bundle", "status": "pending", "tdd": false },
+    { "step": 3, "name": "font-route", "status": "pending", "tdd": true },
+    { "step": 4, "name": "tokens-and-shell", "status": "pending", "tdd": false },
+    { "step": 5, "name": "shared-components", "status": "pending", "tdd": false },
+    { "step": 6, "name": "screens-track-judge", "status": "pending", "tdd": false },
+    { "step": 7, "name": "screens-review-comp-weekly-health", "status": "pending", "tdd": false },
+    { "step": 8, "name": "nav-badge-wiring", "status": "pending", "tdd": false }
+  ]
+}
