@@ -256,6 +256,108 @@ def build_fullstack(cfg: dict) -> dict:
             "missing": missing}
 
 
+def _phase_minutes(data) -> int | None:
+    """phase index의 step 타임스탬프로 총 분(가장 이른 시작 → 가장 늦은 완료). 못 구하면 None."""
+    steps = data.get("steps") if isinstance(data, dict) else None
+    if not isinstance(steps, list):
+        return None
+    starts, ends = [], []
+    try:
+        for st in steps:
+            if not isinstance(st, dict):
+                continue
+            a, b = st.get("started_at"), st.get("completed_at")
+            if isinstance(a, str) and isinstance(b, str):
+                starts.append(datetime.fromisoformat(a))
+                ends.append(datetime.fromisoformat(b))
+        if not starts:
+            return None
+        return max(0, round((max(ends) - min(starts)).total_seconds() / 60))
+    except (ValueError, TypeError):  # 깨진 문자열 · naive/aware 혼용
+        return None
+
+
+def _safe_rel(rel) -> bool:
+    """레포 루트 기준 상대경로이고 `..` · 절대경로가 아닌지."""
+    if not isinstance(rel, str) or not rel:
+        return False
+    p = Path(rel)
+    return not p.is_absolute() and ".." not in p.parts
+
+
+def _evidence_files(root: Path, patterns: list) -> tuple:
+    """(레포 루트 안의 파일 [(상대경로, mtime)], 무시한 패턴 수). 내용은 읽지 않는다."""
+    ignored, found = 0, []
+    base = Path(root).resolve()
+    for pat in patterns:
+        if not _safe_rel(pat):
+            ignored += 1
+            continue
+        try:
+            for f in base.glob(pat):
+                if f.is_file() and f.resolve().is_relative_to(base):
+                    found.append((f.relative_to(base).as_posix(), f.stat().st_mtime))
+        except (OSError, ValueError):
+            continue
+    return found, ignored
+
+
+def _read_criteria(cfg: dict) -> dict:
+    if cfg["criteria_file"] is None:
+        return {"text": None, "note": "설정 없음"}
+    try:
+        return {"text": Path(cfg["criteria_file"]).read_text(encoding="utf-8")}
+    except (OSError, UnicodeDecodeError):
+        return {"text": None, "note": "읽을 수 없음"}
+
+
+def build_proactive(cfg: dict) -> dict:
+    """적극성 응답 — 기준 원문 · 소요시간 · PRD 링크 · 최근 증거 경로 · 미반영 공유 파일(읽기만)."""
+    durations, prds, evidence, transparency, missing = [], [], [], [], []
+    no_data, ignored = 0, 0
+    for root in cfg["repos"]:
+        repo = Path(root).name
+        if not Path(root).is_dir():
+            missing.append(missing_row(repo, "repo", "경로 없음"))
+            continue
+        for task, data in list_phase_indexes(root):
+            minutes = _phase_minutes(data)
+            if minutes is None:
+                no_data += 1
+            else:
+                durations.append({"repo": repo, "task": task, "minutes": minutes})
+            docs = data.get("docs") if isinstance(data, dict) else None
+            if _safe_rel(docs) and (Path(root) / docs / "PRD.md").is_file():
+                prds.append({"repo": repo, "task": task,
+                             "prd": (Path(docs) / "PRD.md").as_posix()})
+        files, ign = _evidence_files(root, cfg["evidence_globs"])
+        ignored += ign
+        evidence.extend({"repo": repo, "path": rel, "mtime": mt} for rel, mt in files)
+        sdir = paths.share_dir(repo)
+        if sdir.is_dir():
+            for f in sorted(sdir.glob("*.md")):
+                id_ = f.name[: -len(".md")]
+                if not valid_repo_name(id_) or (sdir / f"{id_}.shared.json").exists():
+                    continue
+                try:
+                    transparency.append({"repo": repo, "id": id_,
+                                         "text": f.read_text(encoding="utf-8")})
+                except (OSError, UnicodeDecodeError):
+                    continue
+    evidence.sort(key=lambda r: r["mtime"], reverse=True)
+    return {
+        "config": config_block(cfg),
+        "criteria": _read_criteria(cfg),
+        "speed": {"durations": durations, "no_data": no_data,
+                  "metric2": "측정 안 함", "workflow_link": "workflow"},
+        "impact": {"prds": prds,
+                   "evidence": evidence[:5] if cfg["evidence_globs"] else {"note": "경로 미설정"},
+                   "ignored": ignored},
+        "transparency": transparency,
+        "missing": missing,
+    }
+
+
 def list_judgments(repo: str | None = None) -> list:
     """레포별 판정 카드 목록 — ask 내용 + 있으면 pick + 있으면 applied.
 
@@ -363,6 +465,23 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._send_json(200, build_review(cfg))
             return
 
+        if parsed.path == "/competency/proactive":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            cfg = config.load_config()
+            if cfg["source"] == "none":
+                self._send_json(200, {
+                    "config": config_block(cfg),
+                    "criteria": {"text": None, "note": "설정 없음"},
+                    "speed": {"durations": [], "no_data": 0,
+                              "metric2": "측정 안 함", "workflow_link": "workflow"},
+                    "impact": {"prds": [], "evidence": {"note": "경로 미설정"}, "ignored": 0},
+                    "transparency": [], "missing": []})
+            else:
+                self._send_json(200, build_proactive(cfg))
+            return
+
         if parsed.path in ("/competency/workflow", "/competency/fullstack"):
             if not check_host(self.headers, self._port()):
                 self._send_json(403, {"error": "bad host"})
@@ -402,6 +521,10 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
 
         if parsed.path == "/review/done":
             self._handle_review_done()
+            return
+
+        if parsed.path == "/share/shared":
+            self._handle_share_shared()
             return
 
         if parsed.path == "/shutdown":
@@ -444,6 +567,24 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             return
         atomic.write_json_atomic(
             paths.review_dir(repo) / f"{key}.done.json",
+            {"at": datetime.now().isoformat()},
+        )
+        self._send_json(200, {"ok": True})
+
+    def _handle_share_shared(self):
+        if not self._check_post_guard():
+            return
+        try:
+            body = self._read_json_body()
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._send_json(400, {"error": "bad json"})
+            return
+        repo, id_ = body.get("repo"), body.get("id")
+        if not valid_repo_name(repo) or not valid_repo_name(id_):
+            self._send_json(400, {"error": "bad repo/id"})
+            return
+        atomic.write_json_atomic(
+            paths.share_dir(repo) / f"{id_}.shared.json",
             {"at": datetime.now().isoformat()},
         )
         self._send_json(200, {"ok": True})
