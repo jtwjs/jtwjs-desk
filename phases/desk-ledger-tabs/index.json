@@ -45,8 +45,11 @@
     {
       "step": 5,
       "name": "server-review",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:00:35+0900",
+      "summary": "page/server.py에 ALLOWED_REL·read_ledger·list_phase_indexes·read_vault_friction·config_block·missing_row·_check_post_guard·이름검증 + GET /review(build_review)·POST /review/done 추가, tests/test_desk_server_review.py; 뒤 step은 ALLOWED_REL에 항목 추가",
+      "completed_at": "2026-11-11T16:03:07+0900"
     },
     {
       "step": 6,
