@@ -27,8 +27,11 @@
     {
       "step": 3,
       "name": "font-route",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T02:41:58+0900",
+      "summary": "page/server.py에 GET /fonts/PretendardVariable.woff2(font/woff2, check_host 403, 고정 경로 상수 _FONT_PATH, 다른 이름·.. ·파일 없음 404) 추가, tests/test_desk_server_font.py 6개",
+      "completed_at": "2026-11-12T02:44:41+0900"
     },
     {
       "step": 4,
