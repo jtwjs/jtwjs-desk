@@ -189,31 +189,6 @@
     padding: 24px 8px;
     text-align: center;
   }
-  .repo-group { margin-bottom: 18px; }
-  .repo-group h2 {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: 0 0 6px 2px;
-  }
-  .session-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface-content);
-    border: 1px solid var(--surface-raised);
-    border-radius: var(--radius-card);
-    padding: 10px 12px;
-    margin-bottom: 6px;
-  }
-  .session-row .status-icon { font-size: 16px; width: 22px; text-align: center; }
-  .session-row .status-text { font-weight: 600; min-width: 70px; color: var(--text-strong); }
-  .session-row .branch { color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); }
-  .session-row .ago { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
-  .session-row.idle { background: var(--neutral-tint); }
-  .session-row.waiting { background: var(--attention-tint); }
-
   .card {
     background: var(--surface-content);
     border: 1px solid var(--surface-raised);
@@ -262,108 +237,6 @@
     font-size: 12px;
     margin: 0 0 10px;
   }
-  .options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .option-btn {
-    border: 1px solid var(--surface-raised);
-    background: var(--surface-panel);
-    color: var(--text-strong);
-    border-radius: var(--radius-control);
-    padding: 8px 12px;
-    cursor: pointer;
-    font: inherit;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .option-btn:hover { border-color: var(--text-muted); }
-  .option-btn.recommended .rec-badge {
-    color: var(--text-muted);
-    font-size: 11px;
-  }
-  .option-btn.picked { background: var(--surface-raised); border-color: var(--accent); }
-  .option-btn:disabled { cursor: not-allowed; opacity: 0.6; }
-
-  .ai-decided {
-    border: 1px dashed var(--surface-raised);
-    border-radius: var(--radius-card);
-    padding: 8px 10px;
-    margin-bottom: 10px;
-    font-size: 13px;
-  }
-  .ai-decided .title { font-weight: 600; margin-bottom: 4px; color: var(--text-muted); font-size: 12px; }
-
-  .custom-area {
-    border-top: 1px solid var(--surface-raised);
-    padding-top: 10px;
-  }
-  .custom-area textarea {
-    width: 100%;
-    min-height: 54px;
-    resize: vertical;
-    border: 1px solid var(--surface-raised);
-    border-radius: var(--radius-control);
-    background: var(--surface-raised);
-    color: var(--text-strong);
-    padding: 6px 8px;
-    font-family: inherit;
-    font-size: 13px;
-  }
-  .note-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 6px;
-    flex-wrap: wrap;
-  }
-  .note-row input, .note-row select {
-    border: 1px solid var(--surface-raised);
-    border-radius: var(--radius-control);
-    background: var(--surface-raised);
-    color: var(--text-strong);
-    padding: 6px 8px;
-    font-family: inherit;
-    font-size: 13px;
-  }
-  .note-row input[type="text"] { flex: 1; min-width: 140px; }
-  .custom-area button, .submit-row button {
-    margin-top: 6px;
-    border: 1px solid var(--brand-fill);
-    background: var(--brand-fill);
-    color: var(--on-brand);
-    border-radius: var(--radius-control);
-    padding: 7px 14px;
-    cursor: pointer;
-    font: inherit;
-    font-size: 13px;
-  }
-  .custom-area button:hover:not(:disabled), .submit-row button:hover:not(:disabled) { border-color: var(--accent); }
-  .custom-area button:disabled, .submit-row button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .current-pick {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-  .card-error {
-    color: var(--danger);
-    font-size: 12px;
-    margin-top: 6px;
-  }
-  .applied-info {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 6px;
-  }
-  .applied-info a { color: var(--accent); }
-
   .cfg-line { color: var(--attention); font-size: 12px; margin: 0 0 10px; }
   .sec-title { font-size: 13px; color: var(--text-muted); margin: 14px 0 6px 2px; font-weight: 600; }
   .row {
@@ -618,6 +491,69 @@
   .btn.sm { height: 28px; padding: 0 12px; font-size: 13px; }
   .btn.confirm-pending { border-color: var(--attention); }
 
+  .screen { display: flex; flex-direction: column; gap: 20px; }
+  .page-head { display: flex; flex-direction: column; gap: 8px; }
+  .page-head h1 { margin: 0; font-size: 20px; font-weight: 600; color: var(--text-strong); }
+  .page-head p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-muted); }
+  .chip-row { display: flex; gap: 8px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: start; }
+  .decision-card .dc-why { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); }
+  .decision-card .dc-ai {
+    padding: 8px 12px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-body);
+  }
+  .decision-card .dc-ai-title { color: var(--text-muted); }
+  .decision-card .dc-options { display: flex; flex-direction: column; gap: 8px; }
+  .decision-card button.dc-opt {
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    border-color: var(--surface-raised);
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+  }
+  .decision-card button.dc-opt:hover { border-color: var(--text-muted); }
+  .decision-card button.dc-opt.picked { border-color: var(--accent); background: var(--surface-raised); }
+  .decision-card .dc-radio {
+    width: 14px;
+    height: 14px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    border: 2px solid var(--text-muted);
+    border-radius: 50%;
+  }
+  .decision-card .dc-opt.picked .dc-radio { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--surface-raised), inset 0 0 0 7px var(--accent); }
+  .decision-card .dc-rec { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .decision-card textarea,
+  .decision-card .dc-note-row input,
+  .decision-card .dc-note-row select {
+    box-sizing: border-box;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .decision-card textarea { width: 100%; min-height: 64px; resize: vertical; }
+  .decision-card textarea[hidden] { display: none; }
+  .decision-card .dc-note-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .decision-card .dc-note-row input { flex: 1; min-width: 140px; }
+  .decision-card .dc-error[hidden] { display: none; }
+  .decision-card .dc-actions { display: flex; align-items: center; gap: 12px; }
+  .decision-card .dc-hint { font-size: 12px; color: var(--text-muted); }
+  .decision-card.locked .dc-opt { cursor: default; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
@@ -647,10 +583,10 @@
 </nav>
 <main>
   <section id="tab-track" class="tab-panel">
-    <div id="track-content"><p class="empty-msg">불러오는 중…</p></div>
+    <div id="track-content"></div>
   </section>
   <section id="tab-judge" class="tab-panel" hidden>
-    <div id="judge-content"><p class="empty-msg">불러오는 중…</p></div>
+    <div id="judge-content"></div>
   </section>
   <section id="tab-review" class="tab-panel" hidden>
     <div id="review-content"><p class="empty-msg">불러오는 중…</p></div>
@@ -674,14 +610,6 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   "use strict";
 
   var POLL_MS = 15000;
-
-  var STATUS_ICON = {
-    "승인 대기": "🔔",
-    "신호 없음": "💤",
-    "입력 대기": "⌨️",
-    "작업 중": "⚙️",
-    "완료": "✅"
-  };
 
   var NOTE_KIND_LABEL = {
     reason: "이유",
@@ -802,54 +730,88 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     return node;
   }
 
-  // ---- 트랙 탭 ----
-  // 서버(desk.sort.sort_sessions)가 이미 정렬한 순서를 그대로 쓴다.
-  // 여기서는 레포별로 묶기만 하고, 각 레포 안 순서·레포 등장 순서는
-  // 서버가 준 배열의 순서를 그대로 보존한다(재정렬하지 않음).
+  // ---- 화면 머리(제목 + 한 줄 설명) ----
 
-  function groupByRepoPreservingOrder(sessions) {
-    var order = [];
-    var groups = {};
-    sessions.forEach(function (s) {
-      var repo = s.repo || "(알수없음)";
-      if (!groups[repo]) {
-        groups[repo] = [];
-        order.push(repo);
-      }
-      groups[repo].push(s);
-    });
-    return order.map(function (repo) {
-      return { repo: repo, sessions: groups[repo] };
-    });
+  function pageHead(title, desc) {
+    return el("div", { class: "page-head" }, [
+      el("h1", { text: title }),
+      el("p", { text: desc })
+    ]);
   }
 
-  function renderSessions(sessions) {
-    var container = document.getElementById("track-content");
-    container.innerHTML = "";
+  // ---- 트랙 탭 ----
+  // 서버(desk.sort.sort_sessions)가 이미 정렬한 순서를 그대로 쓴다(재정렬하지 않음).
+  // 표 구조: 상태(점 + 라벨) · 레포 · 브랜치 · 마지막 신호.
 
-    if (!sessions || sessions.length === 0) {
-      container.appendChild(el("p", { class: "empty-msg", text: "실행 중인 세션이 없습니다." }));
+  var trackState = { sessions: null, error: false, repo: null };
+
+  function renderTrack() {
+    var container = document.getElementById("track-content");
+    clear(container);
+    container.className = "screen";
+    container.appendChild(pageHead("트랙", "지금 도는 세션과 사람이 움직일 차례를 한눈에 본다."));
+
+    var sessions = trackState.sessions;
+    if (trackState.error) {
+      container.appendChild(inlineNote("불러오지 못했다: 마지막으로 받은 값을 보여 준다. 15초 뒤 다시 시도한다", "danger"));
+    }
+
+    var cols = [
+      { name: "상태", width: "170px" },
+      { name: "레포 · 브랜치", width: "minmax(0, 1fr)" },
+      { name: "마지막 신호", width: "110px" }
+    ];
+
+    if (sessions === null) {
+      container.appendChild(dataTable(cols, []));
+      container.appendChild(waitLine("불러오는 중…"));
+      return;
+    }
+    if (sessions.length === 0) {
+      container.appendChild(emptyStateCard("지금 도는 세션 없음", "세션이 시작되면 이 자리에 나타난다."));
       return;
     }
 
-    var groups = groupByRepoPreservingOrder(sessions);
-    groups.forEach(function (g) {
-      var groupEl = el("div", { class: "repo-group" });
-      groupEl.appendChild(el("h2", { text: g.repo }));
-      g.sessions.forEach(function (s) {
-        var effStatus = s.effectiveStatus || s.status || "";
-        var rowClass = "session-row";
-        if (effStatus === "신호 없음") rowClass += " idle";
-        if (effStatus === "승인 대기") rowClass += " waiting";
-        var row = el("div", { class: rowClass });
-        row.appendChild(el("span", { class: "status-icon", text: STATUS_ICON[effStatus] || "" }));
-        row.appendChild(el("span", { class: "status-text", text: effStatus }));
-        row.appendChild(el("span", { class: "branch", text: s.branch || "" }));
-        row.appendChild(el("span", { class: "ago", text: minutesAgoText(s.lastAt) }));
-        groupEl.appendChild(row);
-      });
-      container.appendChild(groupEl);
+    var repos = [];
+    sessions.forEach(function (s) {
+      var repo = s.repo || "(알수없음)";
+      if (repos.indexOf(repo) === -1) repos.push(repo);
     });
+    if (trackState.repo !== null && repos.indexOf(trackState.repo) === -1) trackState.repo = null;
+
+    var chipRow = el("div", { class: "chip-row" });
+    var repoChip = chip("레포", trackState.repo === null ? "전체" : trackState.repo);
+    repoChip.setAttribute("aria-label", "레포 필터: 누르면 다음 레포로 바뀐다");
+    repoChip.addEventListener("click", function () {
+      var order = [null].concat(repos);
+      var next = order[(order.indexOf(trackState.repo) + 1) % order.length];
+      trackState.repo = next;
+      renderTrack();
+    });
+    chipRow.appendChild(repoChip);
+    container.appendChild(chipRow);
+
+    var rows = [];
+    sessions.forEach(function (s) {
+      var repo = s.repo || "(알수없음)";
+      if (trackState.repo !== null && repo !== trackState.repo) return;
+      var effStatus = s.effectiveStatus || s.status || "";
+      rows.push([
+        statusDotLabel(effStatus),
+        el("div", { class: "mono" }, [
+          el("div", { text: repo }),
+          el("div", { text: s.branch || "" })
+        ]),
+        el("span", { class: "muted", text: minutesAgoText(s.lastAt) })
+      ]);
+    });
+    container.appendChild(dataTable(cols, rows));
+  }
+
+  function renderSessions(sessions) {
+    trackState.sessions = sessions || [];
+    trackState.error = false;
+    renderTrack();
   }
 
   function fetchSessions() {
@@ -860,160 +822,167 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       })
       .then(renderSessions)
       .catch(function () {
-        // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+        // 화면을 지우지 않고 안내 한 줄만 올린다. 다음 polling에서 다시 시도한다.
+        trackState.error = true;
+        renderTrack();
       });
   }
 
   // ---- 판정 탭 ----
+  // 반영 전에는 다시 고를 수 있고, 반영된 카드는 선택지 · 버튼 없이 잠금 문장만 둔다.
+  // 15초 폴링이 화면을 다시 그려도 고른 것 · 쓰던 글이 사라지지 않게 카드별 초안을 메모리에 둔다.
 
-  function buildOptionButton(card, opt, locked) {
-    var classes = "option-btn";
-    if (opt.recommended) classes += " recommended";
-    var currentChoice = card.pick && card.pick.choice;
-    if (currentChoice === opt.key) classes += " picked";
+  var judgeState = { cards: null, error: false };
+  var drafts = {};
 
-    var children = [el("span", { text: opt.label })];
-    if (opt.recommended) {
-      children.push(el("span", { class: "rec-badge", text: "지휘 추천" }));
-    }
-    var btn = el("button", { class: classes, type: "button" }, children);
-    btn.disabled = locked;
-    // 클릭 핸들러는 buildCard에서 메모 입력칸과 함께 한 번만 붙인다.
-    return btn;
+  function draftKey(card) {
+    return card.repo + "\u0000" + card.id;
   }
 
-  function buildAiDecided(aiDecided) {
-    if (!aiDecided || aiDecided.length === 0) return null;
-    var box = el("div", { class: "ai-decided" });
-    box.appendChild(el("div", { class: "title", text: "AI가 정한 것" }));
-    aiDecided.forEach(function (entry) {
-      box.appendChild(el("div", { text: entry.label }));
-    });
-    return box;
+  function getDraft(card) {
+    var key = draftKey(card);
+    if (!drafts[key]) {
+      var pick = card.pick || {};
+      drafts[key] = {
+        choice: pick.choice || null,
+        customText: pick.choice === "custom" ? (pick.customText || "") : "",
+        note: pick.note || "",
+        noteKind: pick.noteKind || "",
+        error: "",
+        saving: false
+      };
+    }
+    return drafts[key];
   }
 
-  function currentPickSummary(card) {
-    if (!card.pick) return null;
-    var text = "현재 선택: ";
-    if (card.pick.choice === "custom") {
-      text += "직접 답 — " + (card.pick.customText || "");
-    } else {
-      var opt = (card.options || []).find(function (o) { return o.key === card.pick.choice; });
-      text += opt ? opt.label : card.pick.choice;
-    }
-    if (card.pick.note) {
-      text += " (메모: " + card.pick.note + ")";
-    }
-    return el("div", { class: "current-pick", text: text });
+  function buildAiDecided(card) {
+    var parts = (card.aiDecided || []).map(function (entry) { return entry.label; });
+    if (card.premiseOpen) parts.push("전제 열림");
+    if (parts.length === 0) return null;
+    return el("div", { class: "dc-ai" }, [
+      el("span", { class: "dc-ai-title", text: "AI가 이미 정한 것" }),
+      el("span", { text: " · " + parts.join(" · ") })
+    ]);
   }
 
-  function buildAppliedInfo(applied) {
-    var box = el("div", { class: "applied-info" });
-    box.appendChild(el("span", { text: "반영됨" }));
-    if (applied.issue) {
-      box.appendChild(document.createTextNode(" · "));
-      var link = el("a", { href: applied.issue, target: "_blank", rel: "noopener", text: applied.issue });
-      box.appendChild(link);
-    }
-    return box;
+  function pickedLabel(card) {
+    if (!card.pick) return "";
+    if (card.pick.choice === "custom") return "직접 쓰기 — " + (card.pick.customText || "");
+    var opt = (card.options || []).find(function (o) { return o.key === card.pick.choice; });
+    return opt ? opt.label : String(card.pick.choice);
   }
 
   function buildCard(card) {
     var locked = !!card.applied;
-    var cardEl = el("div", { class: locked ? "card locked" : "card" });
-
-    var meta = el("div", { class: "card-meta" });
-    meta.appendChild(el("span", { class: "repo-chip", text: card.repo }));
-    if (card.area) meta.appendChild(el("span", { text: card.area }));
-    if (card.premiseOpen) {
-      meta.appendChild(el("span", { class: "badge premise", text: "전제 열림" }));
-    }
-    if (locked) {
-      meta.appendChild(el("span", { class: "badge applied", text: "반영됨" }));
-    }
-    cardEl.appendChild(meta);
-
-    cardEl.appendChild(el("h3", { text: card.question || "" }));
-    if (card.why) {
-      cardEl.appendChild(el("p", { class: "why", text: card.why }));
-    }
+    var draft = getDraft(card);
+    var meta = card.repo + (card.area ? " · " + card.area : "");
+    var kids = [
+      el("div", { class: "dc-head" }, [
+        el("div", {}, [
+          el("div", { class: "dc-title", text: card.question || "" }),
+          el("div", { class: "dc-meta", text: meta })
+        ]),
+        statusDotLabel(locked ? "반영됨" : "승인 대기", locked ? "success" : "attention")
+      ])
+    ];
+    if (card.why) kids.push(el("p", { class: "dc-why", text: "이유: " + card.why }));
     if (card.see && card.see.length > 0) {
-      cardEl.appendChild(el("p", { class: "see", text: "참고: " + card.see.join(", ") }));
+      kids.push(el("p", { class: "dc-why", text: "참고: " + card.see.join(", ") }));
+    }
+    var aiBox = buildAiDecided(card);
+    if (aiBox) kids.push(aiBox);
+
+    if (locked) {
+      if (card.pick) kids.push(el("div", { class: "dc-opt picked", text: pickedLabel(card) }));
+      kids.push(el("p", { class: "dc-lock", text: "반영된 판정은 바꿀 수 없다." }));
+      if (card.applied.issue) {
+        kids.push(el("p", { class: "dc-lock" }, [
+          el("a", { href: card.applied.issue, target: "_blank", rel: "noopener", text: card.applied.issue })
+        ]));
+      }
+      return el("div", { class: "decision-card locked" }, kids);
     }
 
-    var pickSummary = currentPickSummary(card);
-    if (pickSummary) cardEl.appendChild(pickSummary);
-
-    var aiBox = buildAiDecided(card.aiDecided);
-    if (aiBox) cardEl.appendChild(aiBox);
-
-    var optionsEl = el("div", { class: "options" });
-    (card.options || []).forEach(function (opt) {
-      optionsEl.appendChild(buildOptionButton(card, opt, locked));
-    });
-    cardEl.appendChild(optionsEl);
-
-    var errorEl = el("div", { class: "card-error" });
-
-    var customArea = el("div", { class: "custom-area" });
-    var textarea = el("textarea", { placeholder: "직접 쓰기" });
-    textarea.disabled = locked;
-    if (!locked && card.pick && card.pick.choice === "custom") {
-      textarea.value = card.pick.customText || "";
-    }
-    customArea.appendChild(textarea);
-
-    var noteRow = el("div", { class: "note-row" });
-    var noteInput = el("input", { type: "text", placeholder: "메모(선택)" });
-    noteInput.disabled = locked;
-    if (!locked && card.pick && card.pick.note) {
-      noteInput.value = card.pick.note;
-    }
-    var noteKindSelect = el("select", {});
-    noteKindSelect.disabled = locked;
+    var errorEl = el("p", { class: "dc-error", text: draft.error });
+    errorEl.hidden = !draft.error;
+    var textarea = el("textarea", { placeholder: "직접 쓰기", "aria-label": "직접 쓰기" });
+    var noteInput = el("input", { type: "text", placeholder: "메모(선택)", "aria-label": "메모" });
+    var noteKindSelect = el("select", { "aria-label": "메모 종류" });
     [["", "메모 종류"], ["reason", "이유"], ["scope", "범위 바뀜"], ["new", "새 일"]].forEach(function (pair) {
-      var opt = el("option", { value: pair[0], text: pair[1] });
-      noteKindSelect.appendChild(opt);
+      noteKindSelect.appendChild(el("option", { value: pair[0], text: pair[1] }));
     });
-    if (!locked && card.pick && card.pick.noteKind) {
-      noteKindSelect.value = card.pick.noteKind;
-    }
-    noteRow.appendChild(noteInput);
-    noteRow.appendChild(noteKindSelect);
-    customArea.appendChild(noteRow);
+    textarea.value = draft.customText;
+    noteInput.value = draft.note;
+    noteKindSelect.value = draft.noteKind;
+    textarea.addEventListener("input", function () { draft.customText = textarea.value; });
+    noteInput.addEventListener("input", function () { draft.note = noteInput.value; });
+    noteKindSelect.addEventListener("change", function () { draft.noteKind = noteKindSelect.value; });
 
-    var submitBtn = el("button", { type: "button", text: "직접 답 제출" });
-    submitBtn.disabled = locked;
+    var submitBtn = button("반영", null, "accent");
+    var hint = el("span", { class: "dc-hint" });
+
+    function syncActions() {
+      submitBtn.disabled = !draft.choice || draft.saving;
+      submitBtn.textContent = draft.choice ? "반영" : "반영 (선택 필요)";
+      hint.textContent = draft.saving ? "저장 중…" : (draft.choice ? "반영 전에는 다시 고를 수 있다" : "선택지를 고르면 반영할 수 있다");
+      textarea.hidden = draft.choice !== "custom";
+    }
+
+    var optionsEl = el("div", { class: "dc-options", role: "radiogroup", "aria-label": "선택지" });
+    var optionBtns = [];
+    var choices = (card.options || []).map(function (o) {
+      return { key: o.key, label: o.label, rec: !!o.recommended };
+    });
+    choices.push({ key: "custom", label: "직접 쓰기", rec: false });
+    choices.forEach(function (c) {
+      var b = el("button", { class: "dc-opt", type: "button", role: "radio" }, [
+        el("span", { class: "dc-radio", "aria-hidden": "true" }),
+        el("span", { text: c.label }),
+        c.rec ? el("span", { class: "dc-rec", text: "추천" }) : null
+      ]);
+      b.addEventListener("click", function () {
+        draft.choice = c.key;
+        paintOptions();
+        syncActions();
+      });
+      optionBtns.push({ btn: b, key: c.key });
+      optionsEl.appendChild(b);
+    });
+    function paintOptions() {
+      optionBtns.forEach(function (o) {
+        var on = draft.choice === o.key;
+        o.btn.classList.toggle("picked", on);
+        o.btn.setAttribute("aria-checked", on ? "true" : "false");
+      });
+    }
+
     submitBtn.addEventListener("click", function () {
-      var text = textarea.value.trim();
-      if (!text) {
-        errorEl.textContent = "직접 쓰기 칸이 비어 있습니다.";
+      if (!draft.choice) return;
+      if (draft.choice === "custom") {
+        var text = textarea.value.trim();
+        if (!text) {
+          draft.error = "직접 쓰기 칸이 비어 있습니다.";
+          errorEl.textContent = draft.error;
+          errorEl.hidden = false;
+          return;
+        }
+        submitPick(card, { choice: "custom", customText: text }, noteInput, noteKindSelect, errorEl, draft, syncActions);
         return;
       }
-      submitPick(card, { choice: "custom", customText: text }, noteInput, noteKindSelect, errorEl);
-    });
-    customArea.appendChild(submitBtn);
-    cardEl.appendChild(customArea);
-
-    // 옵션 클릭에도 같은 메모 칸을 쓴다 — 클로저로 재참조한다.
-    optionsEl.querySelectorAll(".option-btn").forEach(function (btn, idx) {
-      btn.addEventListener("click", function () {
-        var opt = (card.options || [])[idx];
-        if (!opt) return;
-        submitPick(card, { choice: opt.key }, noteInput, noteKindSelect, errorEl);
-      }, { once: false });
+      submitPick(card, { choice: draft.choice }, noteInput, noteKindSelect, errorEl, draft, syncActions);
     });
 
-    cardEl.appendChild(errorEl);
-
-    if (locked) {
-      cardEl.appendChild(buildAppliedInfo(card.applied));
-    }
-
-    return cardEl;
+    kids.push(optionsEl);
+    kids.push(textarea);
+    kids.push(el("div", { class: "dc-note-row" }, [noteInput, noteKindSelect]));
+    kids.push(errorEl);
+    kids.push(el("div", { class: "dc-actions" }, [submitBtn, hint]));
+    paintOptions();
+    syncActions();
+    return el("div", { class: "decision-card" }, kids);
   }
 
-  function submitPick(card, fields, noteInput, noteKindSelect, errorEl) {
+  function submitPick(card, fields, noteInput, noteKindSelect, errorEl, draft, syncActions) {
     var body = { repo: card.repo, id: card.id, choice: fields.choice };
     if (fields.customText !== undefined) body.customText = fields.customText;
 
@@ -1022,6 +991,20 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       body.note = noteVal;
       body.noteKind = noteKindSelect ? noteKindSelect.value : "";
     }
+
+    function fail(msg) {
+      // 저장 실패는 그 카드 안 한 줄로. 입력(선택 · 글)은 초안에 그대로 남는다.
+      draft.saving = false;
+      draft.error = msg;
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+      syncActions();
+    }
+
+    draft.saving = true;
+    draft.error = "";
+    errorEl.hidden = true;
+    syncActions();
 
     fetch("/pick", {
       method: "POST",
@@ -1033,41 +1016,65 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     })
       .then(function (res) {
         if (res.status === 200) {
+          delete drafts[draftKey(card)];
           fetchJudgments();
           return;
         }
         if (res.status === 409) {
+          delete drafts[draftKey(card)];
           showBanner("이미 반영된 판정입니다 — 화면을 새로 불러옵니다.");
           fetchJudgments();
           return;
         }
         if (res.status === 403) {
+          draft.saving = false;
+          syncActions();
           showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
           return;
         }
         return res.json().then(function (data) {
           var msg = (data && data.violations && data.violations.join(", ")) || "저장하지 못했습니다.";
-          if (errorEl) errorEl.textContent = msg;
-          else showBanner(msg);
+          fail("저장하지 못했다: " + msg + " 입력한 내용은 그대로 두었다.");
         });
       })
       .catch(function () {
-        showBanner("네트워크 오류로 저장하지 못했습니다.");
+        fail("저장하지 못했다: 서버에 연결되지 않았다. 입력한 내용은 그대로 두었다. 다시 반영을 눌러 재시도한다.");
       });
   }
 
-  function renderJudgments(cards) {
+  function renderJudge() {
     var container = document.getElementById("judge-content");
-    container.innerHTML = "";
+    // 글을 쓰는 중이면 폴링이 입력칸을 지우지 않도록 다음 주기로 미룬다.
+    var active = document.activeElement;
+    if (active && container.contains(active) && (active.tagName === "TEXTAREA" || active.tagName === "INPUT" || active.tagName === "SELECT")) return;
 
-    if (!cards || cards.length === 0) {
-      container.appendChild(el("p", { class: "empty-msg", text: "판정 대기 중인 카드가 없습니다." }));
+    clear(container);
+    container.className = "screen";
+    container.appendChild(pageHead("판정", "지휘가 올린 질문에 고르거나 직접 쓴다. 반영된 판정은 잠긴다."));
+
+    if (judgeState.error) {
+      container.appendChild(inlineNote("불러오지 못했다: 마지막으로 받은 값을 보여 준다. 15초 뒤 다시 시도한다", "danger"));
+    }
+    var cards = judgeState.cards;
+    if (cards === null) {
+      container.appendChild(waitLine("불러오는 중…"));
       return;
     }
-
+    if (cards.length === 0) {
+      container.appendChild(emptyStateCard("판정 대기 카드 없음", "새 카드가 올라오면 이 자리에 나타난다."));
+      return;
+    }
+    var grid = el("div", { class: "card-grid" });
     cards.forEach(function (card) {
-      container.appendChild(buildCard(card));
+      grid.appendChild(buildCard(card));
     });
+    container.appendChild(grid);
+  }
+
+  function renderJudgments(cards) {
+    judgeState.cards = cards || [];
+    judgeState.error = false;
+    renderJudge();
   }
 
   function fetchJudgments() {
@@ -1078,7 +1085,8 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       })
       .then(renderJudgments)
       .catch(function () {
-        // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+        judgeState.error = true;
+        renderJudge();
       });
   }
 
@@ -1503,6 +1511,8 @@ const DESK_TOKEN = "__DESK_TOKEN__";
 
   // ---- 시작 ----
 
+  renderTrack();
+  renderJudge();
   fetchSessions();
   fetchJudgments();
   setInterval(fetchSessions, POLL_MS);
