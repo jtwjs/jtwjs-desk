@@ -72,8 +72,11 @@
     {
       "step": 8,
       "name": "server-weekly-health",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:50:52+0900",
+      "summary": "page/server.py에 _today·build_weekly·build_repo_health + GET /weekly·/repo-health 추가(daily_dir의 YYYY-MM-DD.json만 읽고 aggregate 결과만 응답, score는 find_score_file 후보 4곳만, 설정 none이면 빈 week/repos), tests/test_desk_server_weekly.py(subprocess 금지 grep 포함)",
+      "completed_at": "2026-11-11T17:10:03+0900"
     },
     {
       "step": 9,
