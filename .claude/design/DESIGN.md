@@ -82,7 +82,7 @@
 | 이름 | 모양 |
 |---|---|
 | `app-shell` | 왼쪽 메뉴 패널(`surface-panel`) + 본문(`surface-content`). 패널과 본문 사이 선 하나 |
-| `shell-nav-item` | 선 아이콘 + 라벨(아이콘은 stroke 2, 기본 `text-muted`, 선택은 `text-strong`). 평소 라벨 `text-body`, 선택은 `surface-raised` 면 + `text-strong`. 그룹 부모는 아래 화살표, 하위는 아이콘 없이 들여쓰기 + 왼쪽 가는 세로선. 패널 제목 옆에 접기 버튼. **접은 상태**: 아이콘만 가운데 정렬, 가리키거나 포커스하면 `tooltip`으로 이름, 3역량 하위는 펼친 상태에서만 보인다. 접은 상태에서 3역량 아이콘을 누르면 메뉴가 펼쳐지고 그룹도 펼쳐진다(Finn 결정). 하위 항목이 선택되면 선택 면은 그 하위 항목 하나뿐이고 부모는 면 없이 라벨 · 아이콘만 `text-strong`이다(Finn 결정). 접은 폭은 `미측정`(캔버스 견본은 64, 제안) |
+| `shell-nav-item` | 선 아이콘 + 라벨(아이콘은 stroke 2, 기본 `text-muted`, 선택은 `text-strong`). 평소 라벨 `text-body`, 선택은 `surface-raised` 면 + `text-strong`. 그룹 부모는 아래 화살표, 하위는 아이콘 없이 들여쓰기 + 왼쪽 가는 세로선. 패널 제목 옆에 접기 버튼. **접은 상태**: 아이콘만 가운데 정렬, 가리키거나 포커스하면 `tooltip`으로 이름, 3역량 하위는 펼친 상태에서만 보인다. 접은 상태에서 3역량 아이콘을 누르면 메뉴가 펼쳐지고 그룹도 펼쳐진다(Finn 결정). 하위 항목이 선택되면 선택 면은 그 하위 항목 하나뿐이고 부모는 면 없이 라벨 · 아이콘만 `text-strong`이다(Finn 결정). **판정 · 복습함 항목에만 대기 건수**를 오른쪽에 `attention` 글자 숫자로 단다(틴트 없음, Finn 결정). 접은 상태에서는 아이콘 모서리의 `attention` 점으로 바꾼다(제안). 접은 폭은 `미측정`(캔버스 견본은 64, 제안) |
 | `status-dot-label` | 점 + 한국어 라벨, 둘 다 의미색. 줄 맨 앞에 둔다 |
 | `chip` | `surface-panel` 면 + 테두리, `라벨 | 값 ⌄`. 필요한 곳에만 한 줄 |
 | `data-table` | 헤더 `surface-panel` + `text-muted`, 열 이름은 말줄임. 행 구분선, 행은 여러 줄 허용, 셀은 `text-body` |
@@ -92,7 +92,7 @@
 | `inline-note` | 화면 위 한 줄 안내(설정 · 폴백 · 미등록). `neutral` 또는 `attention` |
 | `wait-line` | 표 아래 가운데 한 줄 대기 문구, `text-body` |
 | `tooltip` | 잘린 열 이름의 전체 이름. `surface-raised` 면 |
-| `button` | 기본: `surface-raised` 면 + `text-strong`. 강조: 브랜드 `#5B63D3` 채움 + `#FFFFFF` 글자. 위험 동작은 `danger`가 아니라 확인 단계를 둔다 |
+| `button` | 기본: `surface-raised` 면 + `text-strong`. 강조: 브랜드 `#5B63D3` 채움 + `#FFFFFF` 글자. 위험 동작은 `danger`가 아니라 확인 단계를 둔다. 글자는 버튼 안 가운데 정렬. 표 행 안에서는 높이를 줄인 작은 버튼을 쓴다(화면 보드 견본은 28, 일반은 36 · 제안, 실렌더에서 확인) |
 | `focus-ring` | `accent` 2 두께 바깥선(제안). 모든 조작 요소에 |
 
 ## 6. 상태 (States)
