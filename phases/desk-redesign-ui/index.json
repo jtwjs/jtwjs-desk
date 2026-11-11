@@ -45,8 +45,11 @@
     {
       "step": 5,
       "name": "shared-components",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:49:08+0900",
+      "summary": "page/index.html에 신규 부품만 추가(기존 렌더 불변): CSS 클래스 status-dot-label·chip·data-table·kpi-tile·decision-card·empty-state-card·inline-note·wait-line·tooltip·btn(accent·sm·confirm-pending)과 빌더 statusDotLabel·chip·dataTable·kpiTile·decisionCard·emptyStateCard·inlineNote·waitLine·button·confirmButton, 상태→의미색 매핑 STATUS_TONE 한 객체(STATUS_ICON은 step 6·7 교체 전까지 유지). 적용값: 행 패딩 12/16·헤더 8/16, 칩 높이 32, 버튼 36(표 행 작은 버튼 28), 툴팁은 포커스 가능 열 이름의 data-tooltip(hover·focus-visible). 색 hex는 :root에만, 데이터는 textContent만, 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T02:51:54+0900"
     },
     {
       "step": 6,
