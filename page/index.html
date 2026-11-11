@@ -237,38 +237,6 @@
     font-size: 12px;
     margin: 0 0 10px;
   }
-  .cfg-line { color: var(--attention); font-size: 12px; margin: 0 0 10px; }
-  .sec-title { font-size: 13px; color: var(--text-muted); margin: 14px 0 6px 2px; font-weight: 600; }
-  .row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    background: var(--surface-content);
-    border: 1px solid var(--surface-raised);
-    border-radius: var(--radius-card);
-    padding: 8px 12px;
-    margin-bottom: 6px;
-  }
-  .row.highlight { background: var(--attention-tint); border-color: var(--attention); font-weight: 600; }
-  .row.missing { background: var(--surface-panel); color: var(--text-muted); }
-  .row .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-  .row .sub { color: var(--text-muted); font-size: 12px; }
-  .row button, .share-actions button {
-    border: 1px solid var(--brand-fill);
-    background: var(--brand-fill);
-    color: var(--on-brand);
-    border-radius: var(--radius-control);
-    padding: 5px 10px;
-    cursor: pointer;
-    font: inherit;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  .row button:hover, .share-actions button:hover { border-color: var(--accent); }
-  .memo { white-space: pre-wrap; background: var(--surface-content); border: 1px solid var(--surface-raised); border-radius: var(--radius-card); padding: 10px 12px; }
-  .share-text { white-space: pre-wrap; margin: 6px 0; }
-  .share-actions { display: flex; gap: 8px; }
-  .link-btn { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; font: inherit; font-size: 13px; text-decoration: underline; }
 
   #banner {
     position: fixed;
@@ -496,6 +464,22 @@
   .page-head h1 { margin: 0; font-size: 20px; font-weight: 600; color: var(--text-strong); }
   .page-head p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-muted); }
   .chip-row { display: flex; gap: 8px; }
+  .section-title { margin: 8px 0 -8px; font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .muted-line { margin: 0; font-size: 13px; color: var(--text-muted); }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+  .note-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--surface-raised); border-radius: var(--radius-card); }
+  .note-card-title { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .note-card-body { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); white-space: pre-wrap; }
+  .share-text { white-space: pre-wrap; margin-top: 4px; color: var(--text-muted); }
+  .row-error { margin: 4px 0 0; font-size: 13px; color: var(--danger); }
+  .count-hl { font-weight: 500; color: var(--attention); }
+  .score { font-weight: 600; color: var(--text-strong); }
+  .grade-badge { display: inline-flex; align-items: flex-start; gap: 8px; padding: 2px 8px; border-radius: var(--radius-control); font-size: 13px; font-weight: 500; }
+  .grade-badge .dot { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; flex-shrink: 0; background: currentColor; }
+  .grade-badge.success { color: var(--success); background: var(--success-tint); }
+  .grade-badge.attention { color: var(--attention); background: var(--attention-tint); }
+  .grade-badge.danger { color: var(--danger); background: var(--danger-tint); }
+  .grade-badge.neutral { color: var(--neutral); background: color-mix(in srgb, var(--neutral) 10%, transparent); }
   .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: start; }
   .decision-card .dc-why { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); }
   .decision-card .dc-ai {
@@ -1100,30 +1084,6 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     while (node.firstChild) node.removeChild(node.firstChild);
   }
 
-  function cfgLine(config) {
-    if (!config) return null;
-    var parts = [];
-    if (config.source === "conductor") parts.push("폴백 사용 중");
-    if (config.source === "none") parts.push("설정 없음");
-    if (config.unregistered && config.unregistered.length > 0) {
-      parts.push("미등록 레포 " + config.unregistered.length + "개: " + config.unregistered.join(", "));
-    }
-    if (config.error) parts.push(String(config.error));
-    if (parts.length === 0) return null;
-    return el("p", { class: "cfg-line", text: parts.join(" · ") });
-  }
-
-  function missingRows(list) {
-    return (list || []).map(function (m) {
-      var text = m.repo + " · " + (m.what || "") + " · " + m.missing;
-      return el("div", { class: "row missing", text: text });
-    });
-  }
-
-  function emptyMsg(text) {
-    return el("p", { class: "empty-msg", text: text });
-  }
-
   // ---- 공통 컴포넌트 빌더 (DESIGN.md §5). 데이터는 textContent로만 ----
   // 상태 이름 → 의미색(accent|attention|success|danger|neutral). 한 곳에서만 정한다.
   var STATUS_TONE = {
@@ -1265,7 +1225,11 @@ const DESK_TOKEN = "__DESK_TOKEN__";
 
   // 표 행 맨 앞 틴트 없는 상태 라벨 = statusDotLabel. 툴팁은 CSS([data-tooltip]) + 포커스 가능 헤더.
 
-  function postMark(path, body, done) {
+  function postMark(path, body, done, onError) {
+    function fail(msg) {
+      if (onError) onError(msg);
+      else showBanner(msg);
+    }
     fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Desk-Token": DESK_TOKEN },
@@ -1275,205 +1239,391 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         if (res.status === 200) { done(); return; }
         if (res.status === 403) {
           showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
+          if (onError) onError("토큰이 맞지 않아 저장하지 못했다");
           return;
         }
-        showBanner("저장하지 못했습니다.");
+        fail("저장하지 못했다");
       })
       .catch(function () {
-        showBanner("네트워크 오류로 저장하지 못했습니다.");
+        fail("네트워크 오류로 저장하지 못했다");
       });
   }
+
+  // ---- 확장 화면 공통 ----
+
+  // config 안내(폴백 · 설정 없음 · 미등록 · 오류) = inline-note 배열
+  function cfgNotes(config) {
+    var notes = [];
+    if (!config) return notes;
+    if (config.source === "conductor") notes.push(inlineNote("폴백 사용 중", "neutral"));
+    if (config.source === "none") notes.push(inlineNote("설정 없음: 레포를 설정 파일에 등록하면 항목이 나타난다", "attention"));
+    if (config.unregistered && config.unregistered.length > 0) {
+      notes.push(inlineNote("미등록 레포 " + config.unregistered.length + "개: " + config.unregistered.join(", "), "attention"));
+    }
+    if (config.error) notes.push(inlineNote(String(config.error), "danger"));
+    return notes;
+  }
+
+  // missing 행은 숨기지 않는다: 상태(점 + 라벨) · 레포 · 대상
+  function missingTable(list) {
+    var rows = (list || []).map(function (m) {
+      return [
+        statusDotLabel(String(m.missing || "확인 필요")),
+        el("span", { class: "mono", text: m.repo || "" }),
+        el("span", { class: "muted", text: m.what || "" })
+      ];
+    });
+    if (rows.length === 0) return null;
+    return dataTable([
+      { name: "상태", width: "170px" },
+      { name: "레포", width: "180px" },
+      { name: "대상", width: "minmax(0, 1fr)" }
+    ], rows);
+  }
+
+  function screenBox(id, title, desc, config) {
+    var box = document.getElementById(id);
+    clear(box);
+    box.className = "screen";
+    box.appendChild(pageHead(title, desc));
+    cfgNotes(config).forEach(function (n) { box.appendChild(n); });
+    return box;
+  }
+
+  function sectionTitle(text) {
+    return el("h2", { class: "section-title", text: text });
+  }
+
+  // 레포 필터 칩: 누르면 다음 레포로 순환(트랙 화면과 같은 방식)
+  var extraRepo = { review: null, workflow: null, fullstack: null };
+  function repoFilterChip(key, repos, rerender) {
+    if (extraRepo[key] !== null && repos.indexOf(extraRepo[key]) === -1) extraRepo[key] = null;
+    var c = chip("레포", extraRepo[key] === null ? "전체" : extraRepo[key]);
+    c.setAttribute("aria-label", "레포 필터: 누르면 다음 레포로 바뀐다");
+    c.addEventListener("click", function () {
+      var order = [null].concat(repos);
+      extraRepo[key] = order[(order.indexOf(extraRepo[key]) + 1) % order.length];
+      rerender();
+    });
+    return el("div", { class: "chip-row" }, [c]);
+  }
+
+  function uniq(list) {
+    var out = [];
+    list.forEach(function (v) { if (v && out.indexOf(v) === -1) out.push(v); });
+    return out;
+  }
+
+  var lastExtra = { review: null, comp: null };
+  var reviewErrors = {};
 
   function renderReview(data) {
-    var box = document.getElementById("review-content");
-    clear(box);
-    var line = cfgLine(data.config);
-    if (line) box.appendChild(line);
+    lastExtra.review = data;
+    var box = screenBox("review-content", "복습함", "복습할 항목을 확인하고 반영한다.", data.config);
     var items = data.items || [];
-    if (items.length === 0 && (data.missing || []).length === 0) {
-      box.appendChild(emptyMsg("복습할 항목이 없습니다."));
+    var missing = data.missing || [];
+    if (items.length === 0 && missing.length === 0) {
+      box.appendChild(emptyStateCard("복습할 항목 없음", "새 항목이 생기면 이 자리에 나타난다."));
+      return;
     }
-    items.forEach(function (it) {
-      var body = el("div", { class: "grow" });
-      var title = it.kind === "phase" ? "이해 증명 건너뜀 · " + it.title : it.title;
-      body.appendChild(el("div", { text: title }));
-      var subParts = [it.repo];
-      if (it.card_kind) subParts.push(it.card_kind);
-      if (it.status) subParts.push(it.status);
-      if (it.where) subParts.push(it.where);
-      body.appendChild(el("div", { class: "sub", text: subParts.join(" · ") }));
-      if (it.summary) body.appendChild(el("div", { class: "sub", text: it.summary }));
-      var btn = el("button", { type: "button", text: "복습함 반영" });
-      btn.addEventListener("click", function () {
-        postMark("/review/done", { repo: it.repo, key: it.key }, function () {
-          fetchExtra("review");
-        });
+    if (items.length > 0) {
+      box.appendChild(repoFilterChip("review", uniq(items.map(function (i) { return i.repo; })), function () { renderReview(data); }));
+      var rows = [];
+      items.forEach(function (it) {
+        if (extraRepo.review !== null && it.repo !== extraRepo.review) return;
+        var errKey = it.repo + "\u0000" + it.key;
+        var title = it.kind === "phase" ? "이해 증명 건너뜀 · " + it.title : it.title;
+        var info = [it.card_kind, it.where].filter(Boolean).join(" · ");
+        var cellKids = [el("div", { text: title })];
+        if (it.summary) cellKids.push(el("div", { class: "muted", text: it.summary }));
+        if (reviewErrors[errKey]) cellKids.push(el("p", { class: "row-error", text: reviewErrors[errKey] }));
+        var btn = button("복습함 반영", function () {
+          postMark("/review/done", { repo: it.repo, key: it.key }, function () {
+            delete reviewErrors[errKey];
+            fetchExtra("review");
+          }, function (msg) {
+            reviewErrors[errKey] = msg;
+            renderReview(data);
+          });
+        }, "accent", true);
+        rows.push([
+          it.status ? statusDotLabel(it.status) : el("span", { class: "muted", text: "" }),
+          el("div", {}, cellKids),
+          el("span", { class: "mono", text: it.repo || "" }),
+          el("span", { class: "muted", text: info }),
+          btn
+        ]);
       });
-      box.appendChild(el("div", { class: "row" }, [body, btn]));
-    });
-    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+      box.appendChild(dataTable([
+        { name: "상태", width: "130px" },
+        { name: "항목", width: "minmax(0, 1fr)" },
+        { name: "레포", width: "150px" },
+        { name: "종류 · 위치", width: "170px" },
+        { name: "반영", width: "110px" }
+      ], rows));
+    }
+    var mt = missingTable(missing);
+    if (mt) {
+      box.appendChild(sectionTitle("확인하지 못한 레포"));
+      box.appendChild(mt);
+    }
   }
 
-  function renderWorkflow(box, data) {
+  var COMP_HEAD = {
+    workflow: ["AI워크플로우", "반복되는 패턴을 횟수순으로 본다. 3회 이상은 강조한다."],
+    proactive: ["적극성", "기준 메모, 소요시간, 임팩트 링크, 미반영 공유 파일을 본다."],
+    fullstack: ["풀스택", "영역별 학습 카드를 복습 순서로 본다."]
+  };
+
+  function renderWorkflow(box, data, rerender) {
     var rows = data.rows || [];
-    if (rows.length === 0 && (data.missing || []).length === 0) {
-      box.appendChild(emptyMsg("열린 패턴이 없습니다."));
+    var missing = data.missing || [];
+    if (rows.length === 0 && missing.length === 0) {
+      box.appendChild(emptyStateCard("열린 패턴 없음", "반복이 쌓이면 이 자리에 나타난다."));
+      return;
     }
-    rows.forEach(function (r) {
-      var cls = r.highlight ? "row highlight" : "row";
-      if (r.unparsed) {
-        box.appendChild(el("div", { class: cls, text: "형식 확인 필요" }));
-        return;
-      }
-      var body = el("div", { class: "grow" });
-      body.appendChild(el("div", { text: r.pattern || "" }));
-      var subParts = [r.source];
-      if (r.repo) subParts.push(r.repo);
-      if (r.kind) subParts.push(r.kind);
-      if (r.status) subParts.push(r.status);
-      if (r.last) subParts.push("마지막 " + r.last);
-      body.appendChild(el("div", { class: "sub", text: subParts.join(" · ") }));
-      var count = r.count === null || r.count === undefined ? "?" : r.count + "회";
-      box.appendChild(el("div", { class: cls }, [body, el("span", { text: count })]));
-    });
-    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+    if (rows.length > 0) {
+      box.appendChild(repoFilterChip("workflow", uniq(rows.map(function (r) { return r.repo; })), rerender));
+      var trs = [];
+      rows.forEach(function (r) {
+        if (extraRepo.workflow !== null && r.repo !== extraRepo.workflow) return;
+        if (r.unparsed) {
+          trs.push([statusDotLabel("형식 확인 필요"), el("span", { class: "muted", text: "" }), "", "", ""]);
+          return;
+        }
+        var count = r.count === null || r.count === undefined ? "?" : String(r.count);
+        var countNode = el("span", { class: r.highlight ? "count-hl" : "", text: count });
+        trs.push([
+          el("div", {}, [
+            el("div", { text: r.pattern || "" }),
+            el("div", { class: "muted", text: [r.source, r.repo].filter(Boolean).join(" · ") })
+          ]),
+          el("span", { text: [r.kind, r.status].filter(Boolean).join(" · ") }),
+          countNode,
+          el("span", { class: "muted", text: r.last || "" })
+        ]);
+      });
+      // 형식 확인 필요 행은 4열에 맞춰 상태를 첫 칸에 둔다
+      trs = trs.map(function (cells) { return cells.length === 5 ? [cells[0], "", "", ""] : cells; });
+      box.appendChild(dataTable([
+        { name: "패턴", width: "minmax(0, 1fr)" },
+        { name: "종류", width: "160px" },
+        { name: "횟수", width: "70px" },
+        { name: "마지막", width: "110px" }
+      ], trs));
+    }
+    var mt = missingTable(missing);
+    if (mt) { box.appendChild(sectionTitle("확인하지 못한 레포")); box.appendChild(mt); }
   }
 
   function renderProactive(box, data) {
-    box.appendChild(el("div", { class: "sec-title", text: "CPO 기준 메모" }));
     var crit = data.criteria || {};
-    box.appendChild(el("div", { class: "memo", text: crit.text !== null && crit.text !== undefined ? crit.text : (crit.note || "설정 없음") }));
+    var memo = crit.text !== null && crit.text !== undefined ? crit.text : (crit.note || "설정 없음");
+    box.appendChild(el("div", { class: "note-card" }, [
+      el("span", { class: "note-card-title", text: "기준 메모" }),
+      el("p", { class: "note-card-body", text: memo })
+    ]));
 
     var speed = data.speed || {};
-    box.appendChild(el("div", { class: "sec-title", text: "스피드" }));
-    box.appendChild(el("div", { class: "sub", text: "① 작업 소요시간" }));
-    (speed.durations || []).forEach(function (d) {
-      box.appendChild(el("div", { class: "row", text: d.repo + " · " + d.task + " · " + d.minutes + "분" }));
+    box.appendChild(sectionTitle("스피드"));
+    var durRows = (speed.durations || []).map(function (d) {
+      return [d.task, el("span", { class: "mono", text: d.repo }), d.minutes + "분"];
     });
-    if (speed.no_data) {
-      box.appendChild(el("div", { class: "row missing", text: "시간 기록 없음 " + speed.no_data + "건" }));
+    if (durRows.length > 0) {
+      box.appendChild(dataTable([
+        { name: "작업", width: "minmax(0, 1fr)" },
+        { name: "레포", width: "160px" },
+        { name: "소요시간", width: "110px" }
+      ], durRows));
     }
-    box.appendChild(el("div", { class: "sub", text: "② " + (speed.metric2 || "") }));
-    var linkWrap = el("div", { class: "sub" });
-    linkWrap.appendChild(document.createTextNode("③ "));
-    var link = el("button", { type: "button", class: "link-btn", text: "AI워크플로우 탭 보기" });
-    link.addEventListener("click", function () {
-      selectTab("comp", speed.workflow_link || "workflow");
-    });
-    linkWrap.appendChild(link);
-    box.appendChild(linkWrap);
+    if (speed.no_data) box.appendChild(inlineNote("시간 기록 없음 " + speed.no_data + "건", "neutral"));
+    if (speed.metric2) box.appendChild(el("p", { class: "muted-line", text: speed.metric2 }));
+    box.appendChild(el("div", { class: "chip-row" }, [
+      button("AI워크플로우 보기", function () { selectTab("comp", speed.workflow_link || "workflow"); }, null, true)
+    ]));
 
     var impact = data.impact || {};
-    box.appendChild(el("div", { class: "sec-title", text: "임팩트" }));
-    box.appendChild(el("div", { class: "sub", text: "① PRD" }));
-    (impact.prds || []).forEach(function (p) {
-      box.appendChild(el("div", { class: "row", text: p.repo + " · " + p.task + " · " + p.prd }));
+    box.appendChild(sectionTitle("임팩트"));
+    var prdRows = (impact.prds || []).map(function (p) {
+      return [p.task, el("span", { class: "mono", text: p.repo }), el("span", { class: "mono", text: p.prd })];
     });
-    box.appendChild(el("div", { class: "sub", text: "② 최근 갱신분" }));
+    if (prdRows.length > 0) {
+      box.appendChild(dataTable([
+        { name: "작업", width: "minmax(0, 1fr)" },
+        { name: "레포", width: "160px" },
+        { name: "PRD", width: "220px" }
+      ], prdRows));
+    }
     if (Array.isArray(impact.evidence)) {
-      if (impact.evidence.length === 0) box.appendChild(el("div", { class: "row missing", text: "최근 갱신분 없음" }));
-      impact.evidence.forEach(function (e) {
-        box.appendChild(el("div", { class: "row", text: e.repo + " · " + e.path }));
-      });
+      if (impact.evidence.length === 0) {
+        box.appendChild(inlineNote("최근 갱신분 없음", "neutral"));
+      } else {
+        box.appendChild(dataTable([
+          { name: "최근 갱신분", width: "minmax(0, 1fr)" },
+          { name: "레포", width: "160px" }
+        ], impact.evidence.map(function (e) {
+          return [el("span", { class: "mono", text: e.path }), el("span", { class: "mono", text: e.repo })];
+        })));
+      }
     } else {
-      box.appendChild(el("div", { class: "row missing", text: (impact.evidence && impact.evidence.note) || "경로 미설정" }));
+      box.appendChild(inlineNote((impact.evidence && impact.evidence.note) || "경로 미설정", "attention"));
     }
 
-    box.appendChild(el("div", { class: "sec-title", text: "투명성 — 미반영 공유" }));
+    box.appendChild(sectionTitle("투명성"));
     var tr = data.transparency || [];
-    if (tr.length === 0) box.appendChild(el("div", { class: "row missing", text: "미반영 공유 파일 없음" }));
-    tr.forEach(function (t) {
-      var card = el("div", { class: "card" });
-      card.appendChild(el("div", { class: "card-meta" }, [el("span", { class: "repo-chip", text: t.repo }), el("span", { text: t.id })]));
-      card.appendChild(el("div", { class: "share-text", text: t.text }));
-      var copy = el("button", { type: "button", text: "복사" });
-      copy.addEventListener("click", function () {
-        if (!navigator.clipboard) { showBanner("이 브라우저에서는 복사할 수 없습니다."); return; }
-        navigator.clipboard.writeText(t.text).then(function () {
-          showBanner("복사했습니다.", 2000);
-        }, function () {
-          showBanner("복사하지 못했습니다.");
-        });
-      });
-      var shared = el("button", { type: "button", text: "공유함" });
-      shared.addEventListener("click", function () {
-        postMark("/share/shared", { repo: t.repo, id: t.id }, function () {
-          fetchExtra("comp");
-        });
-      });
-      card.appendChild(el("div", { class: "share-actions" }, [copy, shared]));
-      box.appendChild(card);
-    });
-    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+    if (tr.length === 0) {
+      box.appendChild(inlineNote("미반영 공유 파일 없음", "neutral"));
+    } else {
+      box.appendChild(dataTable([
+        { name: "공유 파일", width: "minmax(0, 1fr)" },
+        { name: "복사", width: "90px" },
+        { name: "공유함", width: "100px" }
+      ], tr.map(function (t) {
+        var copy = button("복사", function () {
+          if (!navigator.clipboard) { showBanner("이 브라우저에서는 복사할 수 없습니다."); return; }
+          navigator.clipboard.writeText(t.text).then(function () {
+            showBanner("복사했습니다.", 2000);
+          }, function () {
+            showBanner("복사하지 못했습니다.");
+          });
+        }, null, true);
+        var shared = button("공유함", function () {
+          postMark("/share/shared", { repo: t.repo, id: t.id }, function () {
+            fetchExtra("comp");
+          });
+        }, "accent", true);
+        return [
+          el("div", {}, [
+            el("div", { class: "mono", text: t.repo + " · " + t.id }),
+            el("div", { class: "share-text", text: t.text })
+          ]),
+          copy,
+          shared
+        ];
+      })));
+    }
+    var mt = missingTable(data.missing);
+    if (mt) { box.appendChild(sectionTitle("확인하지 못한 레포")); box.appendChild(mt); }
   }
 
-  function renderFullstack(box, data) {
+  function renderFullstack(box, data, rerender) {
     var groups = data.groups || {};
+    var missing = data.missing || [];
+    var allCards = [];
+    Object.keys(groups).forEach(function (a) { allCards = allCards.concat(groups[a] || []); });
+    if (allCards.length > 0) {
+      box.appendChild(repoFilterChip("fullstack", uniq(allCards.map(function (c) { return c.repo; })), rerender));
+    }
     Object.keys(groups).forEach(function (area) {
-      box.appendChild(el("div", { class: "sec-title", text: AREA_LABEL[area] || area }));
-      var cards = groups[area] || [];
-      if (cards.length === 0) box.appendChild(el("div", { class: "row missing", text: "카드 없음" }));
-      cards.forEach(function (c) {
-        var body = el("div", { class: "grow" });
-        body.appendChild(el("div", { text: c.title }));
-        var subParts = [c.repo, c.kind, c.status];
-        if (c.where) subParts.push(c.where);
-        body.appendChild(el("div", { class: "sub", text: subParts.join(" · ") }));
-        if (c.summary) body.appendChild(el("div", { class: "sub", text: c.summary }));
-        box.appendChild(el("div", { class: "row" }, [body]));
+      box.appendChild(sectionTitle(AREA_LABEL[area] || area));
+      var cards = (groups[area] || []).filter(function (c) {
+        return extraRepo.fullstack === null || c.repo === extraRepo.fullstack;
       });
+      if (cards.length === 0) {
+        box.appendChild(inlineNote("카드 없음", "neutral"));
+        return;
+      }
+      box.appendChild(dataTable([
+        { name: "카드", width: "minmax(0, 1fr)" },
+        { name: "레포 · 위치", width: "220px" },
+        { name: "상태", width: "150px" }
+      ], cards.map(function (c) {
+        var kids = [el("div", { text: c.title })];
+        if (c.summary) kids.push(el("div", { class: "muted", text: c.summary }));
+        return [
+          el("div", {}, kids),
+          el("span", { class: "mono", text: [c.repo, c.where].filter(Boolean).join(" · ") }),
+          c.status ? statusDotLabel(c.status) : ""
+        ];
+      })));
     });
-    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+    var mt = missingTable(missing);
+    if (mt) { box.appendChild(sectionTitle("확인하지 못한 레포")); box.appendChild(mt); }
   }
 
   function renderComp(sub, data) {
-    var box = document.getElementById("comp-content");
-    clear(box);
-    var line = cfgLine(data.config);
-    if (line) box.appendChild(line);
-    if (sub === "workflow") renderWorkflow(box, data);
+    lastExtra.comp = { sub: sub, data: data };
+    var head = COMP_HEAD[sub] || COMP_HEAD.fullstack;
+    var box = screenBox("comp-content", head[0], head[1], data.config);
+    var rerender = function () { renderComp(sub, data); };
+    if (sub === "workflow") renderWorkflow(box, data, rerender);
     else if (sub === "proactive") renderProactive(box, data);
-    else renderFullstack(box, data);
+    else renderFullstack(box, data, rerender);
   }
 
   function renderWeekly(data) {
-    var box = document.getElementById("weekly-content");
-    clear(box);
-    var line = cfgLine(data.config);
-    if (line) box.appendChild(line);
+    var box = screenBox("weekly-content", "주간 롤업", "지난 7일 합계와 레포별 진행을 본다.", data.config);
     var w = data.week || {};
-    var totals = "세션 " + w.sessions + " · 프로젝트 " + w.projects + " · 커밋 " + w.commits +
-      " · 학습카드 " + w.cards + " · 막힌 것 " + w.stuck;
-    box.appendChild(el("div", { class: "row", text: totals }));
-    box.appendChild(el("div", { class: "sub", text: "기록 있는 날 " + w.present + "/" + w.days }));
+    // 지난주 값을 주지 않으므로 증감은 없다 — kpiTile이 자리째 숨긴다
+    box.appendChild(el("div", { class: "kpi-row" }, [
+      kpiTile("세션", w.sessions),
+      kpiTile("프로젝트", w.projects),
+      kpiTile("커밋", w.commits),
+      kpiTile("학습카드", w.cards),
+      kpiTile("막힌 것", w.stuck)
+    ]));
+    box.appendChild(el("p", { class: "muted-line", text: "기록 있는 날 " + w.present + "/" + w.days }));
     if ((w.missing || []).length > 0) {
-      box.appendChild(el("div", { class: "row missing", text: "기록 없음: " + w.missing.join(", ") }));
+      box.appendChild(inlineNote("기록 없음: " + w.missing.join(", "), "attention"));
     }
-    (w.repos || []).forEach(function (r) {
-      var body = el("div", { class: "grow" });
-      body.appendChild(el("div", { text: r.name + " · 커밋 " + r.commits }));
-      (r.progress || []).forEach(function (p) {
-        body.appendChild(el("div", { class: "sub", text: p }));
-      });
-      box.appendChild(el("div", { class: "row" }, [body]));
-    });
+    var repos = w.repos || [];
+    box.appendChild(sectionTitle("레포별"));
+    if (repos.length === 0) {
+      box.appendChild(emptyStateCard("레포별 진행 없음", "커밋이 쌓이면 이 자리에 나타난다."));
+      return;
+    }
+    box.appendChild(dataTable([
+      { name: "레포", width: "180px" },
+      { name: "커밋", width: "80px" },
+      { name: "내용", width: "minmax(0, 1fr)" }
+    ], repos.map(function (r) {
+      return [
+        el("span", { class: "mono", text: r.name }),
+        String(r.commits),
+        el("div", {}, (r.progress || []).map(function (p) { return el("div", { text: p }); }))
+      ];
+    })));
+  }
+
+  // 채점 도구가 주는 색 이름 → 의미색(DESIGN.md §2). 모르는 값은 neutral.
+  var GRADE_TONE = { green: "success", amber: "attention", red: "danger" };
+
+  function gradeBadge(grade, colorName) {
+    var tone = GRADE_TONE[String(colorName || "").toLowerCase()] || "neutral";
+    return el("span", { class: "grade-badge " + tone }, [
+      el("span", { class: "dot", "aria-hidden": "true" }),
+      el("span", { text: String(grade) })
+    ]);
   }
 
   function renderHealth(data) {
-    var box = document.getElementById("health-content");
-    clear(box);
-    var line = cfgLine(data.config);
-    if (line) box.appendChild(line);
+    var box = screenBox("health-content", "레포 건강도", "레포별 AI 준비도 점수와 채점 경과일을 본다.", data.config);
     var rows = data.repos || [];
-    if (rows.length === 0) box.appendChild(emptyMsg("등록된 레포가 없습니다."));
-    rows.forEach(function (r) {
-      if (r.missing) {
-        box.appendChild(el("div", { class: "row missing", text: r.repo + " · " + r.missing }));
-        return;
-      }
-      var text = r.repo + " · " + r.total + "점 · " + r.grade + " · " + r.age_days + "일 전 채점 (" + r.scored_on + ")";
-      box.appendChild(el("div", { class: "row", text: text }));
+    if (rows.length === 0) {
+      box.appendChild(emptyStateCard("등록된 레포 없음", "레포를 설정 파일에 등록하면 점수가 나타난다."));
+      return;
+    }
+    var scored = rows.filter(function (r) { return !r.missing; });
+    var missing = rows.filter(function (r) { return r.missing; }).map(function (r) {
+      return { repo: r.repo, what: "", missing: r.missing };
     });
+    if (scored.length > 0) {
+      box.appendChild(dataTable([
+        { name: "레포", width: "minmax(0, 1fr)" },
+        { name: "점수", width: "80px" },
+        { name: "등급", width: "170px" },
+        { name: "채점", width: "170px" }
+      ], scored.map(function (r) {
+        return [
+          el("span", { class: "mono", text: r.repo }),
+          el("span", { class: "score", text: String(r.total) }),
+          gradeBadge(r.grade, r.color || r.grade_color),
+          el("span", { class: "muted", text: r.age_days + "일 전 채점 (" + r.scored_on + ")" })
+        ];
+      })));
+    }
+    var mt = missingTable(missing);
+    if (mt) { box.appendChild(sectionTitle("채점하지 못한 레포")); box.appendChild(mt); }
   }
 
   function fetchExtra(tab) {
