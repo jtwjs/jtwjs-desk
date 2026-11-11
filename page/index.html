@@ -5,91 +5,194 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>지휘 책상</title>
 <style>
-  :root {
-    --bg: #f5f5f4;
-    --panel: #ffffff;
-    --text: #1c1c1a;
-    --muted: #6b6b66;
-    --border: #ddd9d2;
-    --accent: #2563eb;
-    --accent-bg: #eaf1ff;
-    --warn: #b45309;
-    --warn-bg: #fff3e0;
-    --danger: #b91c1c;
-    --danger-bg: #fdecec;
-    --locked-bg: #f0f0ee;
+  @font-face {
+    font-family: "Pretendard";
+    src: url("/fonts/PretendardVariable.woff2") format("woff2");
+    font-weight: 45 920;
+    font-style: normal;
+    font-display: swap;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #17171a;
-      --panel: #212125;
-      --text: #ededec;
-      --muted: #9a9a97;
-      --border: #35353a;
-      --accent: #60a5fa;
-      --accent-bg: #16233b;
-      --warn: #fbbf24;
-      --warn-bg: #3a2a0d;
-      --danger: #f87171;
-      --danger-bg: #3a1414;
-      --locked-bg: #27272b;
-    }
+  :root {
+    --surface-content: #202432;
+    --surface-panel: #232837;
+    --surface-raised: #2A303F;
+    --text-strong: #FFFFFF;
+    --text-body: #B9BFCF;
+    --text-muted: #959DB6;
+    --accent: #7C87F7;
+    --attention: #FBBF24;
+    --success: #34D399;
+    --danger: #F87171;
+    --neutral: #94A3B8;
+    --brand-fill: #5B63D3;
+    --on-brand: #FFFFFF;
+    --attention-tint: color-mix(in srgb, var(--attention) 10%, transparent);
+    --success-tint: color-mix(in srgb, var(--success) 10%, transparent);
+    --danger-tint: color-mix(in srgb, var(--danger) 10%, transparent);
+    --neutral-tint: color-mix(in srgb, var(--neutral) 10%, transparent);
+    --hover-face: color-mix(in srgb, var(--surface-raised) 50%, transparent);
+    --font-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --radius-control: 6px;
+    --radius-card: 8px;
+    --menu-w: 264px;
+    --menu-w-collapsed: 64px;
+    --motion: 150ms;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    min-height: 100vh;
+    background: var(--surface-content);
+    color: var(--text-body);
+    font-family: var(--font-sans);
     font-size: 14px;
     line-height: 1.5;
+    word-break: keep-all;
   }
-  header {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---- 앱 셸: 좌측 메뉴 ---- */
+  #menu {
+    width: var(--menu-w);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 16px 12px;
     display: flex;
-    gap: 4px;
-    padding: 10px 16px 0;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    gap: 16px;
+    background: var(--surface-panel);
+    border-right: 1px solid var(--surface-raised);
+    z-index: 5;
   }
-  header h1 {
-    font-size: 15px;
-    margin: 0 16px 10px 0;
-    font-weight: 600;
+  #menu.collapsed { width: var(--menu-w-collapsed); align-items: center; }
+  .menu-head {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    width: 100%;
   }
-  .tab-btn {
-    appearance: none;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    padding: 8px 14px;
-    font-size: 14px;
+  #menu.collapsed .menu-head { justify-content: center; padding: 0; }
+  .menu-title { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  #menu.collapsed .menu-title { display: none; }
+  .menu-toggle {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    color: var(--text-muted);
     cursor: pointer;
-    border-bottom: 2px solid transparent;
   }
-  .tab-btn.active {
-    color: var(--text);
-    border-bottom-color: var(--accent);
-    font-weight: 600;
+  .menu-toggle:hover { border-color: var(--text-muted); }
+  .menu-toggle svg { transition: transform var(--motion); }
+  #menu.collapsed .menu-toggle svg { transform: rotate(180deg); }
+  .menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
   }
+  .menu-item {
+    position: relative;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 36px;
+    padding: 0 8px;
+    border: none;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--text-body);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--motion), color var(--motion);
+  }
+  .menu-item .icon { flex-shrink: 0; color: var(--text-muted); }
+  .menu-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu-item:hover { background: var(--hover-face); color: var(--text-strong); }
+  .menu-item:hover .icon { color: var(--text-strong); }
+  .menu-item[aria-current="page"] {
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    font-weight: 500;
+  }
+  .menu-item[aria-current="page"] .icon,
+  .menu-item.parent-active .icon { color: var(--text-strong); }
+  .menu-item.parent-active { color: var(--text-strong); }
+  .menu-item .chev { flex-shrink: 0; color: var(--text-muted); transition: transform var(--motion); }
+  .menu-item[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .badge-count {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--attention);
+  }
+  .badge-count:empty { display: none; }
+  .sub-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-left: 16px;
+    padding-left: 8px;
+    border-left: 1px solid var(--surface-raised);
+  }
+  .sub-list[hidden] { display: none; }
+  .menu-item.sub { height: 32px; font-size: 13px; }
+  #menu.collapsed .menu-item { width: 36px; justify-content: center; padding: 0; }
+  #menu.collapsed .menu-item .label,
+  #menu.collapsed .menu-item .chev,
+  #menu.collapsed .badge-count,
+  #menu.collapsed .sub-list { display: none; }
+  .tip {
+    display: none;
+    position: absolute;
+    left: 48px;
+    top: 4px;
+    padding: 4px 8px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  #menu.collapsed .menu-item:hover .tip,
+  #menu.collapsed .menu-item:focus-visible .tip { display: block; }
+
   main {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 16px;
+    flex: 1;
+    min-width: 0;
+    max-width: 1040px;
+    padding: 32px 40px;
   }
   .tab-panel[hidden] { display: none; }
   .empty-msg {
-    color: var(--muted);
+    color: var(--text-muted);
     padding: 24px 8px;
     text-align: center;
   }
-  .repo-group {
-    margin-bottom: 18px;
-  }
+  .repo-group { margin-bottom: 18px; }
   .repo-group h2 {
     font-size: 13px;
-    color: var(--muted);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin: 0 0 6px 2px;
@@ -98,64 +201,64 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: var(--surface-content);
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
     padding: 10px 12px;
     margin-bottom: 6px;
   }
   .session-row .status-icon { font-size: 16px; width: 22px; text-align: center; }
-  .session-row .status-text { font-weight: 600; min-width: 70px; }
-  .session-row .branch { color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .session-row .ago { color: var(--muted); font-size: 12px; white-space: nowrap; }
-  .session-row.idle { background: var(--warn-bg); }
-  .session-row.waiting { background: var(--accent-bg); }
+  .session-row .status-text { font-weight: 600; min-width: 70px; color: var(--text-strong); }
+  .session-row .branch { color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); }
+  .session-row .ago { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+  .session-row.idle { background: var(--neutral-tint); }
+  .session-row.waiting { background: var(--attention-tint); }
 
   .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    background: var(--surface-content);
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
     padding: 14px 16px;
     margin-bottom: 14px;
   }
-  .card.locked { background: var(--locked-bg); }
+  .card.locked { background: var(--surface-panel); }
   .card-meta {
     display: flex;
     gap: 8px;
     align-items: center;
-    color: var(--muted);
+    color: var(--text-muted);
     font-size: 12px;
     margin-bottom: 4px;
   }
   .card-meta .repo-chip {
-    background: var(--accent-bg);
-    color: var(--accent);
-    border-radius: 999px;
+    background: var(--surface-panel);
+    border: 1px solid var(--surface-raised);
+    color: var(--text-strong);
+    border-radius: var(--radius-control);
     padding: 1px 8px;
-    font-weight: 600;
+    font-weight: 500;
+    font-family: var(--font-mono);
   }
   .badge {
     display: inline-block;
     font-size: 11px;
     padding: 1px 7px;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     font-weight: 600;
   }
-  .badge.premise { background: var(--warn-bg); color: var(--warn); }
-  .badge.applied { background: #dcfce7; color: #15803d; }
-  @media (prefers-color-scheme: dark) {
-    .badge.applied { background: #0f3b22; color: #4ade80; }
-  }
+  .badge.premise { background: var(--attention-tint); color: var(--attention); }
+  .badge.applied { background: var(--success-tint); color: var(--success); }
   .card h3 {
     margin: 4px 0 2px;
     font-size: 16px;
+    color: var(--text-strong);
   }
   .card .why {
-    color: var(--muted);
+    color: var(--text-muted);
     margin: 0 0 10px;
   }
   .card .see {
-    color: var(--muted);
+    color: var(--text-muted);
     font-size: 12px;
     margin: 0 0 10px;
   }
@@ -166,49 +269,47 @@
     margin-bottom: 10px;
   }
   .option-btn {
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    border-radius: 8px;
+    border: 1px solid var(--surface-raised);
+    background: var(--surface-panel);
+    color: var(--text-strong);
+    border-radius: var(--radius-control);
     padding: 8px 12px;
     cursor: pointer;
+    font: inherit;
     font-size: 13px;
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .option-btn.recommended { border-color: var(--accent); }
+  .option-btn:hover { border-color: var(--text-muted); }
   .option-btn.recommended .rec-badge {
-    background: var(--accent);
-    color: #fff;
-    border-radius: 999px;
-    font-size: 10px;
-    padding: 1px 6px;
+    color: var(--text-muted);
+    font-size: 11px;
   }
-  .option-btn.picked { outline: 2px solid var(--accent); }
+  .option-btn.picked { background: var(--surface-raised); border-color: var(--accent); }
   .option-btn:disabled { cursor: not-allowed; opacity: 0.6; }
 
   .ai-decided {
-    border: 1px dashed var(--border);
-    border-radius: 8px;
+    border: 1px dashed var(--surface-raised);
+    border-radius: var(--radius-card);
     padding: 8px 10px;
     margin-bottom: 10px;
     font-size: 13px;
   }
-  .ai-decided .title { font-weight: 600; margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+  .ai-decided .title { font-weight: 600; margin-bottom: 4px; color: var(--text-muted); font-size: 12px; }
 
   .custom-area {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--surface-raised);
     padding-top: 10px;
   }
   .custom-area textarea {
     width: 100%;
     min-height: 54px;
     resize: vertical;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--text);
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
     padding: 6px 8px;
     font-family: inherit;
     font-size: 13px;
@@ -220,24 +321,27 @@
     flex-wrap: wrap;
   }
   .note-row input, .note-row select {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--text);
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
     padding: 6px 8px;
+    font-family: inherit;
     font-size: 13px;
   }
   .note-row input[type="text"] { flex: 1; min-width: 140px; }
   .custom-area button, .submit-row button {
     margin-top: 6px;
-    border: 1px solid var(--accent);
-    background: var(--accent);
-    color: #fff;
-    border-radius: 6px;
+    border: 1px solid var(--brand-fill);
+    background: var(--brand-fill);
+    color: var(--on-brand);
+    border-radius: var(--radius-control);
     padding: 7px 14px;
     cursor: pointer;
+    font: inherit;
     font-size: 13px;
   }
+  .custom-area button:hover:not(:disabled), .submit-row button:hover:not(:disabled) { border-color: var(--accent); }
   .custom-area button:disabled, .submit-row button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -245,7 +349,7 @@
 
   .current-pick {
     font-size: 12px;
-    color: var(--muted);
+    color: var(--text-muted);
     margin-bottom: 8px;
   }
   .card-error {
@@ -255,80 +359,86 @@
   }
   .applied-info {
     font-size: 12px;
-    color: var(--muted);
+    color: var(--text-muted);
     margin-top: 6px;
   }
   .applied-info a { color: var(--accent); }
 
-  .cfg-line { color: var(--warn); font-size: 12px; margin: 0 0 10px; }
-  .sub-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
-  .sub-btn {
-    appearance: none;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--muted);
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .sub-btn.active { color: var(--accent); border-color: var(--accent); font-weight: 600; }
-  .sec-title { font-size: 13px; color: var(--muted); margin: 14px 0 6px 2px; font-weight: 600; }
+  .cfg-line { color: var(--attention); font-size: 12px; margin: 0 0 10px; }
+  .sec-title { font-size: 13px; color: var(--text-muted); margin: 14px 0 6px 2px; font-weight: 600; }
   .row {
     display: flex;
     gap: 10px;
     align-items: center;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: var(--surface-content);
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
     padding: 8px 12px;
     margin-bottom: 6px;
   }
-  .row.highlight { background: var(--warn-bg); border-color: var(--warn); font-weight: 600; }
-  .row.missing { background: var(--locked-bg); color: var(--muted); }
+  .row.highlight { background: var(--attention-tint); border-color: var(--attention); font-weight: 600; }
+  .row.missing { background: var(--surface-panel); color: var(--text-muted); }
   .row .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-  .row .sub { color: var(--muted); font-size: 12px; }
+  .row .sub { color: var(--text-muted); font-size: 12px; }
   .row button, .share-actions button {
-    border: 1px solid var(--accent);
-    background: var(--accent);
-    color: #fff;
-    border-radius: 6px;
+    border: 1px solid var(--brand-fill);
+    background: var(--brand-fill);
+    color: var(--on-brand);
+    border-radius: var(--radius-control);
     padding: 5px 10px;
     cursor: pointer;
+    font: inherit;
     font-size: 12px;
     white-space: nowrap;
   }
-  .memo { white-space: pre-wrap; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .row button:hover, .share-actions button:hover { border-color: var(--accent); }
+  .memo { white-space: pre-wrap; background: var(--surface-content); border: 1px solid var(--surface-raised); border-radius: var(--radius-card); padding: 10px 12px; }
   .share-text { white-space: pre-wrap; margin: 6px 0; }
   .share-actions { display: flex; gap: 8px; }
-  .link-btn { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 13px; text-decoration: underline; }
+  .link-btn { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; font: inherit; font-size: 13px; text-decoration: underline; }
 
   #banner {
     position: fixed;
     bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--danger-bg);
+    background: var(--surface-panel);
     color: var(--danger);
     border: 1px solid var(--danger);
-    border-radius: 8px;
+    border-radius: var(--radius-card);
     padding: 10px 16px;
     font-size: 13px;
     max-width: 90vw;
   }
   #banner[hidden] { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>지휘 책상</h1>
-  <button type="button" class="tab-btn active" data-tab="track">트랙</button>
-  <button type="button" class="tab-btn" data-tab="judge">판정</button>
-  <button type="button" class="tab-btn" data-tab="review">복습함</button>
-  <button type="button" class="tab-btn" data-tab="comp">3역량</button>
-  <button type="button" class="tab-btn" data-tab="weekly">주간 롤업</button>
-  <button type="button" class="tab-btn" data-tab="health">레포 건강도</button>
-</header>
+<nav id="menu" aria-label="메인 메뉴">
+  <div class="menu-head">
+    <span class="menu-title">desk</span>
+    <button type="button" id="menu-toggle" class="menu-toggle" aria-label="메뉴 접기" aria-expanded="true"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  </div>
+  <div class="menu-list">
+    <button type="button" class="menu-item" data-tab="track" aria-label="트랙" aria-current="page"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg><span class="label">트랙</span><span class="tip" role="tooltip">트랙</span></button>
+    <button type="button" class="menu-item" data-tab="judge" aria-label="판정"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="label">판정</span><span class="badge-count" data-badge="judge"></span><span class="tip" role="tooltip">판정</span></button>
+    <button type="button" class="menu-item" data-tab="review" aria-label="복습함"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="label">복습함</span><span class="badge-count" data-badge="review"></span><span class="tip" role="tooltip">복습함</span></button>
+    <div class="menu-group">
+      <button type="button" class="menu-item" id="comp-parent" aria-label="3역량" aria-expanded="false" aria-controls="sub-comp"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><span class="label">3역량</span><svg class="chev" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg><span class="tip" role="tooltip">3역량</span></button>
+      <div class="sub-list" id="sub-comp" hidden>
+        <button type="button" class="menu-item sub" data-tab="comp" data-sub="workflow"><span class="label">AI워크플로우</span></button>
+        <button type="button" class="menu-item sub" data-tab="comp" data-sub="proactive"><span class="label">적극성</span></button>
+        <button type="button" class="menu-item sub" data-tab="comp" data-sub="fullstack"><span class="label">풀스택</span></button>
+      </div>
+    </div>
+    <button type="button" class="menu-item" data-tab="weekly" aria-label="주간 롤업"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="label">주간 롤업</span><span class="tip" role="tooltip">주간 롤업</span></button>
+    <button type="button" class="menu-item" data-tab="health" aria-label="레포 건강도"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="label">레포 건강도</span><span class="tip" role="tooltip">레포 건강도</span></button>
+  </div>
+</nav>
 <main>
   <section id="tab-track" class="tab-panel">
     <div id="track-content"><p class="empty-msg">불러오는 중…</p></div>
@@ -340,11 +450,6 @@
     <div id="review-content"><p class="empty-msg">불러오는 중…</p></div>
   </section>
   <section id="tab-comp" class="tab-panel" hidden>
-    <div class="sub-tabs">
-      <button type="button" class="sub-btn active" data-sub="workflow">AI워크플로우</button>
-      <button type="button" class="sub-btn" data-sub="proactive">적극성</button>
-      <button type="button" class="sub-btn" data-sub="fullstack">풀스택</button>
-    </div>
     <div id="comp-content"><p class="empty-msg">불러오는 중…</p></div>
   </section>
   <section id="tab-weekly" class="tab-panel" hidden>
@@ -380,7 +485,11 @@ const DESK_TOKEN = "__DESK_TOKEN__";
 
   // ---- 탭 전환(클라이언트 쪽에서만, 새 요청 없음) ----
 
-  var tabButtons = document.querySelectorAll(".tab-btn");
+  var menuEl = document.getElementById("menu");
+  var menuToggle = document.getElementById("menu-toggle");
+  var compParent = document.getElementById("comp-parent");
+  var subComp = document.getElementById("sub-comp");
+  var tabItems = document.querySelectorAll(".menu-item[data-tab]");
   var panels = {
     track: document.getElementById("tab-track"),
     judge: document.getElementById("tab-judge"),
@@ -392,28 +501,57 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   var activeTab = "track";
   var activeSub = "workflow";
 
-  tabButtons.forEach(function (btn) {
+  // 접힘 · 그룹 펼침 상태는 세션 중 메모리만 쓴다(localStorage 없음).
+  function setCompOpen(open) {
+    subComp.hidden = !open;
+    compParent.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function setCollapsed(collapsed) {
+    menuEl.classList.toggle("collapsed", collapsed);
+    menuToggle.setAttribute("aria-label", collapsed ? "메뉴 펼치기" : "메뉴 접기");
+    menuToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  }
+
+  // 선택 면은 항목 하나뿐이다. 3역량은 하위 항목이 선택 면을 갖고 부모는 글자만 올린다.
+  function syncMenu() {
+    tabItems.forEach(function (b) {
+      var on = b.getAttribute("data-tab") === activeTab &&
+        (activeTab !== "comp" || b.getAttribute("data-sub") === activeSub);
+      if (on) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+    compParent.classList.toggle("parent-active", activeTab === "comp");
+  }
+
+  function selectTab(target, sub) {
+    activeTab = target;
+    if (sub) activeSub = sub;
+    Object.keys(panels).forEach(function (key) {
+      panels[key].hidden = key !== target;
+    });
+    if (target === "comp") setCompOpen(true);
+    syncMenu();
+    loadVisibleExtra();
+  }
+
+  tabItems.forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var target = btn.getAttribute("data-tab");
-      activeTab = target;
-      tabButtons.forEach(function (b) {
-        b.classList.toggle("active", b === btn);
-      });
-      Object.keys(panels).forEach(function (key) {
-        panels[key].hidden = key !== target;
-      });
-      loadVisibleExtra();
+      selectTab(btn.getAttribute("data-tab"), btn.getAttribute("data-sub"));
     });
   });
 
-  document.querySelectorAll(".sub-btn").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      activeSub = btn.getAttribute("data-sub");
-      document.querySelectorAll(".sub-btn").forEach(function (b) {
-        b.classList.toggle("active", b === btn);
-      });
-      loadVisibleExtra();
-    });
+  menuToggle.addEventListener("click", function () {
+    setCollapsed(!menuEl.classList.contains("collapsed"));
+  });
+
+  compParent.addEventListener("click", function () {
+    if (menuEl.classList.contains("collapsed")) {
+      setCollapsed(false);
+      setCompOpen(true);
+      return;
+    }
+    setCompOpen(subComp.hidden);
   });
 
   // ---- 배너(에러 안내) ----
@@ -865,11 +1003,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     linkWrap.appendChild(document.createTextNode("③ "));
     var link = el("button", { type: "button", class: "link-btn", text: "AI워크플로우 탭 보기" });
     link.addEventListener("click", function () {
-      activeSub = speed.workflow_link || "workflow";
-      document.querySelectorAll(".sub-btn").forEach(function (b) {
-        b.classList.toggle("active", b.getAttribute("data-sub") === activeSub);
-      });
-      loadVisibleExtra();
+      selectTab("comp", speed.workflow_link || "workflow");
     });
     linkWrap.appendChild(link);
     box.appendChild(linkWrap);
