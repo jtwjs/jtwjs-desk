@@ -203,6 +203,59 @@ def build_review(cfg: dict) -> dict:
     return {"config": config_block(cfg), "items": items, "missing": missing}
 
 
+def build_workflow(cfg: dict) -> dict:
+    """AI워크플로우 응답 — observations(레포별) + friction(vault)을 읽기만 한다(ADR-009)."""
+    obs, missing = [], []
+    for root in cfg["repos"]:
+        repo = Path(root).name
+        if not Path(root).is_dir():
+            missing.append(missing_row(repo, "repo", "경로 없음"))
+            continue
+        text = read_ledger(root, ".claude/observations.md")
+        if text is None:
+            missing.append(missing_row(repo, "observations", "파일 없음"))
+            continue
+        obs.extend({**r, "repo": repo} for r in ledger.parse_observations(text))
+    friction = []
+    if cfg["vault"] is not None:
+        ftext = read_vault_friction(cfg["vault"])
+        if ftext is None:
+            missing.append(missing_row("(vault)", "friction", "파일 없음"))
+        else:
+            friction = ledger.parse_friction(ftext)
+    return {"config": config_block(cfg),
+            "rows": ledger.workflow_rows(obs, friction), "missing": missing}
+
+
+_FULLSTACK_AREAS = ("fe", "be", "infra", "domain", "미분류")
+_FULLSTACK_KINDS = ("기술", "도메인")
+
+
+def build_fullstack(cfg: dict) -> dict:
+    """풀스택 응답 — inbox 기술 · 도메인 카드를 영역별로 묶고 복습 순서로 정렬."""
+    groups = {a: [] for a in _FULLSTACK_AREAS}
+    missing = []
+    for root in cfg["repos"]:
+        repo = Path(root).name
+        if not Path(root).is_dir():
+            missing.append(missing_row(repo, "repo", "경로 없음"))
+            continue
+        text = read_ledger(root, "_learn/inbox.md")
+        if text is None:
+            missing.append(missing_row(repo, "inbox", "파일 없음"))
+            continue
+        for c in ledger.parse_inbox(text):
+            if c["kind"] not in _FULLSTACK_KINDS:
+                continue
+            area = ledger.classify_area(c["where"], c["kind"])
+            groups[area].append({"repo": repo, "title": c["title"], "kind": c["kind"],
+                                 "status": c["status"], "where": c["where"],
+                                 "summary": c["summary"]})
+    return {"config": config_block(cfg),
+            "groups": {a: ledger.fullstack_order(v) for a, v in groups.items()},
+            "missing": missing}
+
+
 def list_judgments(repo: str | None = None) -> list:
     """레포별 판정 카드 목록 — ask 내용 + 있으면 pick + 있으면 applied.
 
@@ -308,6 +361,25 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(200, {"config": config_block(cfg), "items": [], "missing": []})
                 return
             self._send_json(200, build_review(cfg))
+            return
+
+        if parsed.path in ("/competency/workflow", "/competency/fullstack"):
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            cfg = config.load_config()
+            if parsed.path == "/competency/workflow":
+                if cfg["source"] == "none":
+                    self._send_json(200, {"config": config_block(cfg), "rows": [], "missing": []})
+                else:
+                    self._send_json(200, build_workflow(cfg))
+            else:
+                if cfg["source"] == "none":
+                    self._send_json(200, {
+                        "config": config_block(cfg),
+                        "groups": {a: [] for a in _FULLSTACK_AREAS}, "missing": []})
+                else:
+                    self._send_json(200, build_fullstack(cfg))
             return
 
         if parsed.path == "/":
