@@ -63,8 +63,11 @@
     {
       "step": 7,
       "name": "screens-review-comp-weekly-health",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T04:02:37+0900",
+      "summary": "page/index.html만 수정: 복습함(조밀한 표·행 안 작은 반영 버튼·실패 오류는 그 행 한 줄)·3역량 3화면(dataTable, 워크플로우·풀스택 레포 칩, 적극성 메모/스피드/임팩트/투명성)·주간 롤업(kpiTile 5칸, 증감은 서버 값이 없어 숨김, 레포별 표)·레포 건강도(점수+등급 배지 점+라벨+10% 틴트, data의 color→success/attention/danger, 없으면 neutral)로 재배치. config=inlineNote, missing=상태 점+라벨 표. POST /review/done·/share/shared 형식과 보이는 탭만 폴링 불변, 구 row/memo CSS·cfgLine·missingRows 제거, 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T06:04:12+0900"
     },
     {
       "step": 8,
