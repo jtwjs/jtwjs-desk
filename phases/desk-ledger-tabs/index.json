@@ -63,8 +63,11 @@
     {
       "step": 7,
       "name": "server-proactive-share",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:06:37+0900",
+      "summary": "page/server.py에 build_proactive(_phase_minutes·_safe_rel·_evidence_files·_read_criteria) + GET /competency/proactive + POST /share/shared 추가, tests/test_desk_server_proactive.py. 응답 키 config·criteria·speed{durations,no_data,metric2,workflow_link}·impact{prds,evidence(상위5 또는 note),ignored}·transparency·missing; 공유 마킹은 <id>.shared.json(at만), .md 쓰기·삭제 없음",
+      "completed_at": "2026-11-11T16:47:23+0900"
     },
     {
       "step": 8,
