@@ -34,6 +34,8 @@ from desk import atomic, config, ledger, paths, rollup, sort, validate  # noqa: 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
 _TOKEN_PLACEHOLDER = "__DESK_TOKEN__"
+_FONT_ROUTE = "/fonts/PretendardVariable.woff2"  # 허용 이름 하나만(ADR-016)
+_FONT_PATH = Path(__file__).resolve().parent / "fonts" / "PretendardVariable.woff2"
 
 # 읽기 허용 목록(ADR-009) — 뒤 step이 항목을 추가한다. 이 밖의 레포 파일은 열지 않는다.
 ALLOWED_REL = (".claude/observations.md", "_learn/inbox.md")
@@ -489,6 +491,22 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
+
+        if parsed.path == _FONT_ROUTE:
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            try:
+                body = _FONT_PATH.read_bytes()
+            except OSError:
+                self._send_json(404, {"error": "not found"})
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "font/woff2")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
 
         if parsed.path == "/version":
             self._send_json(200, {"version": read_plugin_version()})
