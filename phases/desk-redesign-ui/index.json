@@ -18,8 +18,11 @@
     {
       "step": 2,
       "name": "pretendard-bundle",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:40:27+0900",
+      "summary": "page/fonts/PretendardVariable.woff2(2,057,688바이트, v1.3.9 가변)와 LICENSE-Pretendard.txt(SIL OFL 1.1) 추가, 용량 미측정 해소",
+      "completed_at": "2026-11-12T02:41:58+0900"
     },
     {
       "step": 3,
