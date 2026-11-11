@@ -437,6 +437,13 @@ def list_judgments(repo: str | None = None) -> list:
     return cards
 
 
+def count_nav(cfg: dict) -> dict:
+    """메뉴 배지 건수 — 판정 = pick 없는 카드 수, 복습 = 대기 items 수. 읽기만 한다(ADR-009)."""
+    judge = sum(1 for c in list_judgments() if "pick" not in c)
+    review = 0 if cfg["source"] == "none" else len(build_review(cfg)["items"])
+    return {"judge": judge, "review": review}
+
+
 def spawn_pick_candidate(body: dict) -> dict:
     """요청 바디에서 repo·id를 뺀 나머지 + at(ISO 문자열)을 더한 pick 후보.
 
@@ -501,6 +508,13 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             qs = parse_qs(parsed.query)
             repo = qs.get("repo", [None])[0]
             self._send_json(200, list_judgments(repo))
+            return
+
+        if parsed.path == "/nav-counts":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            self._send_json(200, count_nav(config.load_config()))
             return
 
         if parsed.path == "/review":
