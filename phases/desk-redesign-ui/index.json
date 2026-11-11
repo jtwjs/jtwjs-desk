@@ -72,8 +72,11 @@
     {
       "step": 8,
       "name": "nav-badge-wiring",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T06:04:13+0900",
+      "summary": "page/index.html에 fetchNavCounts(15초, 탭 폴링과 별개, 실패 시 마지막 값 유지·숫자 아니면 무시, textContent, 0이면 숨김, 접힘은 data-has-badge 점) + tests/test_desk_redesign_integration.py 1개(/ · /nav-counts · 폰트 200 · 임의 이름 404), 테스트 289개 통과. 미확인: 브라우저 렌더 — 순서: 서버 띄워 메뉴 펼침/접힘 → 판정·복습 배지(숫자/점, 0이면 숨김) → 6화면 순회",
+      "completed_at": "2026-11-12T06:06:22+0900"
     }
   ]
 }
