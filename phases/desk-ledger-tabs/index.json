@@ -18,8 +18,11 @@
     {
       "step": 2,
       "name": "ledger-learn",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T15:55:30+0900",
+      "summary": "desk/ledger.py 신규(parse_inbox·review_cards·classify_area·fullstack_order·card_key·phase_key·skipped_phases, 순수 함수), tests/test_desk_ledger_learn.py. 카드 dict 키: title·date·kind·status·where·vault·summary. step 3이 같은 파일에 함수 추가",
+      "completed_at": "2026-11-11T15:57:03+0900"
     },
     {
       "step": 3,
