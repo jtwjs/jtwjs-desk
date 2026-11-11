@@ -90,8 +90,11 @@
     {
       "step": 10,
       "name": "guard-test",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-11T18:16:08+0900",
+      "summary": "tests/test_desk_guard.py 추가(ast로 desk/*.py·page/*.py의 subprocess import·os.system/os.popen/Popen 호출·hooks/scripts import 금지, glob 대상, 파일:줄 메시지). desk/atomic.py에 import subprocess를 임시 주입해 실패 확인 후 git checkout으로 되돌림(소스 변경 없음). verify.test 273건 통과",
+      "completed_at": "2026-11-11T18:18:02+0900"
     }
   ]
 }
