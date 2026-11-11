@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>타이포그래피</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif}
+</style>
+</helmet>
+<div style="width: 1280px; height: 860px; box-sizing: border-box; padding: 48px; background: #202432; color: #B9BFCF; display: flex; flex-direction: column; gap: 32px; font-family: Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #FFFFFF">타이포그래피</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #959DB6">본문 글꼴은 Pretendard(Finn 결정, SIL OFL 1.1, v1.3.9)이고 레포에 파일로 포함한다. 이 캔버스는 글꼴 파일을 올리지 않아서 Pretendard가 설치되지 않은 기기에서는 시스템 한글 글꼴로 보인다. 크기 · 굵기는 AI 제안이고 구현 화면에서 검증한다.</p>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 0; border: 1px solid #2A303F; border-radius: 8px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 160px 160px 1fr; background: #232837; padding: 8px 16px; font-size: 12px; font-weight: 500; color: #959DB6; border-bottom: 1px solid #2A303F"><span>이름</span><span>크기 · 굵기</span><span>견본</span></div>
+<div style="display: grid; grid-template-columns: 160px 160px 1fr; align-items: center; padding: 16px; border-bottom: 1px solid #2A303F"><span style="font-size: 13px; color: #B9BFCF">제목</span><span style="font-size: 13px; color: #959DB6">20 · 600 · 행간 1.4</span><span style="font-size: 20px; font-weight: 600; line-height: 1.4; color: #FFFFFF">지금 사람이 움직일 차례인 항목</span></div>
+<div style="display: grid; grid-template-columns: 160px 160px 1fr; align-items: center; padding: 16px; border-bottom: 1px solid #2A303F"><span style="font-size: 13px; color: #B9BFCF">본문</span><span style="font-size: 13px; color: #959DB6">14 · 400 · 행간 1.5</span><span style="font-size: 14px; line-height: 1.5; color: #B9BFCF">판정을 기다리는 항목과 복습이 밀린 카드를 한 화면에서 훑는다.</span></div>
+<div style="display: grid; grid-template-columns: 160px 160px 1fr; align-items: center; padding: 16px; border-bottom: 1px solid #2A303F"><span style="font-size: 13px; color: #B9BFCF">표 셀</span><span style="font-size: 13px; color: #959DB6">13 · 400 · 행간 1.4</span><span style="font-size: 13px; line-height: 1.4; color: #B9BFCF">여러 줄 행은 줄을 이어 보인다. 이어진 줄도 같은 크기와 행간을 쓴다.</span></div>
+<div style="display: grid; grid-template-columns: 160px 160px 1fr; align-items: center; padding: 16px; border-bottom: 1px solid #2A303F"><span style="font-size: 13px; color: #B9BFCF">표 헤더 · 라벨</span><span style="font-size: 13px; color: #959DB6">12 · 500</span><span style="font-size: 12px; font-weight: 500; color: #959DB6">마지막 신호 · 상태 · 레포</span></div>
+<div style="display: grid; grid-template-columns: 160px 160px 1fr; align-items: center; padding: 16px"><span style="font-size: 13px; color: #B9BFCF">고정폭</span><span style="font-size: 13px; color: #959DB6">13 · 400 · 시스템 고정폭</span><span style="font-family: ui-monospace,Menlo,monospace; font-size: 13px; color: #B9BFCF">feature/desk · docs/desk-2026-11-11 · a691c5f</span></div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">규칙</h2>
+<ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.7; color: #B9BFCF">
+<li>고정폭은 ID · 경로 · 브랜치에만 쓴다. 본문 전체를 고정폭으로 쓰지 않는다</li>
+<li>한글은 단어 중간에서 끊지 않는다(<span style="font-family: ui-monospace,Menlo,monospace">word-break: keep-all</span>)</li>
+<li>보조 글자는 text-muted(<span style="font-family: ui-monospace,Menlo,monospace">#959DB6</span>) 이상. 더 어두운 값은 쓰지 않는다</li>
+<li>글꼴 파일은 한글 포함 가변 웨이트 woff2 하나. 용량은 <span style="color: #FBBF24">미측정</span>(받아서 잰 뒤 DESIGN.md에 기록)</li>
+</ul>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":860}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

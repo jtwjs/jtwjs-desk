@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>앱 셸과 메뉴</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif}
+a{text-decoration:none}
+</style>
+</helmet>
+<div style="width: 1280px; height: 760px; display: flex; background: #202432; color: #B9BFCF; font-family: Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif">
+
+<nav aria-label="메인 메뉴" style="width: 264px; flex-shrink: 0; box-sizing: border-box; background: #232837; border-right: 1px solid #2A303F; padding: 16px 12px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+<span style="font-size: 14px; font-weight: 600; color: #FFFFFF">desk</span>
+<button aria-label="메뉴 접기" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #2A303F; border-radius: 6px; background: #232837; color: #959DB6; cursor: pointer; padding: 0">
+<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<a href="#" style="display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 6px; font-size: 14px; color: #B9BFCF">트랙</a>
+<a href="#" aria-current="page" style="display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 6px; background: #2A303F; font-size: 14px; font-weight: 500; color: #FFFFFF">판정</a>
+<a href="#" style="display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 6px; font-size: 14px; color: #B9BFCF">복습함</a>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<a href="#" style="display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 8px; border-radius: 6px; font-size: 14px; color: #B9BFCF">3역량<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #959DB6"><path d="M6 9l6 6 6-6"/></svg></a>
+<div style="margin-left: 16px; padding-left: 8px; border-left: 1px solid #2A303F; display: flex; flex-direction: column; gap: 2px">
+<a href="#" style="display: flex; align-items: center; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 13px; color: #B9BFCF">AI워크플로우</a>
+<a href="#" style="display: flex; align-items: center; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 13px; color: #B9BFCF">적극성</a>
+<a href="#" style="display: flex; align-items: center; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 13px; color: #B9BFCF">풀스택</a>
+</div>
+</div>
+<a href="#" style="display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 6px; font-size: 14px; color: #B9BFCF">주간 롤업</a>
+<a href="#" style="display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 6px; font-size: 14px; color: #B9BFCF">레포 건강도</a>
+</div>
+</nav>
+
+<main style="flex: 1; min-width: 0; box-sizing: border-box; padding: 32px 40px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #FFFFFF">판정</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #959DB6">화면마다 제목과 한 줄 설명을 둔다.</p>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #2A303F; border-radius: 6px; background: rgba(251,191,36,0.10); font-size: 13px; color: #FBBF24"><span style="width: 8px; height: 8px; border-radius: 50%; background: #FBBF24; flex-shrink: 0"></span>미등록 레포 2개: 설정 파일에 등록하면 이 화면에 나타난다</div>
+<div style="margin-top: auto; padding: 16px 0; text-align: center; font-size: 13px; color: #B9BFCF">불러오는 중…</div>
+</main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

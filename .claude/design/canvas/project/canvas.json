@@ -1,0 +1,20 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-11T12:00:00Z"},
+  "title": "desk 디자인 시스템",
+  "launch": {"view": "canvas"},
+  "pages": [
+    {"id": "ds", "name": "디자인 시스템"},
+    {"id": "comp", "name": "컴포넌트"}
+  ],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 1180, "title": "색", "page": "ds"},
+    "Type.dc.html": {"x": 1360, "y": 0, "w": 1280, "h": 860, "title": "타이포그래피", "page": "ds"},
+    "Shape.dc.html": {"x": 2720, "y": 0, "w": 1280, "h": 760, "title": "모양 · 간격 · 깊이 · 모션", "page": "ds"},
+    "Nav.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 760, "title": "앱 셸 · 메뉴", "page": "comp"},
+    "Data.dc.html": {"x": 1360, "y": 0, "w": 1280, "h": 1240, "title": "표 · 상태 · 카드 · 입력", "page": "comp"}
+  },
+  "order": ["Main.dc.html", "Type.dc.html", "Shape.dc.html", "Nav.dc.html", "Data.dc.html"],
+  "notes": {},
+  "designSystems": []
+}
