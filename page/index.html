@@ -260,6 +260,49 @@
   }
   .applied-info a { color: var(--accent); }
 
+  .cfg-line { color: var(--warn); font-size: 12px; margin: 0 0 10px; }
+  .sub-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .sub-btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .sub-btn.active { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+  .sec-title { font-size: 13px; color: var(--muted); margin: 14px 0 6px 2px; font-weight: 600; }
+  .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+  }
+  .row.highlight { background: var(--warn-bg); border-color: var(--warn); font-weight: 600; }
+  .row.missing { background: var(--locked-bg); color: var(--muted); }
+  .row .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .row .sub { color: var(--muted); font-size: 12px; }
+  .row button, .share-actions button {
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .memo { white-space: pre-wrap; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .share-text { white-space: pre-wrap; margin: 6px 0; }
+  .share-actions { display: flex; gap: 8px; }
+  .link-btn { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 13px; text-decoration: underline; }
+
   #banner {
     position: fixed;
     bottom: 16px;
@@ -281,6 +324,10 @@
   <h1>지휘 책상</h1>
   <button type="button" class="tab-btn active" data-tab="track">트랙</button>
   <button type="button" class="tab-btn" data-tab="judge">판정</button>
+  <button type="button" class="tab-btn" data-tab="review">복습함</button>
+  <button type="button" class="tab-btn" data-tab="comp">3역량</button>
+  <button type="button" class="tab-btn" data-tab="weekly">주간 롤업</button>
+  <button type="button" class="tab-btn" data-tab="health">레포 건강도</button>
 </header>
 <main>
   <section id="tab-track" class="tab-panel">
@@ -288,6 +335,23 @@
   </section>
   <section id="tab-judge" class="tab-panel" hidden>
     <div id="judge-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-review" class="tab-panel" hidden>
+    <div id="review-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-comp" class="tab-panel" hidden>
+    <div class="sub-tabs">
+      <button type="button" class="sub-btn active" data-sub="workflow">AI워크플로우</button>
+      <button type="button" class="sub-btn" data-sub="proactive">적극성</button>
+      <button type="button" class="sub-btn" data-sub="fullstack">풀스택</button>
+    </div>
+    <div id="comp-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-weekly" class="tab-panel" hidden>
+    <div id="weekly-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-health" class="tab-panel" hidden>
+    <div id="health-content"><p class="empty-msg">불러오는 중…</p></div>
   </section>
 </main>
 <div id="banner" hidden></div>
@@ -319,18 +383,36 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   var tabButtons = document.querySelectorAll(".tab-btn");
   var panels = {
     track: document.getElementById("tab-track"),
-    judge: document.getElementById("tab-judge")
+    judge: document.getElementById("tab-judge"),
+    review: document.getElementById("tab-review"),
+    comp: document.getElementById("tab-comp"),
+    weekly: document.getElementById("tab-weekly"),
+    health: document.getElementById("tab-health")
   };
+  var activeTab = "track";
+  var activeSub = "workflow";
 
   tabButtons.forEach(function (btn) {
     btn.addEventListener("click", function () {
       var target = btn.getAttribute("data-tab");
+      activeTab = target;
       tabButtons.forEach(function (b) {
         b.classList.toggle("active", b === btn);
       });
       Object.keys(panels).forEach(function (key) {
         panels[key].hidden = key !== target;
       });
+      loadVisibleExtra();
+    });
+  });
+
+  document.querySelectorAll(".sub-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      activeSub = btn.getAttribute("data-sub");
+      document.querySelectorAll(".sub-btn").forEach(function (b) {
+        b.classList.toggle("active", b === btn);
+      });
+      loadVisibleExtra();
     });
   });
 
@@ -656,12 +738,295 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       });
   }
 
+  // ---- 확장 탭(복습함 · 3역량 · 주간 롤업 · 레포 건강도) ----
+  // 서버가 준 문자열은 원장의 임의 텍스트다 — 전부 el()의 textContent로만 넣는다.
+  // 정렬 · 분류는 서버가 한 순서 그대로 그린다.
+
+  var AREA_LABEL = { fe: "FE", be: "BE", infra: "infra", domain: "도메인", "미분류": "미분류" };
+
+  function clear(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  function cfgLine(config) {
+    if (!config) return null;
+    var parts = [];
+    if (config.source === "conductor") parts.push("폴백 사용 중");
+    if (config.source === "none") parts.push("설정 없음");
+    if (config.unregistered && config.unregistered.length > 0) {
+      parts.push("미등록 레포 " + config.unregistered.length + "개: " + config.unregistered.join(", "));
+    }
+    if (config.error) parts.push(String(config.error));
+    if (parts.length === 0) return null;
+    return el("p", { class: "cfg-line", text: parts.join(" · ") });
+  }
+
+  function missingRows(list) {
+    return (list || []).map(function (m) {
+      var text = m.repo + " · " + (m.what || "") + " · " + m.missing;
+      return el("div", { class: "row missing", text: text });
+    });
+  }
+
+  function emptyMsg(text) {
+    return el("p", { class: "empty-msg", text: text });
+  }
+
+  function postMark(path, body, done) {
+    fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Desk-Token": DESK_TOKEN },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        if (res.status === 200) { done(); return; }
+        if (res.status === 403) {
+          showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
+          return;
+        }
+        showBanner("저장하지 못했습니다.");
+      })
+      .catch(function () {
+        showBanner("네트워크 오류로 저장하지 못했습니다.");
+      });
+  }
+
+  function renderReview(data) {
+    var box = document.getElementById("review-content");
+    clear(box);
+    var line = cfgLine(data.config);
+    if (line) box.appendChild(line);
+    var items = data.items || [];
+    if (items.length === 0 && (data.missing || []).length === 0) {
+      box.appendChild(emptyMsg("복습할 항목이 없습니다."));
+    }
+    items.forEach(function (it) {
+      var body = el("div", { class: "grow" });
+      var title = it.kind === "phase" ? "이해 증명 건너뜀 · " + it.title : it.title;
+      body.appendChild(el("div", { text: title }));
+      var subParts = [it.repo];
+      if (it.card_kind) subParts.push(it.card_kind);
+      if (it.status) subParts.push(it.status);
+      if (it.where) subParts.push(it.where);
+      body.appendChild(el("div", { class: "sub", text: subParts.join(" · ") }));
+      if (it.summary) body.appendChild(el("div", { class: "sub", text: it.summary }));
+      var btn = el("button", { type: "button", text: "복습함 반영" });
+      btn.addEventListener("click", function () {
+        postMark("/review/done", { repo: it.repo, key: it.key }, function () {
+          fetchExtra("review");
+        });
+      });
+      box.appendChild(el("div", { class: "row" }, [body, btn]));
+    });
+    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+  }
+
+  function renderWorkflow(box, data) {
+    var rows = data.rows || [];
+    if (rows.length === 0 && (data.missing || []).length === 0) {
+      box.appendChild(emptyMsg("열린 패턴이 없습니다."));
+    }
+    rows.forEach(function (r) {
+      var cls = r.highlight ? "row highlight" : "row";
+      if (r.unparsed) {
+        box.appendChild(el("div", { class: cls, text: "형식 확인 필요" }));
+        return;
+      }
+      var body = el("div", { class: "grow" });
+      body.appendChild(el("div", { text: r.pattern || "" }));
+      var subParts = [r.source];
+      if (r.repo) subParts.push(r.repo);
+      if (r.kind) subParts.push(r.kind);
+      if (r.status) subParts.push(r.status);
+      if (r.last) subParts.push("마지막 " + r.last);
+      body.appendChild(el("div", { class: "sub", text: subParts.join(" · ") }));
+      var count = r.count === null || r.count === undefined ? "?" : r.count + "회";
+      box.appendChild(el("div", { class: cls }, [body, el("span", { text: count })]));
+    });
+    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+  }
+
+  function renderProactive(box, data) {
+    box.appendChild(el("div", { class: "sec-title", text: "CPO 기준 메모" }));
+    var crit = data.criteria || {};
+    box.appendChild(el("div", { class: "memo", text: crit.text !== null && crit.text !== undefined ? crit.text : (crit.note || "설정 없음") }));
+
+    var speed = data.speed || {};
+    box.appendChild(el("div", { class: "sec-title", text: "스피드" }));
+    box.appendChild(el("div", { class: "sub", text: "① 작업 소요시간" }));
+    (speed.durations || []).forEach(function (d) {
+      box.appendChild(el("div", { class: "row", text: d.repo + " · " + d.task + " · " + d.minutes + "분" }));
+    });
+    if (speed.no_data) {
+      box.appendChild(el("div", { class: "row missing", text: "시간 기록 없음 " + speed.no_data + "건" }));
+    }
+    box.appendChild(el("div", { class: "sub", text: "② " + (speed.metric2 || "") }));
+    var linkWrap = el("div", { class: "sub" });
+    linkWrap.appendChild(document.createTextNode("③ "));
+    var link = el("button", { type: "button", class: "link-btn", text: "AI워크플로우 탭 보기" });
+    link.addEventListener("click", function () {
+      activeSub = speed.workflow_link || "workflow";
+      document.querySelectorAll(".sub-btn").forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-sub") === activeSub);
+      });
+      loadVisibleExtra();
+    });
+    linkWrap.appendChild(link);
+    box.appendChild(linkWrap);
+
+    var impact = data.impact || {};
+    box.appendChild(el("div", { class: "sec-title", text: "임팩트" }));
+    box.appendChild(el("div", { class: "sub", text: "① PRD" }));
+    (impact.prds || []).forEach(function (p) {
+      box.appendChild(el("div", { class: "row", text: p.repo + " · " + p.task + " · " + p.prd }));
+    });
+    box.appendChild(el("div", { class: "sub", text: "② 최근 갱신분" }));
+    if (Array.isArray(impact.evidence)) {
+      if (impact.evidence.length === 0) box.appendChild(el("div", { class: "row missing", text: "최근 갱신분 없음" }));
+      impact.evidence.forEach(function (e) {
+        box.appendChild(el("div", { class: "row", text: e.repo + " · " + e.path }));
+      });
+    } else {
+      box.appendChild(el("div", { class: "row missing", text: (impact.evidence && impact.evidence.note) || "경로 미설정" }));
+    }
+
+    box.appendChild(el("div", { class: "sec-title", text: "투명성 — 미반영 공유" }));
+    var tr = data.transparency || [];
+    if (tr.length === 0) box.appendChild(el("div", { class: "row missing", text: "미반영 공유 파일 없음" }));
+    tr.forEach(function (t) {
+      var card = el("div", { class: "card" });
+      card.appendChild(el("div", { class: "card-meta" }, [el("span", { class: "repo-chip", text: t.repo }), el("span", { text: t.id })]));
+      card.appendChild(el("div", { class: "share-text", text: t.text }));
+      var copy = el("button", { type: "button", text: "복사" });
+      copy.addEventListener("click", function () {
+        if (!navigator.clipboard) { showBanner("이 브라우저에서는 복사할 수 없습니다."); return; }
+        navigator.clipboard.writeText(t.text).then(function () {
+          showBanner("복사했습니다.", 2000);
+        }, function () {
+          showBanner("복사하지 못했습니다.");
+        });
+      });
+      var shared = el("button", { type: "button", text: "공유함" });
+      shared.addEventListener("click", function () {
+        postMark("/share/shared", { repo: t.repo, id: t.id }, function () {
+          fetchExtra("comp");
+        });
+      });
+      card.appendChild(el("div", { class: "share-actions" }, [copy, shared]));
+      box.appendChild(card);
+    });
+    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+  }
+
+  function renderFullstack(box, data) {
+    var groups = data.groups || {};
+    Object.keys(groups).forEach(function (area) {
+      box.appendChild(el("div", { class: "sec-title", text: AREA_LABEL[area] || area }));
+      var cards = groups[area] || [];
+      if (cards.length === 0) box.appendChild(el("div", { class: "row missing", text: "카드 없음" }));
+      cards.forEach(function (c) {
+        var body = el("div", { class: "grow" });
+        body.appendChild(el("div", { text: c.title }));
+        var subParts = [c.repo, c.kind, c.status];
+        if (c.where) subParts.push(c.where);
+        body.appendChild(el("div", { class: "sub", text: subParts.join(" · ") }));
+        if (c.summary) body.appendChild(el("div", { class: "sub", text: c.summary }));
+        box.appendChild(el("div", { class: "row" }, [body]));
+      });
+    });
+    missingRows(data.missing).forEach(function (r) { box.appendChild(r); });
+  }
+
+  function renderComp(sub, data) {
+    var box = document.getElementById("comp-content");
+    clear(box);
+    var line = cfgLine(data.config);
+    if (line) box.appendChild(line);
+    if (sub === "workflow") renderWorkflow(box, data);
+    else if (sub === "proactive") renderProactive(box, data);
+    else renderFullstack(box, data);
+  }
+
+  function renderWeekly(data) {
+    var box = document.getElementById("weekly-content");
+    clear(box);
+    var line = cfgLine(data.config);
+    if (line) box.appendChild(line);
+    var w = data.week || {};
+    var totals = "세션 " + w.sessions + " · 프로젝트 " + w.projects + " · 커밋 " + w.commits +
+      " · 학습카드 " + w.cards + " · 막힌 것 " + w.stuck;
+    box.appendChild(el("div", { class: "row", text: totals }));
+    box.appendChild(el("div", { class: "sub", text: "기록 있는 날 " + w.present + "/" + w.days }));
+    if ((w.missing || []).length > 0) {
+      box.appendChild(el("div", { class: "row missing", text: "기록 없음: " + w.missing.join(", ") }));
+    }
+    (w.repos || []).forEach(function (r) {
+      var body = el("div", { class: "grow" });
+      body.appendChild(el("div", { text: r.name + " · 커밋 " + r.commits }));
+      (r.progress || []).forEach(function (p) {
+        body.appendChild(el("div", { class: "sub", text: p }));
+      });
+      box.appendChild(el("div", { class: "row" }, [body]));
+    });
+  }
+
+  function renderHealth(data) {
+    var box = document.getElementById("health-content");
+    clear(box);
+    var line = cfgLine(data.config);
+    if (line) box.appendChild(line);
+    var rows = data.repos || [];
+    if (rows.length === 0) box.appendChild(emptyMsg("등록된 레포가 없습니다."));
+    rows.forEach(function (r) {
+      if (r.missing) {
+        box.appendChild(el("div", { class: "row missing", text: r.repo + " · " + r.missing }));
+        return;
+      }
+      var text = r.repo + " · " + r.total + "점 · " + r.grade + " · " + r.age_days + "일 전 채점 (" + r.scored_on + ")";
+      box.appendChild(el("div", { class: "row", text: text }));
+    });
+  }
+
+  function fetchExtra(tab) {
+    var url;
+    var render;
+    if (tab === "review") { url = "/review"; render = renderReview; }
+    else if (tab === "weekly") { url = "/weekly"; render = renderWeekly; }
+    else if (tab === "health") { url = "/repo-health"; render = renderHealth; }
+    else if (tab === "comp") {
+      var sub = activeSub;
+      url = "/competency/" + sub;
+      render = function (d) { renderComp(sub, d); };
+    } else return;
+    fetch(url)
+      .then(function (res) {
+        if (!res.ok) throw new Error(url + " " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        // 응답이 늦게 와도 지금 보는 탭 · 서브 탭 것만 그린다.
+        if (activeTab !== tab) return;
+        if (tab === "comp" && url !== "/competency/" + activeSub) return;
+        render(data);
+      })
+      .catch(function () {
+        // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+      });
+  }
+
+  // 보이는 확장 탭 하나만 부른다(ADR-010). 트랙 · 판정은 아래 기존 polling이 맡는다.
+  function loadVisibleExtra() {
+    if (activeTab === "track" || activeTab === "judge") return;
+    fetchExtra(activeTab);
+  }
+
   // ---- 시작 ----
 
   fetchSessions();
   fetchJudgments();
   setInterval(fetchSessions, POLL_MS);
   setInterval(fetchJudgments, POLL_MS);
+  setInterval(loadVisibleExtra, POLL_MS);
 })();
 </script>
 </body>
