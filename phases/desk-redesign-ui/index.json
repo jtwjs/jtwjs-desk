@@ -54,8 +54,11 @@
     {
       "step": 6,
       "name": "screens-track-judge",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:51:54+0900",
+      "summary": "page/index.html만 수정: 트랙(pageHead·레포 순환 칩·dataTable 상태/레포·브랜치/마지막 신호·빈·로딩·에러 inlineNote)과 판정(decision-card 라디오 선택지+직접 쓰기+메모+반영 버튼, 카드별 초안 drafts로 폴링 후 입력 유지, 저장 실패 카드 안 한 줄, 반영됨은 선택 1행+잠금 문장만) 재배치, POST /pick 형식·토큰 헤더 불변, STATUS_ICON·구 트랙/판정 CSS 제거, 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T04:02:37+0900"
     },
     {
       "step": 7,
