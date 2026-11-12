@@ -81,8 +81,11 @@
     {
       "step": 9,
       "name": "score-parse-grade-color",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T13:43:07+0900",
+      "summary": "desk/ledger.py parse_score가 grade_color(green/amber/red, 소문자화)를 읽어 유효할 때만 키를 넣음, 그 외엔 기존 {total,grade} 그대로. tests/test_desk_ledger_signals.py에 TestParseScoreGradeColor 5개, 테스트 294개 통과. 서버 전달은 step 10",
+      "completed_at": "2026-11-12T13:46:26+0900"
     },
     {
       "step": 10,
