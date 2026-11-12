@@ -47,6 +47,9 @@ def load_config() -> dict:
         "evidence_globs": [],
         "routine_questions": None,
         "routine_answers": None,
+        "trends_items": None,
+        "trends_reads": None,
+        "trends_marks": None,
         "error": None,
     }
     try:
@@ -97,7 +100,13 @@ def load_config() -> dict:
                     result["evidence_globs"] = list(g)
                 else:
                     errors.append("evidence_globs 타입 오류")
-            for key in ("routine_questions", "routine_answers"):
+            for key in (
+                "routine_questions",
+                "routine_answers",
+                "trends_items",
+                "trends_reads",
+                "trends_marks",
+            ):
                 if key in data:
                     if not isinstance(data[key], str):
                         errors.append(f"{key} 타입 오류")
