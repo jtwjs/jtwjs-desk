@@ -27,8 +27,11 @@
     {
       "step": 3,
       "name": "trends-write",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T00:45:22+0900",
+      "summary": "desk/trends.py 쓰기 껍질 추가: 모듈 락 _LOCK · _append_line(path,line) · record_read(items,reads,id,now)→'ok'|'duplicate'|'unknown_id' · record_mark(items,marks,id,on,now)→'ok'|'same'|'unknown_id'; OSError는 올림; tests/test_desk_trends_write.py",
+      "completed_at": "2026-11-13T00:48:57+0900"
     },
     {
       "step": 4,
