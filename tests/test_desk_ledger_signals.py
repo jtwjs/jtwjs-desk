@@ -112,6 +112,29 @@ class TestParseScore(unittest.TestCase):
         self.assertIsNone(ledger.parse_score(json.dumps([1, 2])))
 
 
+class TestParseScoreGradeColor(unittest.TestCase):
+    def _parse(self, **extra):
+        return ledger.parse_score(json.dumps({"total": 72, "grade": "B", **extra}))
+
+    def test_세_색은_그대로_통과한다(self):
+        for color in ("green", "amber", "red"):
+            self.assertEqual(self._parse(grade_color=color),
+                             {"total": 72, "grade": "B", "grade_color": color})
+
+    def test_대문자는_소문자로_바꾼다(self):
+        self.assertEqual(self._parse(grade_color="GREEN")["grade_color"], "green")
+
+    def test_모르는_색은_키가_없다(self):
+        self.assertEqual(self._parse(grade_color="blue"), {"total": 72, "grade": "B"})
+
+    def test_문자열이_아니면_키가_없다(self):
+        for bad in (1, None, ["green"], {"a": 1}, True):
+            self.assertEqual(self._parse(grade_color=bad), {"total": 72, "grade": "B"})
+
+    def test_키가_없으면_기존_결과_그대로다(self):
+        self.assertEqual(self._parse(), {"total": 72, "grade": "B"})
+
+
 class TestFindScoreFile(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
