@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, config, ledger, paths, rollup, routine, sort, validate  # noqa: E402
+from desk import atomic, config, ledger, paths, rollup, routine, sort, trends, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
@@ -466,10 +466,19 @@ def count_nav(cfg: dict) -> dict:
         answers, _ = routine.parse_answers(a_text) if a_text is not None else ({}, 0)
         return routine.unanswered_today_count(questions, answers, _today())
 
+    def count_trends():
+        text = routine.read_text_or_none(cfg.get("trends_items"))
+        if text is None:
+            return 0
+        items, _ = trends.parse_items(text)
+        reads, _ = trends.parse_reads(routine.read_text_or_none(cfg.get("trends_reads")) or "")
+        return trends.unread_count(items, reads, _today())
+
     judge = isolated("judge", lambda: sum(1 for c in list_judgments() if "pick" not in c))
     review = isolated("review", lambda: 0 if cfg["source"] == "none" else len(build_review(cfg)["items"]))
     return {"judge": judge, "review": review,
-            "routine": isolated("routine", count_routine), "errors": errors}
+            "routine": isolated("routine", count_routine),
+            "trends": isolated("trends", count_trends), "errors": errors}
 
 
 def build_routine(cfg: dict) -> dict:
@@ -492,6 +501,34 @@ def build_routine(cfg: dict) -> dict:
     split = routine.split_by_date(questions, answers, today)
     return {**base, "groups": routine.group_by_kind(split["today"]), "past": split["past"],
             "broken": q_broken + a_broken, "missing": []}
+
+
+def build_trends(cfg: dict) -> dict:
+    """기술 동향 화면 응답 — 동향·읽음·북마크 파일을 읽기만 한다(ADR-009). 계산은 desk/trends.py."""
+    today = _today()
+    base = {"config": config_block(cfg), "date": today.isoformat(), "today": [],
+            "past_unread": [], "heatmap": trends.heatmap({}, set(), today), "bookmarks": [],
+            "broken": 0, "can_record_read": cfg.get("trends_reads") is not None,
+            "can_bookmark": cfg.get("trends_marks") is not None}
+
+    def reason(why):
+        return {**base, "missing": [{"what": "동향", "reason": why}]}
+
+    if cfg.get("trends_items") is None:
+        return reason("설정 없음")
+    text = routine.read_text_or_none(cfg["trends_items"])
+    if text is None:
+        return reason("파일 없음" if not Path(cfg["trends_items"]).exists() else "형식 확인 필요")
+    items, i_broken = trends.parse_items(text)
+    if not items and i_broken:
+        return {**reason("형식 확인 필요"), "broken": i_broken}
+    reads, r_broken = trends.parse_reads(routine.read_text_or_none(cfg.get("trends_reads")) or "")
+    marks, m_broken = trends.parse_marks(routine.read_text_or_none(cfg.get("trends_marks")) or "")
+    split = trends.split_items(items, reads, marks, today)
+    return {**base, "today": split["today"], "past_unread": split["past_unread"],
+            "heatmap": trends.heatmap(items, reads, today),
+            "bookmarks": trends.bookmark_list(items, reads, marks),
+            "broken": i_broken + r_broken + m_broken, "missing": []}
 
 
 def spawn_pick_candidate(body: dict) -> dict:
@@ -588,6 +625,13 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(403, {"error": "bad host"})
                 return
             self._send_json(200, build_routine(config.load_config()))
+            return
+
+        if parsed.path == "/trends":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            self._send_json(200, build_trends(config.load_config()))
             return
 
         if parsed.path == "/review":
