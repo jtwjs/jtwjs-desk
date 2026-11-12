@@ -33,7 +33,7 @@ class 화면_재설계_통합(_ServerTestCase):
         status, body = self._get("/nav-counts")
         self.assertEqual(status, 200)
         counts = json.loads(body)
-        self.assertEqual(set(counts), {"judge", "review", "routine", "errors"})
+        self.assertEqual(set(counts), {"judge", "review", "routine", "trends", "errors"})
 
         status, body = self._get("/fonts/PretendardVariable.woff2")
         self.assertEqual(status, 200)

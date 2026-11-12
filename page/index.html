@@ -549,6 +549,114 @@
   .decision-card .dc-hint { font-size: 12px; color: var(--text-muted); }
   .decision-card.locked .dc-opt { cursor: default; }
 
+  /* ---- 기술 동향 ---- */
+  .trend-list { display: flex; flex-direction: column; gap: 12px; }
+  .trend-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
+  }
+  .trend-card .tc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .trend-card .tc-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text-strong); }
+  .trend-card.is-read .tc-title { color: var(--text-body); }
+  .trend-card .tc-state { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: 13px; font-weight: 500; }
+  .trend-card .tc-state .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .trend-card .tc-state.read { color: var(--success); }
+  .trend-card .tc-state.unread { color: var(--attention); }
+  .trend-card .tc-summary { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); }
+  .trend-card .tc-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 32px; }
+  .trend-card .tc-left, .trend-card .tc-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .trend-card .tc-link { display: inline-flex; align-items: center; min-height: 32px; font-size: 13px; color: var(--accent); text-decoration: none; }
+  .trend-card .tc-link:hover { text-decoration: underline; }
+  .trend-card .tc-link .host { margin-left: 4px; font-family: var(--font-mono); font-size: 12px; }
+  .trend-card .tc-plain { font-size: 13px; color: var(--text-muted); word-break: break-all; }
+  .trend-card .tc-hint { font-size: 12px; color: var(--text-muted); }
+  .trend-card .tc-error { margin: 0; font-size: 13px; color: var(--danger); }
+  /* 북마크 버튼 — 꺼짐: PANEL 배경 + RAISED 테두리 + BODY 글자 + MUTED 외곽선 아이콘 / 켜짐: RAISED 배경 + STRONG 글자 + ACCENT 채운 아이콘 */
+  .bm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    color: var(--text-body);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .bm-btn svg { flex-shrink: 0; fill: none; stroke: var(--text-muted); }
+  .bm-btn:hover:not(:disabled) { border-color: var(--text-muted); }
+  .bm-btn[aria-pressed="true"] { background: var(--surface-raised); color: var(--text-strong); }
+  .bm-btn[aria-pressed="true"] svg { fill: var(--accent); stroke: var(--accent); }
+  .bm-btn:disabled { color: var(--text-muted); cursor: default; }
+  .hm-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
+  }
+  .hm-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .hm-head .t { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .hm-head .d { font-size: 12px; color: var(--text-muted); }
+  .hm-wrap { display: flex; gap: 8px; overflow-x: auto; }
+  .hm-days { display: grid; grid-template-rows: repeat(7, 12px); gap: 3px; padding-top: 19px; font-size: 12px; line-height: 12px; color: var(--text-muted); }
+  .hm-main { display: flex; flex-direction: column; gap: 4px; }
+  .hm-months, .hm-grid { display: grid; grid-auto-flow: column; grid-auto-columns: 12px; gap: 3px; }
+  .hm-months { grid-template-rows: 15px; font-size: 12px; line-height: 15px; color: var(--text-muted); }
+  .hm-months span { white-space: nowrap; overflow: visible; }
+  .hm-grid { grid-template-rows: repeat(7, 12px); }
+  .hm-cell { width: 12px; height: 12px; box-sizing: border-box; border-radius: 2px; border: 1px solid transparent; }
+  /* 잔디 4단계(읽은 건수 0 · 1 · 2 · 3) — 보드 Trends1Today의 값. 새 토큰 이름 없음 */
+  .hm-cell.l0 { background: var(--surface-raised); border-color: var(--surface-raised); }
+  .hm-cell.l1 { background: color-mix(in srgb, var(--success) 40%, transparent); }
+  .hm-cell.l2 { background: color-mix(in srgb, var(--success) 70%, transparent); }
+  .hm-cell.l3 { background: var(--success); }
+  .hm-legend { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); }
+  .hm-legend .hm-cell { margin: 0 1px; }
+
+  /* 안 읽은 글 · 북마크 줄 목록 */
+  .tr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--surface-raised); border-radius: var(--radius-card); }
+  .tr-head, .tr-row { display: grid; align-items: center; column-gap: 16px; padding: 12px 16px; }
+  .tr-list.unread .tr-head, .tr-list.unread .tr-row { grid-template-columns: 96px minmax(0, 1fr) 200px 112px; }
+  .tr-list.marks .tr-head, .tr-list.marks .tr-row { grid-template-columns: 96px minmax(0, 1fr) 88px 200px 112px; }
+  .tr-head { font-size: 12px; color: var(--text-muted); border-bottom: 1px solid var(--surface-raised); }
+  .tr-head .tr-bm { justify-self: end; }
+  .tr-row + .tr-row { border-top: 1px solid var(--surface-raised); }
+  .tr-row .tr-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+  .tr-row .tr-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tr-row .tr-title { font-size: 14px; font-weight: 600; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tr-row .tr-sum { font-size: 13px; color: var(--text-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tr-row .tr-state { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+  .tr-row .tr-state .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .tr-row .tr-state.read { color: var(--success); }
+  .tr-row .tr-state.unread { color: var(--attention); }
+  .tr-row .tc-link { display: inline-flex; align-items: center; min-height: 32px; font-size: 13px; color: var(--accent); text-decoration: none; white-space: nowrap; }
+  .tr-row .tc-link:hover { text-decoration: underline; }
+  .tr-row .tc-link .host { margin-left: 4px; font-family: var(--font-mono); font-size: 12px; }
+  .tr-row .tc-plain { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+  .tr-row .tc-error { grid-column: 2 / -1; margin: 8px 0 0; font-size: 13px; color: var(--danger); }
+  .tr-row .tr-bm { justify-self: end; }
+  .tr-note { margin: 0 0 12px; font-size: 12px; color: var(--text-muted); }
+  .tr-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .tr-chip {
+    height: 32px; padding: 0 12px;
+    border: 1px solid var(--surface-raised); border-radius: var(--radius-control);
+    background: var(--surface-panel); color: var(--text-body);
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  .tr-chip:hover { border-color: var(--text-muted); }
+  .tr-chip[aria-pressed="true"] { background: var(--surface-raised); color: var(--text-strong); }
+  .tr-counts { font-size: 12px; color: var(--text-muted); margin-left: 4px; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
@@ -575,6 +683,14 @@
     <button type="button" class="menu-item" data-tab="weekly" aria-label="주간 롤업"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="label">주간 롤업</span><span class="tip" role="tooltip">주간 롤업</span></button>
     <button type="button" class="menu-item" data-tab="health" aria-label="레포 건강도"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="label">레포 건강도</span><span class="tip" role="tooltip">레포 건강도</span></button>
     <button type="button" class="menu-item" data-tab="routine" aria-label="회고"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span class="label">회고</span><span class="badge-count" data-badge="routine"></span><span class="tip" role="tooltip">회고</span></button>
+    <div class="menu-group">
+      <button type="button" class="menu-item" id="trends-parent" aria-label="기술 동향" aria-expanded="false" aria-controls="sub-trends"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span class="label">기술 동향</span><svg class="chev" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg><span class="tip" role="tooltip">기술 동향</span></button>
+      <div class="sub-list" id="sub-trends" hidden>
+        <button type="button" class="menu-item sub" data-tab="trends" data-sub="today"><span class="label">오늘</span></button>
+        <button type="button" class="menu-item sub" data-tab="trends" data-sub="unread"><span class="label">안 읽은 글</span><span class="badge-count" data-badge="trends"></span></button>
+        <button type="button" class="menu-item sub" data-tab="trends" data-sub="bookmarks"><span class="label">북마크</span></button>
+      </div>
+    </div>
   </div>
 </nav>
 <main>
@@ -599,6 +715,9 @@
   <section id="tab-routine" class="tab-panel" hidden>
     <div id="routine-content"><p class="empty-msg">불러오는 중…</p></div>
   </section>
+  <section id="tab-trends" class="tab-panel" hidden>
+    <div id="trends-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
 </main>
 <div id="banner" hidden></div>
 <script>
@@ -622,6 +741,13 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   var menuToggle = document.getElementById("menu-toggle");
   var compParent = document.getElementById("comp-parent");
   var subComp = document.getElementById("sub-comp");
+  var trendsParent = document.getElementById("trends-parent");
+  var subTrends = document.getElementById("sub-trends");
+  // 펼침 그룹: 부모 버튼 + 하위 목록. 3역량과 기술 동향이 같은 규칙을 쓴다.
+  var menuGroups = {
+    comp: { parent: compParent, list: subComp },
+    trends: { parent: trendsParent, list: subTrends }
+  };
   var tabItems = document.querySelectorAll(".menu-item[data-tab]");
   var panels = {
     track: document.getElementById("tab-track"),
@@ -630,15 +756,18 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     comp: document.getElementById("tab-comp"),
     weekly: document.getElementById("tab-weekly"),
     health: document.getElementById("tab-health"),
-    routine: document.getElementById("tab-routine")
+    routine: document.getElementById("tab-routine"),
+    trends: document.getElementById("tab-trends")
   };
   var activeTab = "track";
   var activeSub = "workflow";
+  var trendsSub = "today"; // today | unread | bookmarks
 
   // 접힘 · 그룹 펼침 상태는 세션 중 메모리만 쓴다(localStorage 없음).
-  function setCompOpen(open) {
-    subComp.hidden = !open;
-    compParent.setAttribute("aria-expanded", open ? "true" : "false");
+  function setGroupOpen(key, open) {
+    var g = menuGroups[key];
+    g.list.hidden = !open;
+    g.parent.setAttribute("aria-expanded", open ? "true" : "false");
   }
 
   function setCollapsed(collapsed) {
@@ -647,25 +776,34 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     menuToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
   }
 
-  // 선택 면은 항목 하나뿐이다. 3역량은 하위 항목이 선택 면을 갖고 부모는 글자만 올린다.
+  // 선택 면은 항목 하나뿐이다. 그룹(3역량 · 기술 동향)은 하위 항목이 선택 면을 갖고 부모는 글자만 올린다.
   function syncMenu() {
     tabItems.forEach(function (b) {
-      var on = b.getAttribute("data-tab") === activeTab &&
-        (activeTab !== "comp" || b.getAttribute("data-sub") === activeSub);
+      var tab = b.getAttribute("data-tab");
+      var sub = b.getAttribute("data-sub");
+      var cur = tab === "trends" ? trendsSub : activeSub;
+      var on = tab === activeTab && (!sub || sub === cur);
       if (on) b.setAttribute("aria-current", "page");
       else b.removeAttribute("aria-current");
     });
-    compParent.classList.toggle("parent-active", activeTab === "comp");
+    Object.keys(menuGroups).forEach(function (key) {
+      menuGroups[key].parent.classList.toggle("parent-active", activeTab === key);
+    });
   }
 
   function selectTab(target, sub) {
     activeTab = target;
-    if (sub) activeSub = sub;
+    if (sub) {
+      if (target === "trends") trendsSub = sub;
+      else activeSub = sub;
+    }
     Object.keys(panels).forEach(function (key) {
       panels[key].hidden = key !== target;
     });
-    if (target === "comp") setCompOpen(true);
+    if (menuGroups[target]) setGroupOpen(target, true);
     syncMenu();
+    // 기술 동향은 받아 둔 응답이 있으면 하위 항목 전환을 바로 그린다(새 요청은 아래 loadVisibleExtra).
+    if (target === "trends" && lastExtra.trends) renderTrends(lastExtra.trends);
     // 회고는 탭이 선택될 때만 rollover(POST) 뒤 GET. 폴링은 GET만(loadVisibleExtra).
     if (target === "routine") fetchRoutine(true);
     else loadVisibleExtra();
@@ -681,13 +819,15 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     setCollapsed(!menuEl.classList.contains("collapsed"));
   });
 
-  compParent.addEventListener("click", function () {
-    if (menuEl.classList.contains("collapsed")) {
-      setCollapsed(false);
-      setCompOpen(true);
-      return;
-    }
-    setCompOpen(subComp.hidden);
+  Object.keys(menuGroups).forEach(function (key) {
+    menuGroups[key].parent.addEventListener("click", function () {
+      if (menuEl.classList.contains("collapsed")) {
+        setCollapsed(false);
+        setGroupOpen(key, true);
+        return;
+      }
+      setGroupOpen(key, menuGroups[key].list.hidden);
+    });
   });
 
   // ---- 배너(에러 안내) ----
@@ -1332,7 +1472,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     return out;
   }
 
-  var lastExtra = { review: null, comp: null, routine: null };
+  var lastExtra = { review: null, comp: null, routine: null, trends: null };
   var reviewErrors = {};
 
   function renderReview(data) {
@@ -1880,13 +2020,369 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   function loadVisibleExtra() {
     if (activeTab === "track" || activeTab === "judge") return;
     if (activeTab === "routine") { fetchRoutine(false); return; }
+    if (activeTab === "trends") { fetchTrends(); return; }
     fetchExtra(activeTab);
+  }
+
+  // ---- 기술 동향 ----
+  // 서버(GET /trends)가 건수 · 단계 · 읽음 여부를 다 계산해 준다. 화면은 받은 대로 그린다.
+  // 응답 문자열은 textContent로만 넣는다(el()). 링크는 http · https만 <a>로 만든다.
+
+  var trendsUi = {
+    readErr: {},   // id → 읽음 기록 실패 한 줄
+    markErr: {},   // id → 북마크 실패 한 줄(읽음 에러와 따로)
+    bmFilter: "all" // 북마크 필터 칩(메모리만) all | unread | read
+  };
+  var BOOKMARK_PATH = "m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z";
+
+  function safeHref(url) {
+    if (typeof url !== "string") return null;
+    try {
+      var u = new URL(url);
+      return u.protocol === "http:" || u.protocol === "https:" ? { href: u.href, host: u.host } : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function bookmarkIcon() {
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("width", "14");
+    svg.setAttribute("height", "14");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", BOOKMARK_PATH);
+    svg.appendChild(path);
+    return svg;
+  }
+
+  function trendsRerender() {
+    if (lastExtra.trends) renderTrends(lastExtra.trends);
+  }
+
+  // 다시 그리면 노드가 바뀌어 포커스가 사라진다. 그리기 전 포커스를 기억했다가 같은 글 · 같은 종류에 돌려준다.
+  function trendsFocusNow() {
+    var a = document.activeElement;
+    var box = document.getElementById("trends-content");
+    if (!a || !box || !box.contains(a) || !a.getAttribute("data-trend-kind")) return null;
+    return { id: a.getAttribute("data-trend-id"), kind: a.getAttribute("data-trend-kind") };
+  }
+
+  function restoreTrendsFocus(f) {
+    if (!f) return;
+    var nodes = document.querySelectorAll("#trends-content [data-trend-kind]");
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].getAttribute("data-trend-id") === f.id && nodes[i].getAttribute("data-trend-kind") === f.kind) {
+        nodes[i].focus();
+        return;
+      }
+    }
+  }
+
+  // 응답에서 같은 글을 찾아 값을 바꾼다(성공 직후 바로 보이게. 곧 이어 서버 값으로 다시 받는다).
+  function patchTrendsItem(id, field, value) {
+    var d = lastExtra.trends;
+    if (!d) return;
+    ["today", "past_unread", "bookmarks"].forEach(function (k) {
+      (d[k] || []).forEach(function (it) {
+        if (it && it.id === id) it[field] = value;
+      });
+    });
+  }
+
+  function onTrendRead(it, data) {
+    if (it.read || !data.can_record_read) return; // 이미 읽음 · 기록 불가: 링크만 열린다
+    postMark("/trends/read", { id: it.id }, function () {
+      delete trendsUi.readErr[it.id];
+      patchTrendsItem(it.id, "read", true);
+      trendsRerender();
+      fetchTrends();
+      fetchNavCounts(); // 안 읽은 글 배지도 바로 맞춘다
+    }, function (msg) {
+      trendsUi.readErr[it.id] = "읽음 기록 실패: " + msg + ". 안 읽음으로 남는다";
+      trendsRerender();
+    });
+  }
+
+  function onTrendMark(it) {
+    var next = !it.bookmarked;
+    postMark("/trends/mark", { id: it.id, on: next }, function () {
+      delete trendsUi.markErr[it.id];
+      patchTrendsItem(it.id, "bookmarked", next);
+      trendsRerender();
+      fetchTrends();
+    }, function (msg) {
+      trendsUi.markErr[it.id] = "북마크 실패: " + msg;
+      trendsRerender();
+    });
+  }
+
+  function buildTrendCard(it, data) {
+    var read = it.read === true;
+    var left = [];
+    var linkInfo = safeHref(it.url);
+    if (linkInfo) {
+      var a = el("a", { class: "tc-link", href: linkInfo.href, target: "_blank", rel: "noopener noreferrer", "data-trend-id": String(it.id), "data-trend-kind": "link" });
+      a.appendChild(document.createTextNode("원문 열기 · "));
+      a.appendChild(el("span", { class: "host", text: linkInfo.host }));
+      a.appendChild(document.createTextNode(" ↗"));
+      // 링크는 항상 열린다(preventDefault 없음). 읽음 기록은 따로 보낸다.
+      a.addEventListener("click", function () { onTrendRead(it, data); });
+      left.push(a);
+    } else {
+      left.push(el("span", { class: "tc-plain", text: "열 수 없는 링크(http · https 아님): " + String(it.url || "") }));
+    }
+    if (!read) {
+      if (!data.can_record_read) left.push(el("span", { class: "tc-hint", text: "읽음 기록 불가: 읽음 파일 설정(trends_reads)이 없다" }));
+    }
+
+    var on = it.bookmarked === true;
+    var bm = el("button", { class: "bm-btn", type: "button", "aria-pressed": on ? "true" : "false", "data-trend-id": String(it.id), "data-trend-kind": "mark" });
+    bm.appendChild(bookmarkIcon());
+    bm.appendChild(document.createTextNode("북마크"));
+    if (!data.can_bookmark) bm.disabled = true;
+    else bm.addEventListener("click", function () { onTrendMark(it); });
+    var right = [bm];
+    if (!data.can_bookmark) right.unshift(el("span", { class: "tc-hint", text: "북마크 불가: 북마크 파일 설정(trends_marks)이 없다" }));
+
+    var kids = [
+      el("div", { class: "tc-head" }, [
+        el("span", { class: "tc-title", text: String(it.title || "") }),
+        el("span", { class: "tc-state " + (read ? "read" : "unread") }, [
+          el("span", { class: "dot", "aria-hidden": "true" }),
+          el("span", { text: read ? "읽음" : "안 읽음" })
+        ])
+      ]),
+      el("p", { class: "tc-summary", text: String(it.summary || "") }),
+      el("div", { class: "tc-foot" }, [
+        el("div", { class: "tc-left" }, left),
+        el("div", { class: "tc-right" }, right)
+      ])
+    ];
+    if (trendsUi.readErr[it.id]) kids.push(el("p", { class: "tc-error", role: "alert", text: trendsUi.readErr[it.id] }));
+    if (trendsUi.markErr[it.id]) kids.push(el("p", { class: "tc-error", role: "alert", text: trendsUi.markErr[it.id] }));
+    return el("div", { class: "trend-card" + (read ? " is-read" : "") }, kids);
+  }
+
+  function heatLevel(n) {
+    n = typeof n === "number" && isFinite(n) ? Math.floor(n) : 0;
+    return n < 0 ? 0 : n > 3 ? 3 : n;
+  }
+
+  function buildHeatmap(cells) {
+    var MONTHS = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
+    var grid = el("div", { class: "hm-grid" });
+    var months = el("div", { class: "hm-months" });
+    var firstDow = 0;
+    var lastMonthCol = -10;
+    cells.forEach(function (c, i) {
+      var parts = String(c.date || "").split("-");
+      var y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
+      var dow = new Date(y, m - 1, d).getDay(); // 배치용 요일(0=일)
+      if (i === 0) firstDow = dow;
+      var col = Math.floor((i + firstDow) / 7);
+      var row = (i + firstDow) % 7;
+      var total = typeof c.total === "number" ? c.total : 0;
+      var read = typeof c.read === "number" ? c.read : 0;
+      var tip = String(c.date) + " · " + (total > 0 ? "글 " + total + "건 중 " + read + "건 읽음" : "글 없음");
+      var cell = el("span", { class: "hm-cell l" + heatLevel(read), title: tip, "aria-hidden": "true" });
+      cell.style.gridColumn = String(col + 1);
+      cell.style.gridRow = String(row + 1);
+      grid.appendChild(cell);
+      // 달 이름: 그 달 1일이 든 칸 열 위에(바로 앞 라벨과 겹치지 않게 3열 이상 띄운다)
+      if (d === 1 && m >= 1 && m <= 12 && col - lastMonthCol >= 3) {
+        var lab = el("span", { text: MONTHS[m - 1] });
+        lab.style.gridColumn = String(col + 1);
+        lab.style.gridRow = "1";
+        months.appendChild(lab);
+        lastMonthCol = col;
+      }
+    });
+    var days = el("div", { class: "hm-days", "aria-hidden": "true" }, [
+      el("span", { text: "" }), el("span", { text: "월" }), el("span", { text: "" }), el("span", { text: "수" }),
+      el("span", { text: "" }), el("span", { text: "금" }), el("span", { text: "" })
+    ]);
+    var legend = el("div", { class: "hm-legend", "aria-hidden": "true" }, [
+      el("span", { text: "읽은 건수 " }),
+      el("span", { class: "hm-cell l0" }), el("span", { text: "0" }),
+      el("span", { class: "hm-cell l1" }), el("span", { text: "1" }),
+      el("span", { class: "hm-cell l2" }), el("span", { text: "2" }),
+      el("span", { class: "hm-cell l3" }), el("span", { text: "3건" })
+    ]);
+    return el("div", { class: "hm-box" }, [
+      el("div", { class: "hm-head" }, [
+        el("span", { class: "t", text: "읽은 기록 · 최근 1년" }),
+        el("span", { class: "d", text: "글이 나온 날 기준. 지난 글을 읽으면 그 글이 나온 날 칸이 진해진다" })
+      ]),
+      el("div", { class: "hm-wrap", role: "img", "aria-label": "최근 1년 읽은 기록. 칸마다 그날 글 몇 건 중 몇 건을 읽었는지 툴팁으로 본다" }, [
+        days,
+        el("div", { class: "hm-main" }, [months, grid])
+      ]),
+      legend
+    ]);
+  }
+
+  function renderTrendsToday(data) {
+    var box = screenBox("trends-content", "오늘의 기술 동향", "오늘 나온 글. 잔디는 그날 글을 몇 건 읽었는지 보여 준다.", null);
+    var missing = data.missing || [];
+    missing.forEach(function (m) {
+      box.appendChild(emptyStateCard(String(m.what || "확인 필요") + ": " + String(m.reason || "확인 필요"), "설정과 파일을 확인하면 이 자리에 오늘 글이 나타난다."));
+    });
+    if (data.broken > 0) box.appendChild(inlineNote("깨진 줄 " + data.broken + "개 건너뜀", "attention"));
+    if (missing.length > 0) return;
+    var today = data.today || [];
+    if (today.length === 0) {
+      box.appendChild(emptyStateCard("오늘 동향 0건", "오늘 글이 올라오면 이 자리에 나타난다."));
+    } else {
+      var list = el("div", { class: "trend-list" });
+      today.forEach(function (it) { list.appendChild(buildTrendCard(it, data)); });
+      box.appendChild(list);
+    }
+    box.appendChild(buildHeatmap(data.heatmap || []));
+  }
+
+  // 줄 하나(안 읽은 글 · 북마크 공용). 읽음 · 북마크 핸들러는 카드와 같은 것을 쓴다.
+  // withState: 읽음 여부 칸을 넣는다(북마크 목록). 북마크 버튼은 항상 맨 오른쪽 칸.
+  function buildTrendRow(it, data, withState) {
+    var read = it.read === true;
+    var linkInfo = safeHref(it.url);
+    var linkNode;
+    if (linkInfo) {
+      linkNode = el("a", { class: "tc-link", href: linkInfo.href, target: "_blank", rel: "noopener noreferrer", "data-trend-id": String(it.id), "data-trend-kind": "link" });
+      linkNode.appendChild(document.createTextNode("원문 열기 · "));
+      linkNode.appendChild(el("span", { class: "host", text: linkInfo.host }));
+      linkNode.appendChild(document.createTextNode(" ↗"));
+      linkNode.addEventListener("click", function () { onTrendRead(it, data); });
+    } else {
+      linkNode = el("span", { class: "tc-plain", text: "열 수 없는 링크" });
+    }
+    var on = it.bookmarked === true;
+    var bm = el("button", { class: "bm-btn tr-bm", type: "button", "aria-pressed": on ? "true" : "false", "data-trend-id": String(it.id), "data-trend-kind": "mark" });
+    bm.appendChild(bookmarkIcon());
+    bm.appendChild(document.createTextNode("북마크"));
+    if (!data.can_bookmark) bm.disabled = true;
+    else bm.addEventListener("click", function () { onTrendMark(it); });
+
+    var main = el("div", { class: "tr-main" }, [
+      el("span", { class: "tr-title", text: String(it.title || ""), title: String(it.title || "") })
+    ]);
+    if (!withState) main.appendChild(el("span", { class: "tr-sum", text: String(it.summary || "") }));
+    var kids = [el("span", { class: "tr-date", text: String(it.date || "") }), main];
+    if (withState) {
+      kids.push(el("span", { class: "tr-state " + (read ? "read" : "unread") }, [
+        el("span", { class: "dot", "aria-hidden": "true" }),
+        el("span", { text: read ? "읽음" : "안 읽음" })
+      ]));
+    }
+    kids.push(linkNode);
+    kids.push(bm);
+    if (trendsUi.readErr[it.id]) kids.push(el("p", { class: "tc-error", role: "alert", text: trendsUi.readErr[it.id] }));
+    if (trendsUi.markErr[it.id]) kids.push(el("p", { class: "tc-error", role: "alert", text: trendsUi.markErr[it.id] }));
+    return el("li", { class: "tr-row" }, kids);
+  }
+
+  // 이유 행 · 깨진 줄 · 설정 안내를 공통으로 그린다. 이유 행이 있으면 true(목록은 안 그린다).
+  function trendsListPrelude(box, data) {
+    var missing = data.missing || [];
+    missing.forEach(function (m) {
+      box.appendChild(emptyStateCard(String(m.what || "확인 필요") + ": " + String(m.reason || "확인 필요"), "설정과 파일을 확인하면 이 자리에 글이 나타난다."));
+    });
+    if (data.broken > 0) box.appendChild(inlineNote("깨진 줄 " + data.broken + "개 건너뜀", "attention"));
+    return missing.length > 0;
+  }
+
+  function renderTrendsUnread(data) {
+    var box = screenBox("trends-content", "안 읽은 글", "오늘 이전에 나온 글 중 아직 읽지 않은 글을 모두 보여 준다.", null);
+    if (trendsListPrelude(box, data)) return;
+    var rows = (data.past_unread || []).filter(function (it) { return it && it.read !== true; });
+    rows.sort(function (a, b) { return String(b.date || "") < String(a.date || "") ? -1 : String(b.date || "") > String(a.date || "") ? 1 : 0; });
+    if (!data.can_record_read) box.appendChild(el("p", { class: "tr-note", text: "읽음 기록 불가: 읽음 파일 설정(trends_reads)이 없다. 링크는 열리지만 이 목록에서 빠지지 않는다" }));
+    if (!data.can_bookmark) box.appendChild(el("p", { class: "tr-note", text: "북마크 불가: 북마크 파일 설정(trends_marks)이 없다" }));
+    if (rows.length === 0) {
+      box.appendChild(emptyStateCard("안 읽은 글 없음", "지난 날 글을 모두 읽었다."));
+      return;
+    }
+    var list = el("ul", { class: "tr-list unread", "aria-label": "안 읽은 글 " + rows.length + "건" });
+    list.appendChild(el("li", { class: "tr-head", "aria-hidden": "true" }, [
+      el("span", { text: "나온 날" }), el("span", { text: "글" }), el("span", { text: "" }), el("span", { class: "tr-bm", text: "북마크" })
+    ]));
+    rows.forEach(function (it) { list.appendChild(buildTrendRow(it, data, false)); });
+    box.appendChild(list);
+    box.appendChild(el("p", { class: "tr-note", text: "전체 " + rows.length + "건" }));
+  }
+
+  var TRENDS_FILTERS = [["all", "전체"], ["unread", "안 읽음"], ["read", "읽음"]];
+
+  function renderTrendsBookmarks(data) {
+    var box = screenBox("trends-content", "북마크", "나중에 다시 보거나 두고두고 볼 글을 쌓아 둔다. 읽은 글도 안 읽은 글도 담긴다.", null);
+    if (trendsListPrelude(box, data)) return;
+    var all = (data.bookmarks || []).filter(function (it) { return it && it.bookmarked !== false; });
+    all.sort(function (a, b) { return String(b.date || "") < String(a.date || "") ? -1 : String(b.date || "") > String(a.date || "") ? 1 : 0; });
+    if (!data.can_bookmark) box.appendChild(el("p", { class: "tr-note", text: "북마크 불가: 북마크 파일 설정(trends_marks)이 없다. 버튼은 눌리지 않는다" }));
+    if (!data.can_record_read) box.appendChild(el("p", { class: "tr-note", text: "읽음 기록 불가: 읽음 파일 설정(trends_reads)이 없다" }));
+    if (all.length === 0) {
+      box.appendChild(emptyStateCard("북마크한 글 없음", "글 카드나 목록의 북마크 버튼을 누르면 여기에 쌓인다. 읽은 글도 안 읽은 글도 담을 수 있다."));
+      return;
+    }
+    var nUnread = all.filter(function (it) { return it.read !== true; }).length;
+    var counts = { all: all.length, unread: nUnread, read: all.length - nUnread };
+    var chips = el("div", { class: "tr-chips", role: "group", "aria-label": "읽음 여부 필터" });
+    TRENDS_FILTERS.forEach(function (f) {
+      var b = el("button", { class: "tr-chip", type: "button", "aria-pressed": trendsUi.bmFilter === f[0] ? "true" : "false", text: f[1] + " " + counts[f[0]] });
+      b.addEventListener("click", function () { trendsUi.bmFilter = f[0]; trendsRerender(); });
+      chips.appendChild(b);
+    });
+    box.appendChild(chips);
+    var rows = all.filter(function (it) {
+      return trendsUi.bmFilter === "all" || (trendsUi.bmFilter === "read") === (it.read === true);
+    });
+    if (rows.length === 0) {
+      var label = trendsUi.bmFilter === "unread" ? "안 읽은 북마크 없음" : "읽은 북마크 없음";
+      var hint = trendsUi.bmFilter === "unread" ? "북마크한 글을 모두 읽었다. 전체나 읽음으로 바꿔 본다." : "북마크한 글을 아직 읽지 않았다. 전체나 안 읽음으로 바꿔 본다.";
+      box.appendChild(emptyStateCard(label, hint));
+      return;
+    }
+    var list = el("ul", { class: "tr-list marks", "aria-label": "북마크 " + rows.length + "건" });
+    list.appendChild(el("li", { class: "tr-head", "aria-hidden": "true" }, [
+      el("span", { text: "나온 날" }), el("span", { text: "글" }), el("span", { text: "읽음 여부" }), el("span", { text: "" }), el("span", { class: "tr-bm", text: "북마크" })
+    ]));
+    rows.forEach(function (it) { list.appendChild(buildTrendRow(it, data, true)); });
+    box.appendChild(list);
+  }
+
+  function renderTrends(data) {
+    lastExtra.trends = data;
+    var focus = trendsFocusNow();
+    if (trendsSub === "unread") renderTrendsUnread(data);
+    else if (trendsSub === "bookmarks") renderTrendsBookmarks(data);
+    else renderTrendsToday(data);
+    restoreTrendsFocus(focus);
+  }
+
+  function fetchTrends() {
+    fetch("/trends")
+      .then(function (res) {
+        if (!res.ok) throw new Error("trends " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        if (activeTab !== "trends") return;
+        renderTrends(data);
+      })
+      .catch(function () {
+        // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+      });
   }
 
   // ---- 메뉴 배지 (ADR-014(임시)) — 메뉴는 항상 보이므로 탭 폴링과 별개로 부른다 ----
 
   var navCounts = { judge: 0, review: 0 };
   var routineBadge = { n: 0, reason: "" };
+  var trendsBadge = null; // 숫자 | null(못 구함 → 이 배지만 숨김)
 
   function renderNavBadges() {
     ["judge", "review"].forEach(function (key) {
@@ -1913,6 +2409,17 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         else ritem.removeAttribute("title");
       }
     }
+    // 기술 동향: 「안 읽은 글」 항목 배지. 0 · null이면 숨긴다. 접힌 메뉴는 하위 목록이 안 보여 부모에 점을 단다.
+    var tb = document.querySelector('[data-badge="trends"]');
+    if (tb) {
+      var tn = trendsBadge;
+      var tshow = typeof tn === "number" && tn > 0;
+      tb.textContent = tshow ? String(tn) : "";
+      if (tshow) tb.setAttribute("aria-label", "안 읽은 글 " + tn + "건");
+      else tb.removeAttribute("aria-label");
+      if (tshow) trendsParent.setAttribute("data-has-badge", "1");
+      else trendsParent.removeAttribute("data-has-badge");
+    }
   }
 
   function fetchNavCounts() {
@@ -1935,6 +2442,9 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         } else if (typeof rv === "number" && isFinite(rv) && rv >= 0 && Math.floor(rv) === rv) {
           routineBadge = { n: rv, reason: "" };
         }
+        var tv = data && data.trends;
+        if (tv === null) trendsBadge = null;
+        else if (typeof tv === "number" && isFinite(tv) && tv >= 0 && Math.floor(tv) === tv) trendsBadge = tv;
         renderNavBadges();
       })
       .catch(function () { /* 배지는 부가 정보 — 마지막 값 유지, 에러 줄 없음 */ });

@@ -37,3 +37,6 @@ harness-doctor 검사 3이 이 파일이 계속 비어 있는지 본다.
 - **[PR · 스크린샷]** 브라우저 `computer` 스크린샷은 JPEG인데 `upload_image`에 `.png` 이름을 주면 GitHub 업로드가 422로 거절되고 본문에 `<!-- Failed to upload -->`만 남는다 — 같은 파일을 `.jpg`로 주면 201·200으로 통과했다. 파일명 확장자를 실제 형식에 맞춘다. (2026-11-12 실측, PR #7)
 
 - **[서버 · 화면]** 화면이 읽는 필드를 서버가 실제로 보내는지는 서버·파서 단위 테스트만으로 확인하지 않는다 — 건강도 배지가 항상 회색이었다: 화면은 `grade_color`를 읽는데 서버가 점수 파일에서 그 키를 버렸고, 297개 테스트는 둘이 따로 통과했다. 새 필드는 가짜 데이터로 서버를 띄워 브라우저에서 한 번 본다. (2026-11-12 실측, `desk/ledger.py` `parse_score` · `page/server.py` `build_repo_health`)
+
+- **[sdd · nav-counts]** `/nav-counts`에 새 키를 더하면 `tests/test_desk_redesign_integration.py:36`의 키 집합 단언이 깨지는데, 이 수정을 GREEN 단계에서 하면 러너가 테스트 파일 변경을 되돌리고 실패시킨다 — 두 phase(`desk-routine-inbox`, `desk-tech-trends`) 연속으로 step 4가 막혔다. 그 한 줄은 step 문서에 "RED 커밋에 넣는다"고 못박는다. (2026-11-13 실측, `desk-tech-trends` step 4)
+- **[화면 · 서버 집계]** 서버가 전체를 세어 보내는 목록(오늘 글)을 화면이 `slice`로 자르지 않는다 — 오늘 글이 4건이면 배지·잔디 total은 4인데 화면이 3건만 그려 4번째 글이 안 보였다. 8 step이 전부 통과한 뒤 리뷰에서야 나왔다. 상한이 필요하면 서버가 자르고 응답에 전체 건수를 같이 준다. (2026-11-13 실측, `page/index.html` 오늘 화면)

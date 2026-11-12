@@ -1,0 +1,101 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-tech-trends",
+  "docs": "docs/desk-tech-trends-2026-11-12",
+  "after": [
+    "desk-routine-inbox"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "name": "trends-core",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T00:37:57+0900",
+      "summary": "desk/trends.py 순수 함수: parse_items→(id→글,깨진수)·parse_reads→(set,깨진수)·parse_marks→(id→bool,깨진수)·split_items(items,reads,marks,today)→{today,past_unread}·heatmap(items,reads,today,days=365)→[{date,total,read}]·bookmark_list·unread_count; 글 모양 {id,date,title,url,summary,read,bookmarked}",
+      "completed_at": "2026-11-13T00:41:50+0900"
+    },
+    {
+      "step": 2,
+      "name": "trends-config",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T00:41:55+0900",
+      "summary": "desk/config.py load_config()에 trends_items·trends_reads·trends_marks 키 추가(Path|None, 빈 문자열 None, 타입 오류는 None+'<키> 타입 오류', conductor 폴백 None); tests/test_desk_config_trends.py",
+      "completed_at": "2026-11-13T00:45:17+0900"
+    },
+    {
+      "step": 3,
+      "name": "trends-write",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T00:45:22+0900",
+      "summary": "desk/trends.py 쓰기 껍질 추가: 모듈 락 _LOCK · _append_line(path,line) · record_read(items,reads,id,now)→'ok'|'duplicate'|'unknown_id' · record_mark(items,marks,id,on,now)→'ok'|'same'|'unknown_id'; OSError는 올림; tests/test_desk_trends_write.py",
+      "completed_at": "2026-11-13T00:48:57+0900"
+    },
+    {
+      "step": 4,
+      "name": "trends-get",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T00:50:05+0900",
+      "attempts": [
+        {
+          "at": "2026-11-13T00:56:11+0900",
+          "error": "GREEN: 테스트 파일을 고쳤다(되돌림): tests/test_desk_redesign_integration.py — 테스트는 그대로 두고 구현을 고친다"
+        }
+      ],
+      "retries": 1,
+      "summary": "page/server.py: build_trends(cfg)→GET /trends{config,date,today,past_unread,heatmap(365),bookmarks,broken,can_record_read,can_bookmark,missing}; /nav-counts에 trends(isolated); tests/test_desk_server_trends.py",
+      "completed_at": "2026-11-13T01:03:45+0900"
+    },
+    {
+      "step": 5,
+      "name": "trends-post",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T01:03:53+0900",
+      "summary": "page/server.py: POST /trends/read {id} · /trends/mark {id,on} → 200 {ok,changed}(멱등) · 400 not configured/bad id/bad on/unknown id/bad json · 403 가드 · 500 write failed; tests/test_desk_server_trends_post.py",
+      "completed_at": "2026-11-13T01:09:09+0900"
+    },
+    {
+      "step": 6,
+      "name": "trends-screen-today",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-13T01:09:18+0900",
+      "summary": "page/index.html: 메뉴 그룹 「기술 동향」(오늘·안 읽은 글·북마크, 그룹 펼침 일반화) · tab-trends · renderTrendsToday(카드 3+잔디 365칸 4단계) · fetchTrends · nav 배지 trends · renderTrendsUnread/Bookmarks 「준비 중」 자리. 잔디 색 l0 #2A303F · l1 rgba(52,211,153,0.40) · l2 rgba(52,211,153,0.70) · l3 #34D399(보드 값, success 기반 color-mix; 브리프의 accent 계열 아님). 북마크 버튼 꺼짐 bg #232837/테두리 #2A303F/글자 #B9BFCF/아이콘 외곽선 #959DB6, 켜짐 bg #2A303F/글자 #FFFFFF/아이콘 채움 #7C87F7. 브라우저로 본 것: 오늘 3건 카드+요약+잔디, 링크 읽음(POST 200→카드 읽음→오늘 칸 l1, 배지 6→5), 북마크 aria-pressed 전환, 배지, 설정 없음 이유 행, script/javascript: 무실행, 접힌 메뉴 부모 점 속성. 못 본 것: 실제 마우스 클릭(탭이 비활성이라 안 먹어 JS click으로 대체), 읽음/북마크 쓰기 실패 에러 줄, can_record_read=false·can_bookmark=false 화면, 파일 없음·형식 확인 필요·오늘 0건·깨진 줄 안내, 접힌 메뉴 점의 실제 렌더 모양. Finn 지시로 「읽음 기록·되돌릴 수 없다」류 안내 문구 삭제(오류·불가 사유 문구는 유지).",
+      "completed_at": "2026-11-13T01:19:19+0900"
+    },
+    {
+      "step": 7,
+      "name": "trends-screen-lists",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-13T01:19:23+0900",
+      "summary": "page/index.html: renderTrendsUnread(past_unread 날짜 내림차순 전체·줄=날짜/제목/요약 한 줄/링크/북마크)·renderTrendsBookmarks(칩 전체·안 읽음·읽음 건수, 줄 맨 오른쪽 북마크 열)·buildTrendRow(step 6의 onTrendRead/onTrendMark 재사용)·trendsListPrelude. 브라우저로 본 것: 안 읽은 글 13줄 내림차순+링크 클릭 시 줄 빠짐·배지 16→15·잔디 11-12 칸 read 2, 북마크 칩 4/3/1 건수대로 거름·버튼 맨 오른쪽, 북마크 0건·필터 0건·안 읽은 글 0건 문구 서로 다름, 북마크 글 읽어도 유지·끄면 줄 빠짐, reads/marks 비운 서버에서 토글 disabled+이유 한 줄(오늘·안 읽은 글·북마크), 쓰기 실패 서버에서 읽음·북마크 에러 줄 따로(줄 남고 읽음 상태 불변), 설정 없음·파일 없음·형식 확인 필요(+깨진 줄 2개)·오늘 0건 이유 행. 못 본 것: 실제 마우스 클릭(JS click 사용), 접힌 메뉴 점 모양, 키보드 포커스 링. 참고: 배지는 오늘 안 읽은 글도 센다(지난 글 0건이어도 3) — 보드 문구 '배지도 사라진다'는 뺐다. 읽음 기록·되돌릴 수 없다 안내 문구 없음. 테스트 518개 통과",
+      "completed_at": "2026-11-13T01:26:13+0900"
+    },
+    {
+      "step": 8,
+      "name": "trends-verify",
+      "status": "completed",
+      "tdd": false,
+      "kind": "measure",
+      "started_at": "2026-11-13T01:26:16+0900",
+      "completed_at": "2026-11-13T01:34:14+0900",
+      "summary": "측정 전용, 레포 파일 변경 0(git status는 index.json만). 가짜 데이터(example.com)·DESK_HOME/DESK_CONFIG를 스크래치패드로 돌린 서버(127.0.0.1:47731)를 PID로 내리고 임시 파일 삭제. `python3 -m unittest discover -s tests` 518개 통과. `curl -s http://127.0.0.1:47731/trends` 키 확인: config·date·today·past_unread·heatmap(365칸 {date,total,read})·bookmarks·broken·can_record_read·can_bookmark·missing; `curl -s http://127.0.0.1:47731/nav-counts` {judge,review,routine,trends:32,errors}(trends_items 비우면 0). curl POST(토큰+Origin): /trends/read 200·200(두 번 보내도 reads 1줄)·모르는 id 400·토큰 없음 403·reads 비움 400 not configured·reads를 디렉터리로 500 write failed; /trends/mark 200·200(마지막 줄 on/off 덧붙임)·모르는 id 400·on 문자열 400·marks 디렉터리 500; GET 전후 md5 동일. 브라우저(Chrome, 실제 마우스 클릭 됨): 메뉴 그룹·오늘·안 읽은 글·북마크·원문 링크(새 탭 example.com)·북마크 버튼·필터 칩 클릭 모두 실제 클릭으로 동작. 수용 조건: 1 확인함(curl today 건수·필드 + 화면 카드 3) / 2 확인함(링크 실제 클릭→새 탭 열림·reads에 {id,at}·카드 읽음·배지 감소·읽음 파일 줄 확인) / 3 확인함(curl 2회→1줄) / 4 확인함(curl unknown id 400) / 5 확인함(heatmap 365칸·total·read, 3건 초과 상한은 이번에 못 만듦→못 봄 일부: 단위 테스트에 의존) / 6 확인함(11-11 글을 읽으니 11-11 칸 title '글 3건 중 1건 읽음', 오늘 칸 불변) / 7 확인함(설정 없음·파일 없음·형식 확인 필요+깨진 줄 2개·오늘 0건 화면 문구 4가지, 깨진 줄 1개 건너뜀 표시, 서버 안 죽음) / 8 확인함(제목 '<script>' 글자 그대로 표시·window.__xss 미설정, javascript: 링크는 링크 없이 '열 수 없는 링크' 문구) / 9 확인함(토큰 없으면 403, GET 전후 파일 해시 동일; 코드 가드는 /pick과 같음은 코드 안 읽음→테스트 의존) / 10 확인함(메뉴 새 항목, 오늘 화면에 카드 3+잔디 한 화면; 잔디 4단계 실제 배경색 rgb(42,48,63)·rgba .4·.7·rgb(52,211,153) 서로 다름, 스크린샷에서도 구분) / 11 확인함(reads 비운 설정: can_record_read false·카드에 '읽음 기록 불가: 읽음 파일 설정(trends_reads)이 없다'·링크 실제 클릭하면 열리고 reads 줄 수 불변·POST 400) / 12 확인함(reads 경로가 디렉터리: POST 500, 화면 링크 열림+'읽음 기록 실패: 저장하지 못했다. 안 읽음으로 남는다' 한 줄, 줄 그대로 남고 목록 응답 read 0; 파일 없을 뿐이면 첫 읽음 때 생성됨은 빈 파일로 시작해 못 봄→단위 테스트에 의존) / 13 확인함(메뉴 그룹 아래 오늘·안 읽은 글·북마크, 배지는 안 읽은 글에만, 배지 감소 확인, trends_items 비우면 배지 사라짐; 건수 계산 오류 시 다른 건수 유지는 오류를 못 만들어 못 봄(코드 isolated)) / 14 확인함(안 읽은 글 날짜 내림차순 전체, 페이지 없음, 링크 클릭하면 줄 빠지고 해당 날짜 칸 오름) / 15 확인함(curl: 같은 on 두 번→1줄, 모르는 id 400, 토큰 403, GET 불변) / 16 확인함(북마크 화면 칩 전체 1·안 읽음 1·읽음 0→읽음 클릭 뒤 0/1; 북마크 글을 링크로 읽어도 북마크됨 유지, 목록에 읽음 여부 표시) / 17 확인함(북마크 항목 배지 없음, 오늘 카드·안 읽은 글 줄·북마크 줄에서 실제 클릭으로 토글, aria-pressed true/false) / 18 확인함(marks 비움: 토글 6개 disabled+'북마크 불가: 북마크 파일 설정(trends_marks)이 없다'·POST 400; marks를 디렉터리로: 화면 '북마크 실패: 저장하지 못했다' 한 줄·읽음 상태 불변·POST 500; 북마크 0건 '북마크한 글 없음'과 필터 0건 '읽은 북마크 없음' 문구 다름). 앞 step에서 못 본 것: 실제 마우스 클릭 확인함(탭이 활성이라 모두 실제 클릭), 키보드 포커스 링 일부 확인함(원문 링크에 보라색 윤곽, 북마크 버튼 포커스 링은 못 봄), 접힌 메뉴 점 확인함(접으면 기술 동향 아이콘 오른쪽 위에 노란 8px 점, 부모 data-has-badge=1). 읽음/되돌릴 수 없다류 안내 문구: 화면 4곳 눈으로 확인 + page/index.html grep(기록된다·되돌릴 수·취소할 수 없다·확정) 0건 — 없음. 못 본 것: 잔디 칸 툴팁은 브라우저 기본 title이라 스크린샷에 안 잡힘(title 속성 값만 확인), 3건 초과 상한·읽음 파일 없을 때 첫 읽음 생성은 화면에서 못 봄. 새 함정: ①오늘 화면은 응답이 4건이어도 slice(0,3)으로 3건만 그리는데 잔디 total과 배지는 4건 기준이라 어긋날 수 있음(wiki가 3건만 쓰면 무관) ②javascript: 글은 링크가 아예 없고 '열 수 없는 링크' 문구가 뜬다."
+    }
+  ],
+  "reviews": [
+    {
+      "at": "2026-11-13T01:39:06+09:00",
+      "head": "9981c4292f2df2a0efc225757f5c969f5ec0d0cd",
+      "issues": [
+        "오늘 화면 slice(0,3)이 4건째부터 숨김(배지·잔디 total은 전체 집계, 숨긴 글은 어느 화면에서도 읽을 수 없음)",
+        "criteria 5·9·12·13 브라우저 미확인(단위 테스트만)",
+        "잔디 색·북마크 버튼 값이 DESIGN.md에 없음"
+      ]
+    }
+  ]
+}
