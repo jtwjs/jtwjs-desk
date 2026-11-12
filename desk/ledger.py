@@ -144,6 +144,7 @@ def skipped_phases(indexes: list) -> list:
 _DATE_DIR = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _SCORE_NAME = "ai-readiness-score.json"
 _FRICTION_OPEN = ("열림", "보류")
+_GRADE_COLORS = ("green", "amber", "red")
 
 
 def _cells(line: str):
@@ -237,14 +238,18 @@ def workflow_rows(obs: list, friction: list) -> list:
 
 
 def parse_score(text: str):
-    """JSON에서 `total` · `grade`만. 깨졌거나 키가 없으면 None."""
+    """JSON에서 `total` · `grade` · (유효하면) `grade_color`만. 깨졌거나 키가 없으면 None."""
     try:
         data = json.loads(text)
     except (ValueError, TypeError):
         return None
     if not isinstance(data, dict) or "total" not in data or "grade" not in data:
         return None
-    return {"total": data["total"], "grade": data["grade"]}
+    result = {"total": data["total"], "grade": data["grade"]}
+    color = data.get("grade_color")
+    if isinstance(color, str) and color.lower() in _GRADE_COLORS:
+        result["grade_color"] = color.lower()
+    return result
 
 
 def find_score_file(repo_root: Path):
