@@ -45,8 +45,11 @@
     {
       "step": 5,
       "name": "routine-endpoints",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T17:42:35+0900",
+      "summary": "page/server.py에 build_routine(cfg)->{config,date,groups,past,broken,missing} · GET /routine · POST /routine/answer(200 {ok} | 400 bad json/violations/routine not configured | 404 question not found) · POST /routine/rollover(200 {ok, skipped}) 추가. 테스트 tests/test_desk_server_routine.py",
+      "completed_at": "2026-11-12T20:30:14+0900"
     },
     {
       "step": 6,
