@@ -18,8 +18,11 @@
     {
       "step": 2,
       "name": "routine-config",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "summary": "desk/config.py load_config()에 routine_questions·routine_answers 키 추가(Path|None, 기본 None, 빈 문자열은 None, 문자열 아니면 None+error에 '<키> 타입 오류', conductor 폴백은 None). 테스트 tests/test_desk_config_routine.py",
+      "tdd": true,
+      "started_at": "2026-11-12T17:19:15+0900",
+      "completed_at": "2026-11-12T17:25:56+0900"
     },
     {
       "step": 3,
