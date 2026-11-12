@@ -1,0 +1,81 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-routine-inbox",
+  "docs": "docs/desk-routine-inbox-2026-11-12",
+  "after": [
+    "desk-redesign-ui"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "name": "routine-mailbox-parse",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T17:10:17+0900",
+      "summary": "desk/routine.py 순수 함수: parse_questions/parse_answers(text)->(id→마지막 줄 dict, 깨진 줄 수), input_shape, effective_options, question_state, validate_answer(q, body)->어긴 필드 목록, split_by_date(questions, answers, today)->{today, past}(각 문항에 input·options·state·value·note), group_by_kind->[{kind, items}], unanswered_today_count; 상수 ANSWER_MAX_CHARS=4000, REVIEW_DEFAULT_OPTIONS",
+      "completed_at": "2026-11-12T17:15:03+0900"
+    },
+    {
+      "step": 2,
+      "name": "routine-config",
+      "status": "completed",
+      "summary": "desk/config.py load_config()에 routine_questions·routine_answers 키 추가(Path|None, 기본 None, 빈 문자열은 None, 문자열 아니면 None+error에 '<키> 타입 오류', conductor 폴백은 None). 테스트 tests/test_desk_config_routine.py",
+      "tdd": true,
+      "started_at": "2026-11-12T17:19:15+0900",
+      "completed_at": "2026-11-12T17:25:56+0900"
+    },
+    {
+      "step": 3,
+      "name": "routine-mailbox-write",
+      "status": "completed",
+      "summary": "desk/routine.py에 답함 쓰기 껍질 추가: 모듈 락 _LOCK, read_text_or_none(path)->str|None, append_answer(answers_path, line), save_answer(qpath, apath, body, now)->위반 필드 리스트(빈 리스트=통과), rollover(qpath, apath, today, now)->덧붙인 줄 수(멱등, 락 안에서 재읽기). 테스트 tests/test_desk_routine_write.py",
+      "tdd": true,
+      "started_at": "2026-11-12T17:26:09+0900",
+      "completed_at": "2026-11-12T17:35:04+0900"
+    },
+    {
+      "step": 4,
+      "name": "count-nav-routine",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T17:37:51+0900",
+      "summary": "page/server.py count_nav(cfg)가 {judge, review, routine, errors}를 반환(항목별 try/except, 실패 항목은 None + errors[항목]=예외 이름, 오류 없으면 errors={}). routine=오늘 미답 수(설정·질문함 없으면 0). 테스트 tests/test_desk_server_navcounts_routine.py, 기존 단언 2곳 routine 허용.",
+      "completed_at": "2026-11-12T17:42:29+0900"
+    },
+    {
+      "step": 5,
+      "name": "routine-endpoints",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T17:42:35+0900",
+      "summary": "page/server.py에 build_routine(cfg)->{config,date,groups,past,broken,missing} · GET /routine · POST /routine/answer(200 {ok} | 400 bad json/violations/routine not configured | 404 question not found) · POST /routine/rollover(200 {ok, skipped}) 추가. 테스트 tests/test_desk_server_routine.py",
+      "completed_at": "2026-11-12T20:30:14+0900"
+    },
+    {
+      "step": 6,
+      "name": "routine-screen",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T20:30:19+0900",
+      "summary": "page/index.html에 '회고' 메뉴(data-tab=routine, 배지 data-badge=routine, null이면 숨김+title 이유)와 화면 추가: 탭 선택 시 POST /routine/rollover 후 GET /routine(폴링은 GET만), input(choice/long/line)만 보고 카드 렌더, POST /routine/answer 저장(400 violations 카드 내 표시·입력 유지·중복 클릭 방지), missing·broken·지난 건너뜀 구역, 종류 이름은 모든 카드 머리에 표시. 함수 renderRoutine·fetchRoutine·buildRoutineCard. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T20:49:48+0900"
+    },
+    {
+      "step": 7,
+      "name": "routine-integration-check",
+      "status": "completed",
+      "tdd": false,
+      "kind": "measure",
+      "started_at": "2026-11-12T20:49:53+0900",
+      "summary": "실측 통과(코드 변경 0). 임시 폴더(스크래치패드)에 가짜 config.json·질문함(오늘 6문항[설명·복습·재시험·결정·원칙·샘플종류]+어제 미답 1+깨진 줄 1)을 만들고 `DESK_HOME=… DESK_CONFIG=… DESK_PORT=47999 python3 page/server.py`로 서버를 띄워 `curl -X POST /routine/rollover`(토큰·Origin 헤더) → `curl /routine` → `curl /nav-counts` 실행. 결과: rollover {ok:true, skipped:1}, 재호출 skipped:0(멱등, 답함 1줄 유지). GET /routine 최상위 키 config·date·groups·past·broken·missing, 문항 키 id·date·kind·text·input·options·state·value·note, 그룹 키 kind·items, config 키 source·unregistered·error — index.html 화면 코드 grep(`data.broken/groups/missing/past`, `g.items/kind`, `it.input/options/state/value/note/text/kind/date/id`, `m.what/reason`, `o.key/label`)과 하나도 빠짐없이 일치. 입력 모양: 설명=long, 복습=choice(known/unsure 채움), 재시험·원칙·샘플종류=line, 결정=choice(options 유지). 어제 문항은 rollover 뒤 past에서 state=skipped, broken=1. `/nav-counts` = {judge:0, review:0, routine:6, errors:{}} (오늘 미답 6과 일치). 질문함 파일 없음 설정: missing=[{what:질문함, reason:파일 없음}], routine=0. 서버 종료·임시 폴더 삭제 확인, `python3 -m unittest discover -s tests` 413 tests OK. 레포 git status는 phases index.json 하나뿐(러너 몫). 미확인: 브라우저 렌더(카드 모양·배지 눈 확인은 메인 세션이 가짜 데이터 서버로)",
+      "completed_at": "2026-11-12T21:01:03+0900"
+    }
+  ],
+  "reviews": [
+    {
+      "at": "2026-11-12T21:03:35",
+      "head": "cb5b9dfe68c6c86e0d885e63904aa539c65ce9df",
+      "issues": []
+    }
+  ]
+}

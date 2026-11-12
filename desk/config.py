@@ -45,6 +45,8 @@ def load_config() -> dict:
         "criteria_file": None,
         "daily_dir": _default_daily_dir(),
         "evidence_globs": [],
+        "routine_questions": None,
+        "routine_answers": None,
         "error": None,
     }
     try:
@@ -95,6 +97,12 @@ def load_config() -> dict:
                     result["evidence_globs"] = list(g)
                 else:
                     errors.append("evidence_globs 타입 오류")
+            for key in ("routine_questions", "routine_answers"):
+                if key in data:
+                    if not isinstance(data[key], str):
+                        errors.append(f"{key} 타입 오류")
+                    else:  # 빈 문자열은 설정 없음(None)
+                        result[key] = _path(data[key])
         if errors:
             result["error"] = "; ".join(errors)
     except Exception as exc:  # 서버가 요청마다 부른다 — 밖으로 던지지 않는다

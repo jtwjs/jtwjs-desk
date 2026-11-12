@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, config, ledger, paths, rollup, sort, validate  # noqa: E402
+from desk import atomic, config, ledger, paths, rollup, routine, sort, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
@@ -443,10 +443,55 @@ def list_judgments(repo: str | None = None) -> list:
 
 
 def count_nav(cfg: dict) -> dict:
-    """메뉴 배지 건수 — 판정 = pick 없는 카드 수, 복습 = 대기 items 수. 읽기만 한다(ADR-009)."""
-    judge = sum(1 for c in list_judgments() if "pick" not in c)
-    review = 0 if cfg["source"] == "none" else len(build_review(cfg)["items"])
-    return {"judge": judge, "review": review}
+    """메뉴 배지 건수 — 판정 = pick 없는 카드 수, 복습 = 대기 items 수, 루틴 = 오늘 미답 문항 수.
+
+    읽기만 한다(ADR-009). 항목별로 격리한다 — 한 항목이 예외를 내면 그 값은 None이고
+    errors[항목]에 예외 이름만 싣는다(메시지·경로 없음). 오류가 없으면 errors는 빈 객체다.
+    """
+    errors = {}
+
+    def isolated(name, fn):
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001 — 항목 하나가 전체 응답을 죽이지 않게
+            errors[name] = type(exc).__name__
+            return None
+
+    def count_routine():
+        q_text = routine.read_text_or_none(cfg.get("routine_questions"))
+        if q_text is None:
+            return 0
+        questions, _ = routine.parse_questions(q_text)
+        a_text = routine.read_text_or_none(cfg.get("routine_answers"))
+        answers, _ = routine.parse_answers(a_text) if a_text is not None else ({}, 0)
+        return routine.unanswered_today_count(questions, answers, _today())
+
+    judge = isolated("judge", lambda: sum(1 for c in list_judgments() if "pick" not in c))
+    review = isolated("review", lambda: 0 if cfg["source"] == "none" else len(build_review(cfg)["items"]))
+    return {"judge": judge, "review": review,
+            "routine": isolated("routine", count_routine), "errors": errors}
+
+
+def build_routine(cfg: dict) -> dict:
+    """루틴 화면 응답 — 질문함·답함을 읽기만 한다(ADR-009). 쓰기는 POST 핸들러에서만."""
+    today = _today()
+    base = {"config": config_block(cfg), "date": today.isoformat(),
+            "groups": [], "past": [], "broken": 0}
+
+    def reason(why):
+        return {**base, "missing": [{"what": "질문함", "reason": why}]}
+
+    if cfg.get("routine_questions") is None:
+        return reason("설정 없음")
+    q_text = routine.read_text_or_none(cfg["routine_questions"])
+    if q_text is None:
+        return reason("파일 없음" if not Path(cfg["routine_questions"]).exists() else "형식 확인 필요")
+    questions, q_broken = routine.parse_questions(q_text)
+    a_text = routine.read_text_or_none(cfg.get("routine_answers"))
+    answers, a_broken = routine.parse_answers(a_text) if a_text is not None else ({}, 0)
+    split = routine.split_by_date(questions, answers, today)
+    return {**base, "groups": routine.group_by_kind(split["today"]), "past": split["past"],
+            "broken": q_broken + a_broken, "missing": []}
 
 
 def spawn_pick_candidate(body: dict) -> dict:
@@ -538,6 +583,13 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._send_json(200, count_nav(config.load_config()))
             return
 
+        if parsed.path == "/routine":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            self._send_json(200, build_routine(config.load_config()))
+            return
+
         if parsed.path == "/review":
             if not check_host(self.headers, self._port()):
                 self._send_json(403, {"error": "bad host"})
@@ -622,6 +674,14 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._handle_review_done()
             return
 
+        if parsed.path == "/routine/answer":
+            self._handle_routine_answer()
+            return
+
+        if parsed.path == "/routine/rollover":
+            self._handle_routine_rollover()
+            return
+
         if parsed.path == "/share/shared":
             self._handle_share_shared()
             return
@@ -669,6 +729,44 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             {"at": datetime.now().isoformat()},
         )
         self._send_json(200, {"ok": True})
+
+    def _handle_routine_answer(self):
+        if not self._check_post_guard():
+            return
+        try:
+            body = self._read_json_body()
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._send_json(400, {"error": "bad json"})
+            return
+        cfg = config.load_config()
+        qpath, apath = cfg.get("routine_questions"), cfg.get("routine_answers")
+        if qpath is None or apath is None:
+            self._send_json(400, {"error": "routine not configured"})
+            return
+        if not isinstance(body, dict):
+            self._send_json(400, {"violations": ["value"]})
+            return
+        questions, _ = routine.parse_questions(routine.read_text_or_none(qpath) or "")
+        qid = body.get("id")
+        if not isinstance(qid, str) or qid not in questions:
+            self._send_json(404, {"error": "question not found"})
+            return
+        violations = routine.save_answer(qpath, apath, body, datetime.now())
+        if violations:
+            self._send_json(400, {"violations": violations})
+            return
+        self._send_json(200, {"ok": True})
+
+    def _handle_routine_rollover(self):
+        if not self._check_post_guard():
+            return
+        cfg = config.load_config()
+        qpath, apath = cfg.get("routine_questions"), cfg.get("routine_answers")
+        if qpath is None or apath is None:
+            self._send_json(200, {"ok": True, "skipped": 0})
+            return
+        skipped = routine.rollover(qpath, apath, _today(), datetime.now())
+        self._send_json(200, {"ok": True, "skipped": skipped})
 
     def _handle_share_shared(self):
         if not self._check_post_guard():
