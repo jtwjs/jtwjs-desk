@@ -623,6 +623,40 @@
   .hm-legend { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); }
   .hm-legend .hm-cell { margin: 0 1px; }
 
+  /* 안 읽은 글 · 북마크 줄 목록 */
+  .tr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--surface-raised); border-radius: var(--radius-card); }
+  .tr-head, .tr-row { display: grid; align-items: center; column-gap: 16px; padding: 12px 16px; }
+  .tr-list.unread .tr-head, .tr-list.unread .tr-row { grid-template-columns: 96px minmax(0, 1fr) 200px 112px; }
+  .tr-list.marks .tr-head, .tr-list.marks .tr-row { grid-template-columns: 96px minmax(0, 1fr) 88px 200px 112px; }
+  .tr-head { font-size: 12px; color: var(--text-muted); border-bottom: 1px solid var(--surface-raised); }
+  .tr-head .tr-bm { justify-self: end; }
+  .tr-row + .tr-row { border-top: 1px solid var(--surface-raised); }
+  .tr-row .tr-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+  .tr-row .tr-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tr-row .tr-title { font-size: 14px; font-weight: 600; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tr-row .tr-sum { font-size: 13px; color: var(--text-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tr-row .tr-state { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+  .tr-row .tr-state .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .tr-row .tr-state.read { color: var(--success); }
+  .tr-row .tr-state.unread { color: var(--attention); }
+  .tr-row .tc-link { display: inline-flex; align-items: center; min-height: 32px; font-size: 13px; color: var(--accent); text-decoration: none; white-space: nowrap; }
+  .tr-row .tc-link:hover { text-decoration: underline; }
+  .tr-row .tc-link .host { margin-left: 4px; font-family: var(--font-mono); font-size: 12px; }
+  .tr-row .tc-plain { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+  .tr-row .tc-error { grid-column: 2 / -1; margin: 8px 0 0; font-size: 13px; color: var(--danger); }
+  .tr-row .tr-bm { justify-self: end; }
+  .tr-note { margin: 0 0 12px; font-size: 12px; color: var(--text-muted); }
+  .tr-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .tr-chip {
+    height: 32px; padding: 0 12px;
+    border: 1px solid var(--surface-raised); border-radius: var(--radius-control);
+    background: var(--surface-panel); color: var(--text-body);
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  .tr-chip:hover { border-color: var(--text-muted); }
+  .tr-chip[aria-pressed="true"] { background: var(--surface-raised); color: var(--text-strong); }
+  .tr-counts { font-size: 12px; color: var(--text-muted); margin-left: 4px; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
@@ -1996,7 +2030,8 @@ const DESK_TOKEN = "__DESK_TOKEN__";
 
   var trendsUi = {
     readErr: {},   // id → 읽음 기록 실패 한 줄
-    markErr: {}    // id → 북마크 실패 한 줄(읽음 에러와 따로)
+    markErr: {},   // id → 북마크 실패 한 줄(읽음 에러와 따로)
+    bmFilter: "all" // 북마크 필터 칩(메모리만) all | unread | read
   };
   var BOOKMARK_PATH = "m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z";
 
@@ -2210,16 +2245,113 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     box.appendChild(buildHeatmap(data.heatmap || []));
   }
 
-  // step 7이 채운다
-  function renderTrendsUnread(data) {
-    var box = screenBox("trends-content", "안 읽은 글", "지난 날 안 읽은 글을 모아 본다.", null);
-    box.appendChild(emptyStateCard("준비 중", ""));
+  // 줄 하나(안 읽은 글 · 북마크 공용). 읽음 · 북마크 핸들러는 카드와 같은 것을 쓴다.
+  // withState: 읽음 여부 칸을 넣는다(북마크 목록). 북마크 버튼은 항상 맨 오른쪽 칸.
+  function buildTrendRow(it, data, withState) {
+    var read = it.read === true;
+    var linkInfo = safeHref(it.url);
+    var linkNode;
+    if (linkInfo) {
+      linkNode = el("a", { class: "tc-link", href: linkInfo.href, target: "_blank", rel: "noopener noreferrer", "data-trend-id": String(it.id), "data-trend-kind": "link" });
+      linkNode.appendChild(document.createTextNode("원문 열기 · "));
+      linkNode.appendChild(el("span", { class: "host", text: linkInfo.host }));
+      linkNode.appendChild(document.createTextNode(" ↗"));
+      linkNode.addEventListener("click", function () { onTrendRead(it, data); });
+    } else {
+      linkNode = el("span", { class: "tc-plain", text: "열 수 없는 링크" });
+    }
+    var on = it.bookmarked === true;
+    var bm = el("button", { class: "bm-btn tr-bm", type: "button", "aria-pressed": on ? "true" : "false", "data-trend-id": String(it.id), "data-trend-kind": "mark" });
+    bm.appendChild(bookmarkIcon());
+    bm.appendChild(document.createTextNode(on ? "북마크됨" : "북마크"));
+    if (!data.can_bookmark) bm.disabled = true;
+    else bm.addEventListener("click", function () { onTrendMark(it); });
+
+    var main = el("div", { class: "tr-main" }, [
+      el("span", { class: "tr-title", text: String(it.title || ""), title: String(it.title || "") })
+    ]);
+    if (!withState) main.appendChild(el("span", { class: "tr-sum", text: String(it.summary || "") }));
+    var kids = [el("span", { class: "tr-date", text: String(it.date || "") }), main];
+    if (withState) {
+      kids.push(el("span", { class: "tr-state " + (read ? "read" : "unread") }, [
+        el("span", { class: "dot", "aria-hidden": "true" }),
+        el("span", { text: read ? "읽음" : "안 읽음" })
+      ]));
+    }
+    kids.push(linkNode);
+    kids.push(bm);
+    if (trendsUi.readErr[it.id]) kids.push(el("p", { class: "tc-error", role: "alert", text: trendsUi.readErr[it.id] }));
+    if (trendsUi.markErr[it.id]) kids.push(el("p", { class: "tc-error", role: "alert", text: trendsUi.markErr[it.id] }));
+    return el("li", { class: "tr-row" }, kids);
   }
 
-  // step 7이 채운다
+  // 이유 행 · 깨진 줄 · 설정 안내를 공통으로 그린다. 이유 행이 있으면 true(목록은 안 그린다).
+  function trendsListPrelude(box, data) {
+    var missing = data.missing || [];
+    missing.forEach(function (m) {
+      box.appendChild(emptyStateCard(String(m.what || "확인 필요") + ": " + String(m.reason || "확인 필요"), "설정과 파일을 확인하면 이 자리에 글이 나타난다."));
+    });
+    if (data.broken > 0) box.appendChild(inlineNote("깨진 줄 " + data.broken + "개 건너뜀", "attention"));
+    return missing.length > 0;
+  }
+
+  function renderTrendsUnread(data) {
+    var box = screenBox("trends-content", "안 읽은 글", "오늘 이전에 나온 글 중 아직 읽지 않은 글을 모두 보여 준다.", null);
+    if (trendsListPrelude(box, data)) return;
+    var rows = (data.past_unread || []).filter(function (it) { return it && it.read !== true; });
+    rows.sort(function (a, b) { return String(b.date || "") < String(a.date || "") ? -1 : String(b.date || "") > String(a.date || "") ? 1 : 0; });
+    if (!data.can_record_read) box.appendChild(el("p", { class: "tr-note", text: "읽음 기록 불가: 읽음 파일 설정(trends_reads)이 없다. 링크는 열리지만 이 목록에서 빠지지 않는다" }));
+    if (!data.can_bookmark) box.appendChild(el("p", { class: "tr-note", text: "북마크 불가: 북마크 파일 설정(trends_marks)이 없다" }));
+    if (rows.length === 0) {
+      box.appendChild(emptyStateCard("안 읽은 글 없음", "지난 날 글을 모두 읽었다."));
+      return;
+    }
+    var list = el("ul", { class: "tr-list unread", "aria-label": "안 읽은 글 " + rows.length + "건" });
+    list.appendChild(el("li", { class: "tr-head", "aria-hidden": "true" }, [
+      el("span", { text: "나온 날" }), el("span", { text: "글" }), el("span", { text: "" }), el("span", { class: "tr-bm", text: "북마크" })
+    ]));
+    rows.forEach(function (it) { list.appendChild(buildTrendRow(it, data, false)); });
+    box.appendChild(list);
+    box.appendChild(el("p", { class: "tr-note", text: "전체 " + rows.length + "건" }));
+  }
+
+  var TRENDS_FILTERS = [["all", "전체"], ["unread", "안 읽음"], ["read", "읽음"]];
+
   function renderTrendsBookmarks(data) {
-    var box = screenBox("trends-content", "북마크", "두고두고 볼 글을 모아 본다.", null);
-    box.appendChild(emptyStateCard("준비 중", ""));
+    var box = screenBox("trends-content", "북마크", "나중에 다시 보거나 두고두고 볼 글을 쌓아 둔다. 읽은 글도 안 읽은 글도 담긴다.", null);
+    if (trendsListPrelude(box, data)) return;
+    var all = (data.bookmarks || []).filter(function (it) { return it && it.bookmarked !== false; });
+    all.sort(function (a, b) { return String(b.date || "") < String(a.date || "") ? -1 : String(b.date || "") > String(a.date || "") ? 1 : 0; });
+    if (!data.can_bookmark) box.appendChild(el("p", { class: "tr-note", text: "북마크 불가: 북마크 파일 설정(trends_marks)이 없다. 버튼은 눌리지 않는다" }));
+    if (!data.can_record_read) box.appendChild(el("p", { class: "tr-note", text: "읽음 기록 불가: 읽음 파일 설정(trends_reads)이 없다" }));
+    if (all.length === 0) {
+      box.appendChild(emptyStateCard("북마크한 글 없음", "글 카드나 목록의 북마크 버튼을 누르면 여기에 쌓인다. 읽은 글도 안 읽은 글도 담을 수 있다."));
+      return;
+    }
+    var nUnread = all.filter(function (it) { return it.read !== true; }).length;
+    var counts = { all: all.length, unread: nUnread, read: all.length - nUnread };
+    var chips = el("div", { class: "tr-chips", role: "group", "aria-label": "읽음 여부 필터" });
+    TRENDS_FILTERS.forEach(function (f) {
+      var b = el("button", { class: "tr-chip", type: "button", "aria-pressed": trendsUi.bmFilter === f[0] ? "true" : "false", text: f[1] + " " + counts[f[0]] });
+      b.addEventListener("click", function () { trendsUi.bmFilter = f[0]; trendsRerender(); });
+      chips.appendChild(b);
+    });
+    box.appendChild(chips);
+    var rows = all.filter(function (it) {
+      return trendsUi.bmFilter === "all" || (trendsUi.bmFilter === "read") === (it.read === true);
+    });
+    if (rows.length === 0) {
+      var label = trendsUi.bmFilter === "unread" ? "안 읽은 북마크 없음" : "읽은 북마크 없음";
+      var hint = trendsUi.bmFilter === "unread" ? "북마크한 글을 모두 읽었다. 전체나 읽음으로 바꿔 본다." : "북마크한 글을 아직 읽지 않았다. 전체나 안 읽음으로 바꿔 본다.";
+      box.appendChild(emptyStateCard(label, hint));
+      return;
+    }
+    var list = el("ul", { class: "tr-list marks", "aria-label": "북마크 " + rows.length + "건" });
+    list.appendChild(el("li", { class: "tr-head", "aria-hidden": "true" }, [
+      el("span", { text: "나온 날" }), el("span", { text: "글" }), el("span", { text: "읽음 여부" }), el("span", { text: "" }), el("span", { class: "tr-bm", text: "북마크" })
+    ]));
+    rows.forEach(function (it) { list.appendChild(buildTrendRow(it, data, true)); });
+    box.appendChild(list);
   }
 
   function renderTrends(data) {
