@@ -77,6 +77,30 @@
       "started_at": "2026-11-12T06:04:13+0900",
       "summary": "page/index.html에 fetchNavCounts(15초, 탭 폴링과 별개, 실패 시 마지막 값 유지·숫자 아니면 무시, textContent, 0이면 숨김, 접힘은 data-has-badge 점) + tests/test_desk_redesign_integration.py 1개(/ · /nav-counts · 폰트 200 · 임의 이름 404), 테스트 289개 통과. 미확인: 브라우저 렌더 — 순서: 서버 띄워 메뉴 펼침/접힘 → 판정·복습 배지(숫자/점, 0이면 숨김) → 6화면 순회",
       "completed_at": "2026-11-12T06:06:22+0900"
+    },
+    {
+      "step": 9,
+      "name": "score-parse-grade-color",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 10,
+      "name": "health-send-grade-color",
+      "status": "pending",
+      "tdd": true
+    }
+  ],
+  "reviews": [
+    {
+      "at": "2026-11-12T13:32:07+09:00",
+      "head": "a1998f2",
+      "issues": [
+        "브라우저 렌더 미확인(확장 미연결)",
+        "주간 롤업 KPI 5칸·증감 숨김 등 step 파일과 다른 점",
+        "ADR-014~016 번호 임시",
+        "화면 제목 '지휘 책상'이 index.html title에 남음"
+      ]
     }
   ]
 }
