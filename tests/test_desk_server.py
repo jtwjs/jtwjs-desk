@@ -330,6 +330,24 @@ class 통합_POST_pick(_ServerTestCase):
         self.assertEqual(status, 400)
         self.assertIn("choice", body.get("violations", []))
 
+    def test_repo나_id_형식이_틀리면_400이고_파일을_쓰지_않는다(self):
+        self._write_ask("repo-a", "ask-1")
+        bad = [
+            {"repo": "..", "id": "ask-1"},
+            {"repo": "a/b", "id": "ask-1"},
+            {"repo": "repo-a", "id": "../ask-1"},
+            {"repo": "repo-a", "id": "a/b"},
+            {"repo": 1, "id": "ask-1"},
+            {"repo": "repo-a", "id": ["ask-1"]},
+        ]
+        for extra in bad:
+            with self.subTest(extra=extra):
+                status, _ = self._post(
+                    "/pick", {**extra, "choice": "a"}, self._pick_headers()
+                )
+                self.assertEqual(status, 400)
+        self.assertFalse((self._inbox("repo-a") / "ask-1.pick.json").exists())
+
     def test_바디가_올바른_JSON이_아니면_400이다(self):
         self._write_ask("repo-a", "ask-1")
         req = urllib.request.Request(
