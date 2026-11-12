@@ -18,8 +18,11 @@
     {
       "step": 2,
       "name": "trends-config",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T00:41:55+0900",
+      "summary": "desk/config.py load_config()에 trends_items·trends_reads·trends_marks 키 추가(Path|None, 빈 문자열 None, 타입 오류는 None+'<키> 타입 오류', conductor 폴백 None); tests/test_desk_config_trends.py",
+      "completed_at": "2026-11-13T00:45:17+0900"
     },
     {
       "step": 3,
