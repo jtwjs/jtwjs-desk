@@ -168,6 +168,25 @@ class 통합_GET_repo_health(_WeeklyCase):
         self.assertEqual(row["scored_on"], date.fromtimestamp(ts).isoformat())
         self.assertEqual(row["age_days"], (TODAY - date.fromtimestamp(ts)).days)
 
+    def _health_row(self, payload):
+        r = self._repo("color-repo")
+        self._score(r / "ai-readiness-score.json", payload)
+        self._write_cfg([r])
+        _, body = self._get("/repo-health")
+        return body["repos"][0]
+
+    def test_grade_color가_있으면_행에_같은_값으로_실린다(self):
+        row = self._health_row({"total": 70, "grade": "C", "grade_color": "amber"})
+        self.assertEqual(row["grade_color"], "amber")
+
+    def test_grade_color가_없으면_행에_키가_없다(self):
+        row = self._health_row({"total": 70, "grade": "C"})
+        self.assertNotIn("grade_color", row)
+
+    def test_모르는_색이면_행에_키가_없다(self):
+        row = self._health_row({"total": 70, "grade": "C", "grade_color": "purple"})
+        self.assertNotIn("grade_color", row)
+
     def test_Host가_다르면_403이다(self):
         status, _ = self._get_raw_host("/repo-health", "evil.example:80")
         self.assertEqual(status, 403)
