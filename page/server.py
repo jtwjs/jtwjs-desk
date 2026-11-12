@@ -403,9 +403,12 @@ def build_repo_health(cfg: dict) -> dict:
         if score is None:
             rows.append({"repo": repo, "missing": "형식 확인 필요"})
             continue
-        rows.append({"repo": repo, "total": score["total"], "grade": score["grade"],
-                     "scored_on": scored_on.isoformat(),
-                     "age_days": ledger.age_days(scored_on, today)})
+        row = {"repo": repo, "total": score["total"], "grade": score["grade"],
+               "scored_on": scored_on.isoformat(),
+               "age_days": ledger.age_days(scored_on, today)}
+        if "grade_color" in score:
+            row["grade_color"] = score["grade_color"]
+        rows.append(row)
     return {"config": config_block(cfg), "repos": rows}
 
 
