@@ -1,0 +1,1723 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지휘 책상</title>
+<style>
+  @font-face {
+    font-family: "Pretendard";
+    src: url("/fonts/PretendardVariable.woff2") format("woff2");
+    font-weight: 45 920;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root {
+    --surface-content: #202432;
+    --surface-panel: #232837;
+    --surface-raised: #2A303F;
+    --text-strong: #FFFFFF;
+    --text-body: #B9BFCF;
+    --text-muted: #959DB6;
+    --accent: #7C87F7;
+    --attention: #FBBF24;
+    --success: #34D399;
+    --danger: #F87171;
+    --neutral: #94A3B8;
+    --brand-fill: #5B63D3;
+    --on-brand: #FFFFFF;
+    --attention-tint: color-mix(in srgb, var(--attention) 10%, transparent);
+    --success-tint: color-mix(in srgb, var(--success) 10%, transparent);
+    --danger-tint: color-mix(in srgb, var(--danger) 10%, transparent);
+    --neutral-tint: color-mix(in srgb, var(--neutral) 10%, transparent);
+    --hover-face: color-mix(in srgb, var(--surface-raised) 50%, transparent);
+    --font-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --radius-control: 6px;
+    --radius-card: 8px;
+    --menu-w: 264px;
+    --menu-w-collapsed: 64px;
+    --motion: 150ms;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+    background: var(--surface-content);
+    color: var(--text-body);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---- 앱 셸: 좌측 메뉴 ---- */
+  #menu {
+    width: var(--menu-w);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--surface-panel);
+    border-right: 1px solid var(--surface-raised);
+    z-index: 5;
+  }
+  #menu.collapsed { width: var(--menu-w-collapsed); align-items: center; }
+  .menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    width: 100%;
+  }
+  #menu.collapsed .menu-head { justify-content: center; padding: 0; }
+  .menu-title { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  #menu.collapsed .menu-title { display: none; }
+  .menu-toggle {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .menu-toggle:hover { border-color: var(--text-muted); }
+  .menu-toggle svg { transition: transform var(--motion); }
+  #menu.collapsed .menu-toggle svg { transform: rotate(180deg); }
+  .menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+  }
+  .menu-item {
+    position: relative;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 36px;
+    padding: 0 8px;
+    border: none;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--text-body);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--motion), color var(--motion);
+  }
+  .menu-item .icon { flex-shrink: 0; color: var(--text-muted); }
+  .menu-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu-item:hover { background: var(--hover-face); color: var(--text-strong); }
+  .menu-item:hover .icon { color: var(--text-strong); }
+  .menu-item[aria-current="page"] {
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    font-weight: 500;
+  }
+  .menu-item[aria-current="page"] .icon,
+  .menu-item.parent-active .icon { color: var(--text-strong); }
+  .menu-item.parent-active { color: var(--text-strong); }
+  .menu-item .chev { flex-shrink: 0; color: var(--text-muted); transition: transform var(--motion); }
+  .menu-item[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .badge-count {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--attention);
+  }
+  .badge-count:empty { display: none; }
+  .menu-item { position: relative; }
+  #menu.collapsed .menu-item[data-has-badge="1"]::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--attention);
+  }
+  .sub-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-left: 16px;
+    padding-left: 8px;
+    border-left: 1px solid var(--surface-raised);
+  }
+  .sub-list[hidden] { display: none; }
+  .menu-item.sub { height: 32px; font-size: 13px; }
+  #menu.collapsed .menu-item { width: 36px; justify-content: center; padding: 0; }
+  #menu.collapsed .menu-item .label,
+  #menu.collapsed .menu-item .chev,
+  #menu.collapsed .badge-count,
+  #menu.collapsed .sub-list { display: none; }
+  .tip {
+    display: none;
+    position: absolute;
+    left: 48px;
+    top: 4px;
+    padding: 4px 8px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  #menu.collapsed .menu-item:hover .tip,
+  #menu.collapsed .menu-item:focus-visible .tip { display: block; }
+
+  main {
+    flex: 1;
+    min-width: 0;
+    max-width: 1040px;
+    padding: 32px 40px;
+  }
+  .tab-panel[hidden] { display: none; }
+  .empty-msg {
+    color: var(--text-muted);
+    padding: 24px 8px;
+    text-align: center;
+  }
+  .card {
+    background: var(--surface-content);
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .card.locked { background: var(--surface-panel); }
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .card-meta .repo-chip {
+    background: var(--surface-panel);
+    border: 1px solid var(--surface-raised);
+    color: var(--text-strong);
+    border-radius: var(--radius-control);
+    padding: 1px 8px;
+    font-weight: 500;
+    font-family: var(--font-mono);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: var(--radius-control);
+    font-weight: 600;
+  }
+  .badge.premise { background: var(--attention-tint); color: var(--attention); }
+  .badge.applied { background: var(--success-tint); color: var(--success); }
+  .card h3 {
+    margin: 4px 0 2px;
+    font-size: 16px;
+    color: var(--text-strong);
+  }
+  .card .why {
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  .card .see {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin: 0 0 10px;
+  }
+
+  #banner {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-panel);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-card);
+    padding: 10px 16px;
+    font-size: 13px;
+    max-width: 90vw;
+  }
+  #banner[hidden] { display: none; }
+
+  /* ---- 공통 컴포넌트 (DESIGN.md §5) ---- */
+  .status-dot-label {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-strong);
+  }
+  .status-dot-label .dot {
+    width: 8px;
+    height: 8px;
+    margin-top: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--neutral);
+  }
+  .status-dot-label.accent .dot { background: var(--accent); }
+  .status-dot-label.attention { color: var(--attention); }
+  .status-dot-label.attention .dot { background: var(--attention); }
+  .status-dot-label.success { color: var(--success); }
+  .status-dot-label.success .dot { background: var(--success); }
+  .status-dot-label.danger { color: var(--danger); }
+  .status-dot-label.danger .dot { background: var(--danger); }
+  .status-dot-label.neutral { color: var(--neutral); }
+  .status-dot-label.neutral .dot { background: var(--neutral); }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    font: inherit;
+    font-size: 13px;
+    color: var(--text-body);
+    cursor: pointer;
+  }
+  .chip .chip-label { color: var(--text-muted); }
+  .chip .chip-sep { width: 1px; height: 14px; background: var(--surface-raised); }
+  .chip .chip-value { color: var(--text-strong); }
+  .chip:hover { border-color: var(--text-muted); }
+
+  .data-table {
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .data-table .dt-head,
+  .data-table .dt-row {
+    display: grid;
+    grid-template-columns: var(--dt-cols, repeat(4, minmax(0, 1fr)));
+    gap: 16px;
+    padding: 8px 16px;
+  }
+  .data-table .dt-head {
+    background: var(--surface-panel);
+    border-bottom: 1px solid var(--surface-raised);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .data-table .dt-head > * {
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .data-table .dt-row {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--surface-raised);
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-body);
+  }
+  .data-table .dt-row:last-child { border-bottom: none; }
+  .data-table .dt-row:hover { background: var(--hover-face); }
+  .data-table .dt-row .mono { font-family: var(--font-mono); font-size: 12px; }
+  .data-table .dt-row .muted { color: var(--text-muted); }
+  .data-table .dt-row .cell { min-width: 0; overflow-wrap: anywhere; }
+  .data-table .dt-head [data-tooltip]:hover::after,
+  .data-table .dt-head [data-tooltip]:focus-visible::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-top: 4px;
+    padding: 4px 8px;
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .tooltip {
+    padding: 4px 8px;
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .kpi-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
+  }
+  .kpi-tile .kpi-label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .kpi-tile .kpi-value { font-size: 20px; font-weight: 600; color: var(--text-strong); }
+  .kpi-tile .kpi-delta { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .kpi-tile .kpi-delta.danger { color: var(--danger); }
+  .kpi-tile .kpi-delta.success { color: var(--success); }
+
+  .decision-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
+  }
+  .decision-card .dc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .decision-card .dc-title { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .decision-card .dc-meta { font-family: var(--font-mono); font-size: 12px; color: var(--text-body); }
+  .decision-card .dc-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    font-size: 13px;
+    color: var(--text-body);
+  }
+  .decision-card .dc-opt.rec { color: var(--text-muted); }
+  .decision-card .dc-opt.picked {
+    background: var(--surface-raised);
+    border-color: var(--accent);
+    color: var(--text-strong);
+  }
+  .decision-card .dc-lock { font-size: 13px; color: var(--text-muted); }
+  .decision-card .dc-error { font-size: 13px; color: var(--danger); }
+
+  .empty-state-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 16px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-card);
+    text-align: center;
+  }
+  .empty-state-card .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--neutral); }
+  .empty-state-card .esc-title { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .empty-state-card .esc-next { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+
+  .inline-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-control);
+    font-size: 13px;
+    line-height: 1.4;
+    background: var(--neutral-tint);
+    color: var(--neutral);
+  }
+  .inline-note .dot { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; flex-shrink: 0; background: currentColor; }
+  .inline-note.attention { background: var(--attention-tint); color: var(--attention); }
+  .inline-note.danger { background: var(--danger-tint); color: var(--danger); }
+
+  .wait-line { padding: 16px 0; text-align: center; font-size: 13px; color: var(--text-body); }
+
+  .btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--text-muted); }
+  .btn:disabled { color: var(--text-muted); cursor: default; }
+  .btn.accent { background: var(--brand-fill); color: var(--on-brand); }
+  .btn.accent:hover:not(:disabled) { border-color: var(--accent); }
+  .btn.sm { height: 28px; padding: 0 12px; font-size: 13px; }
+  .btn.confirm-pending { border-color: var(--attention); }
+
+  .screen { display: flex; flex-direction: column; gap: 20px; }
+  .page-head { display: flex; flex-direction: column; gap: 8px; }
+  .page-head h1 { margin: 0; font-size: 20px; font-weight: 600; color: var(--text-strong); }
+  .page-head p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-muted); }
+  .chip-row { display: flex; gap: 8px; }
+  .section-title { margin: 8px 0 -8px; font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .muted-line { margin: 0; font-size: 13px; color: var(--text-muted); }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+  .note-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--surface-raised); border-radius: var(--radius-card); }
+  .note-card-title { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .note-card-body { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); white-space: pre-wrap; }
+  .share-text { white-space: pre-wrap; margin-top: 4px; color: var(--text-muted); }
+  .row-error { margin: 4px 0 0; font-size: 13px; color: var(--danger); }
+  .count-hl { font-weight: 500; color: var(--attention); }
+  .score { font-weight: 600; color: var(--text-strong); }
+  .grade-badge { display: inline-flex; align-items: flex-start; gap: 8px; padding: 2px 8px; border-radius: var(--radius-control); font-size: 13px; font-weight: 500; }
+  .grade-badge .dot { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; flex-shrink: 0; background: currentColor; }
+  .grade-badge.success { color: var(--success); background: var(--success-tint); }
+  .grade-badge.attention { color: var(--attention); background: var(--attention-tint); }
+  .grade-badge.danger { color: var(--danger); background: var(--danger-tint); }
+  .grade-badge.neutral { color: var(--neutral); background: color-mix(in srgb, var(--neutral) 10%, transparent); }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: start; }
+  .decision-card .dc-why { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); }
+  .decision-card .dc-ai {
+    padding: 8px 12px;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-body);
+  }
+  .decision-card .dc-ai-title { color: var(--text-muted); }
+  .decision-card .dc-options { display: flex; flex-direction: column; gap: 8px; }
+  .decision-card button.dc-opt {
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    border-color: var(--surface-raised);
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+  }
+  .decision-card button.dc-opt:hover { border-color: var(--text-muted); }
+  .decision-card button.dc-opt.picked { border-color: var(--accent); background: var(--surface-raised); }
+  .decision-card .dc-radio {
+    width: 14px;
+    height: 14px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    border: 2px solid var(--text-muted);
+    border-radius: 50%;
+  }
+  .decision-card .dc-opt.picked .dc-radio { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--surface-raised), inset 0 0 0 7px var(--accent); }
+  .decision-card .dc-rec { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .decision-card textarea,
+  .decision-card .dc-note-row input,
+  .decision-card .dc-note-row select {
+    box-sizing: border-box;
+    border: 1px solid var(--surface-raised);
+    border-radius: var(--radius-control);
+    background: var(--surface-raised);
+    color: var(--text-strong);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .decision-card textarea { width: 100%; min-height: 64px; resize: vertical; }
+  .decision-card textarea[hidden] { display: none; }
+  .decision-card .dc-note-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .decision-card .dc-note-row input { flex: 1; min-width: 140px; }
+  .decision-card .dc-error[hidden] { display: none; }
+  .decision-card .dc-actions { display: flex; align-items: center; gap: 12px; }
+  .decision-card .dc-hint { font-size: 12px; color: var(--text-muted); }
+  .decision-card.locked .dc-opt { cursor: default; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<nav id="menu" aria-label="메인 메뉴">
+  <div class="menu-head">
+    <span class="menu-title">desk</span>
+    <button type="button" id="menu-toggle" class="menu-toggle" aria-label="메뉴 접기" aria-expanded="true"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  </div>
+  <div class="menu-list">
+    <button type="button" class="menu-item" data-tab="track" aria-label="트랙" aria-current="page"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg><span class="label">트랙</span><span class="tip" role="tooltip">트랙</span></button>
+    <button type="button" class="menu-item" data-tab="judge" aria-label="판정"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span class="label">판정</span><span class="badge-count" data-badge="judge"></span><span class="tip" role="tooltip">판정</span></button>
+    <button type="button" class="menu-item" data-tab="review" aria-label="복습함"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="label">복습함</span><span class="badge-count" data-badge="review"></span><span class="tip" role="tooltip">복습함</span></button>
+    <div class="menu-group">
+      <button type="button" class="menu-item" id="comp-parent" aria-label="3역량" aria-expanded="false" aria-controls="sub-comp"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><span class="label">3역량</span><svg class="chev" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg><span class="tip" role="tooltip">3역량</span></button>
+      <div class="sub-list" id="sub-comp" hidden>
+        <button type="button" class="menu-item sub" data-tab="comp" data-sub="workflow"><span class="label">AI워크플로우</span></button>
+        <button type="button" class="menu-item sub" data-tab="comp" data-sub="proactive"><span class="label">적극성</span></button>
+        <button type="button" class="menu-item sub" data-tab="comp" data-sub="fullstack"><span class="label">풀스택</span></button>
+      </div>
+    </div>
+    <button type="button" class="menu-item" data-tab="weekly" aria-label="주간 롤업"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="label">주간 롤업</span><span class="tip" role="tooltip">주간 롤업</span></button>
+    <button type="button" class="menu-item" data-tab="health" aria-label="레포 건강도"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="label">레포 건강도</span><span class="tip" role="tooltip">레포 건강도</span></button>
+  </div>
+</nav>
+<main>
+  <section id="tab-track" class="tab-panel">
+    <div id="track-content"></div>
+  </section>
+  <section id="tab-judge" class="tab-panel" hidden>
+    <div id="judge-content"></div>
+  </section>
+  <section id="tab-review" class="tab-panel" hidden>
+    <div id="review-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-comp" class="tab-panel" hidden>
+    <div id="comp-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-weekly" class="tab-panel" hidden>
+    <div id="weekly-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-health" class="tab-panel" hidden>
+    <div id="health-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+</main>
+<div id="banner" hidden></div>
+<script>
+const DESK_TOKEN = "__DESK_TOKEN__";
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var POLL_MS = 15000;
+
+  var NOTE_KIND_LABEL = {
+    reason: "이유",
+    scope: "범위 바뀜",
+    new: "새 일"
+  };
+
+  // ---- 탭 전환(클라이언트 쪽에서만, 새 요청 없음) ----
+
+  var menuEl = document.getElementById("menu");
+  var menuToggle = document.getElementById("menu-toggle");
+  var compParent = document.getElementById("comp-parent");
+  var subComp = document.getElementById("sub-comp");
+  var tabItems = document.querySelectorAll(".menu-item[data-tab]");
+  var panels = {
+    track: document.getElementById("tab-track"),
+    judge: document.getElementById("tab-judge"),
+    review: document.getElementById("tab-review"),
+    comp: document.getElementById("tab-comp"),
+    weekly: document.getElementById("tab-weekly"),
+    health: document.getElementById("tab-health")
+  };
+  var activeTab = "track";
+  var activeSub = "workflow";
+
+  // 접힘 · 그룹 펼침 상태는 세션 중 메모리만 쓴다(localStorage 없음).
+  function setCompOpen(open) {
+    subComp.hidden = !open;
+    compParent.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function setCollapsed(collapsed) {
+    menuEl.classList.toggle("collapsed", collapsed);
+    menuToggle.setAttribute("aria-label", collapsed ? "메뉴 펼치기" : "메뉴 접기");
+    menuToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  }
+
+  // 선택 면은 항목 하나뿐이다. 3역량은 하위 항목이 선택 면을 갖고 부모는 글자만 올린다.
+  function syncMenu() {
+    tabItems.forEach(function (b) {
+      var on = b.getAttribute("data-tab") === activeTab &&
+        (activeTab !== "comp" || b.getAttribute("data-sub") === activeSub);
+      if (on) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+    compParent.classList.toggle("parent-active", activeTab === "comp");
+  }
+
+  function selectTab(target, sub) {
+    activeTab = target;
+    if (sub) activeSub = sub;
+    Object.keys(panels).forEach(function (key) {
+      panels[key].hidden = key !== target;
+    });
+    if (target === "comp") setCompOpen(true);
+    syncMenu();
+    loadVisibleExtra();
+  }
+
+  tabItems.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      selectTab(btn.getAttribute("data-tab"), btn.getAttribute("data-sub"));
+    });
+  });
+
+  menuToggle.addEventListener("click", function () {
+    setCollapsed(!menuEl.classList.contains("collapsed"));
+  });
+
+  compParent.addEventListener("click", function () {
+    if (menuEl.classList.contains("collapsed")) {
+      setCollapsed(false);
+      setCompOpen(true);
+      return;
+    }
+    setCompOpen(subComp.hidden);
+  });
+
+  // ---- 배너(에러 안내) ----
+
+  var bannerEl = document.getElementById("banner");
+  var bannerTimer = null;
+
+  function showBanner(text, ms) {
+    bannerEl.textContent = text;
+    bannerEl.hidden = false;
+    if (bannerTimer) clearTimeout(bannerTimer);
+    if (ms !== 0) {
+      bannerTimer = setTimeout(function () {
+        bannerEl.hidden = true;
+      }, ms || 6000);
+    }
+  }
+
+  // ---- 공용 ----
+
+  function minutesAgoText(lastAt) {
+    if (typeof lastAt !== "number") return "";
+    var secs = Date.now() / 1000 - lastAt;
+    if (secs < 0) secs = 0;
+    var mins = Math.floor(secs / 60);
+    if (mins < 1) return "방금 전";
+    return mins + "분 전";
+  }
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        if (k === "class") node.className = attrs[k];
+        else if (k === "text") node.textContent = attrs[k];
+        else node.setAttribute(k, attrs[k]);
+      });
+    }
+    (children || []).forEach(function (c) {
+      if (c) node.appendChild(c);
+    });
+    return node;
+  }
+
+  // ---- 화면 머리(제목 + 한 줄 설명) ----
+
+  function pageHead(title, desc) {
+    return el("div", { class: "page-head" }, [
+      el("h1", { text: title }),
+      el("p", { text: desc })
+    ]);
+  }
+
+  // ---- 트랙 탭 ----
+  // 서버(desk.sort.sort_sessions)가 이미 정렬한 순서를 그대로 쓴다(재정렬하지 않음).
+  // 표 구조: 상태(점 + 라벨) · 레포 · 브랜치 · 마지막 신호.
+
+  var trackState = { sessions: null, error: false, repo: null };
+
+  function renderTrack() {
+    var container = document.getElementById("track-content");
+    clear(container);
+    container.className = "screen";
+    container.appendChild(pageHead("트랙", "지금 도는 세션과 사람이 움직일 차례를 한눈에 본다."));
+
+    var sessions = trackState.sessions;
+    if (trackState.error) {
+      container.appendChild(inlineNote("불러오지 못했다: 마지막으로 받은 값을 보여 준다. 15초 뒤 다시 시도한다", "danger"));
+    }
+
+    var cols = [
+      { name: "상태", width: "170px" },
+      { name: "레포 · 브랜치", width: "minmax(0, 1fr)" },
+      { name: "마지막 신호", width: "110px" }
+    ];
+
+    if (sessions === null) {
+      container.appendChild(dataTable(cols, []));
+      container.appendChild(waitLine("불러오는 중…"));
+      return;
+    }
+    if (sessions.length === 0) {
+      container.appendChild(emptyStateCard("지금 도는 세션 없음", "세션이 시작되면 이 자리에 나타난다."));
+      return;
+    }
+
+    var repos = [];
+    sessions.forEach(function (s) {
+      var repo = s.repo || "(알수없음)";
+      if (repos.indexOf(repo) === -1) repos.push(repo);
+    });
+    if (trackState.repo !== null && repos.indexOf(trackState.repo) === -1) trackState.repo = null;
+
+    var chipRow = el("div", { class: "chip-row" });
+    var repoChip = chip("레포", trackState.repo === null ? "전체" : trackState.repo);
+    repoChip.setAttribute("aria-label", "레포 필터: 누르면 다음 레포로 바뀐다");
+    repoChip.addEventListener("click", function () {
+      var order = [null].concat(repos);
+      var next = order[(order.indexOf(trackState.repo) + 1) % order.length];
+      trackState.repo = next;
+      renderTrack();
+    });
+    chipRow.appendChild(repoChip);
+    container.appendChild(chipRow);
+
+    var rows = [];
+    sessions.forEach(function (s) {
+      var repo = s.repo || "(알수없음)";
+      if (trackState.repo !== null && repo !== trackState.repo) return;
+      var effStatus = s.effectiveStatus || s.status || "";
+      rows.push([
+        statusDotLabel(effStatus),
+        el("div", { class: "mono" }, [
+          el("div", { text: repo }),
+          el("div", { text: s.branch || "" })
+        ]),
+        el("span", { class: "muted", text: minutesAgoText(s.lastAt) })
+      ]);
+    });
+    container.appendChild(dataTable(cols, rows));
+  }
+
+  function renderSessions(sessions) {
+    trackState.sessions = sessions || [];
+    trackState.error = false;
+    renderTrack();
+  }
+
+  function fetchSessions() {
+    fetch("/sessions")
+      .then(function (res) {
+        if (!res.ok) throw new Error("sessions " + res.status);
+        return res.json();
+      })
+      .then(renderSessions)
+      .catch(function () {
+        // 화면을 지우지 않고 안내 한 줄만 올린다. 다음 polling에서 다시 시도한다.
+        trackState.error = true;
+        renderTrack();
+      });
+  }
+
+  // ---- 판정 탭 ----
+  // 반영 전에는 다시 고를 수 있고, 반영된 카드는 선택지 · 버튼 없이 잠금 문장만 둔다.
+  // 15초 폴링이 화면을 다시 그려도 고른 것 · 쓰던 글이 사라지지 않게 카드별 초안을 메모리에 둔다.
+
+  var judgeState = { cards: null, error: false };
+  var drafts = {};
+
+  function draftKey(card) {
+    return card.repo + "\u0000" + card.id;
+  }
+
+  function getDraft(card) {
+    var key = draftKey(card);
+    if (!drafts[key]) {
+      var pick = card.pick || {};
+      drafts[key] = {
+        choice: pick.choice || null,
+        customText: pick.choice === "custom" ? (pick.customText || "") : "",
+        note: pick.note || "",
+        noteKind: pick.noteKind || "",
+        error: "",
+        saving: false
+      };
+    }
+    return drafts[key];
+  }
+
+  function buildAiDecided(card) {
+    var parts = (card.aiDecided || []).map(function (entry) { return entry.label; });
+    if (card.premiseOpen) parts.push("전제 열림");
+    if (parts.length === 0) return null;
+    return el("div", { class: "dc-ai" }, [
+      el("span", { class: "dc-ai-title", text: "AI가 이미 정한 것" }),
+      el("span", { text: " · " + parts.join(" · ") })
+    ]);
+  }
+
+  function pickedLabel(card) {
+    if (!card.pick) return "";
+    if (card.pick.choice === "custom") return "직접 쓰기 — " + (card.pick.customText || "");
+    var opt = (card.options || []).find(function (o) { return o.key === card.pick.choice; });
+    return opt ? opt.label : String(card.pick.choice);
+  }
+
+  function buildCard(card) {
+    var locked = !!card.applied;
+    var draft = getDraft(card);
+    var meta = card.repo + (card.area ? " · " + card.area : "");
+    var kids = [
+      el("div", { class: "dc-head" }, [
+        el("div", {}, [
+          el("div", { class: "dc-title", text: card.question || "" }),
+          el("div", { class: "dc-meta", text: meta })
+        ]),
+        statusDotLabel(locked ? "반영됨" : "승인 대기", locked ? "success" : "attention")
+      ])
+    ];
+    if (card.why) kids.push(el("p", { class: "dc-why", text: "이유: " + card.why }));
+    if (card.see && card.see.length > 0) {
+      kids.push(el("p", { class: "dc-why", text: "참고: " + card.see.join(", ") }));
+    }
+    var aiBox = buildAiDecided(card);
+    if (aiBox) kids.push(aiBox);
+
+    if (locked) {
+      if (card.pick) kids.push(el("div", { class: "dc-opt picked", text: pickedLabel(card) }));
+      kids.push(el("p", { class: "dc-lock", text: "반영된 판정은 바꿀 수 없다." }));
+      if (card.applied.issue) {
+        kids.push(el("p", { class: "dc-lock" }, [
+          el("a", { href: card.applied.issue, target: "_blank", rel: "noopener", text: card.applied.issue })
+        ]));
+      }
+      return el("div", { class: "decision-card locked" }, kids);
+    }
+
+    var errorEl = el("p", { class: "dc-error", text: draft.error });
+    errorEl.hidden = !draft.error;
+    var textarea = el("textarea", { placeholder: "직접 쓰기", "aria-label": "직접 쓰기" });
+    var noteInput = el("input", { type: "text", placeholder: "메모(선택)", "aria-label": "메모" });
+    var noteKindSelect = el("select", { "aria-label": "메모 종류" });
+    [["", "메모 종류"], ["reason", "이유"], ["scope", "범위 바뀜"], ["new", "새 일"]].forEach(function (pair) {
+      noteKindSelect.appendChild(el("option", { value: pair[0], text: pair[1] }));
+    });
+    textarea.value = draft.customText;
+    noteInput.value = draft.note;
+    noteKindSelect.value = draft.noteKind;
+    textarea.addEventListener("input", function () { draft.customText = textarea.value; });
+    noteInput.addEventListener("input", function () { draft.note = noteInput.value; });
+    noteKindSelect.addEventListener("change", function () { draft.noteKind = noteKindSelect.value; });
+
+    var submitBtn = button("반영", null, "accent");
+    var hint = el("span", { class: "dc-hint" });
+
+    function syncActions() {
+      submitBtn.disabled = !draft.choice || draft.saving;
+      submitBtn.textContent = draft.choice ? "반영" : "반영 (선택 필요)";
+      hint.textContent = draft.saving ? "저장 중…" : (draft.choice ? "반영 전에는 다시 고를 수 있다" : "선택지를 고르면 반영할 수 있다");
+      textarea.hidden = draft.choice !== "custom";
+    }
+
+    var optionsEl = el("div", { class: "dc-options", role: "radiogroup", "aria-label": "선택지" });
+    var optionBtns = [];
+    var choices = (card.options || []).map(function (o) {
+      return { key: o.key, label: o.label, rec: !!o.recommended };
+    });
+    choices.push({ key: "custom", label: "직접 쓰기", rec: false });
+    choices.forEach(function (c) {
+      var b = el("button", { class: "dc-opt", type: "button", role: "radio" }, [
+        el("span", { class: "dc-radio", "aria-hidden": "true" }),
+        el("span", { text: c.label }),
+        c.rec ? el("span", { class: "dc-rec", text: "추천" }) : null
+      ]);
+      b.addEventListener("click", function () {
+        draft.choice = c.key;
+        paintOptions();
+        syncActions();
+      });
+      optionBtns.push({ btn: b, key: c.key });
+      optionsEl.appendChild(b);
+    });
+    function paintOptions() {
+      optionBtns.forEach(function (o) {
+        var on = draft.choice === o.key;
+        o.btn.classList.toggle("picked", on);
+        o.btn.setAttribute("aria-checked", on ? "true" : "false");
+      });
+    }
+
+    submitBtn.addEventListener("click", function () {
+      if (!draft.choice) return;
+      if (draft.choice === "custom") {
+        var text = textarea.value.trim();
+        if (!text) {
+          draft.error = "직접 쓰기 칸이 비어 있습니다.";
+          errorEl.textContent = draft.error;
+          errorEl.hidden = false;
+          return;
+        }
+        submitPick(card, { choice: "custom", customText: text }, noteInput, noteKindSelect, errorEl, draft, syncActions);
+        return;
+      }
+      submitPick(card, { choice: draft.choice }, noteInput, noteKindSelect, errorEl, draft, syncActions);
+    });
+
+    kids.push(optionsEl);
+    kids.push(textarea);
+    kids.push(el("div", { class: "dc-note-row" }, [noteInput, noteKindSelect]));
+    kids.push(errorEl);
+    kids.push(el("div", { class: "dc-actions" }, [submitBtn, hint]));
+    paintOptions();
+    syncActions();
+    return el("div", { class: "decision-card" }, kids);
+  }
+
+  function submitPick(card, fields, noteInput, noteKindSelect, errorEl, draft, syncActions) {
+    var body = { repo: card.repo, id: card.id, choice: fields.choice };
+    if (fields.customText !== undefined) body.customText = fields.customText;
+
+    var noteVal = noteInput ? noteInput.value.trim() : "";
+    if (noteVal) {
+      body.note = noteVal;
+      body.noteKind = noteKindSelect ? noteKindSelect.value : "";
+    }
+
+    function fail(msg) {
+      // 저장 실패는 그 카드 안 한 줄로. 입력(선택 · 글)은 초안에 그대로 남는다.
+      draft.saving = false;
+      draft.error = msg;
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+      syncActions();
+    }
+
+    draft.saving = true;
+    draft.error = "";
+    errorEl.hidden = true;
+    syncActions();
+
+    fetch("/pick", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Desk-Token": DESK_TOKEN
+      },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        if (res.status === 200) {
+          delete drafts[draftKey(card)];
+          fetchJudgments();
+          return;
+        }
+        if (res.status === 409) {
+          delete drafts[draftKey(card)];
+          showBanner("이미 반영된 판정입니다 — 화면을 새로 불러옵니다.");
+          fetchJudgments();
+          return;
+        }
+        if (res.status === 403) {
+          draft.saving = false;
+          syncActions();
+          showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
+          return;
+        }
+        return res.json().then(function (data) {
+          var msg = (data && data.violations && data.violations.join(", ")) || "저장하지 못했습니다.";
+          fail("저장하지 못했다: " + msg + " 입력한 내용은 그대로 두었다.");
+        });
+      })
+      .catch(function () {
+        fail("저장하지 못했다: 서버에 연결되지 않았다. 입력한 내용은 그대로 두었다. 다시 반영을 눌러 재시도한다.");
+      });
+  }
+
+  function renderJudge() {
+    var container = document.getElementById("judge-content");
+    // 글을 쓰는 중이면 폴링이 입력칸을 지우지 않도록 다음 주기로 미룬다.
+    var active = document.activeElement;
+    if (active && container.contains(active) && (active.tagName === "TEXTAREA" || active.tagName === "INPUT" || active.tagName === "SELECT")) return;
+
+    clear(container);
+    container.className = "screen";
+    container.appendChild(pageHead("판정", "지휘가 올린 질문에 고르거나 직접 쓴다. 반영된 판정은 잠긴다."));
+
+    if (judgeState.error) {
+      container.appendChild(inlineNote("불러오지 못했다: 마지막으로 받은 값을 보여 준다. 15초 뒤 다시 시도한다", "danger"));
+    }
+    var cards = judgeState.cards;
+    if (cards === null) {
+      container.appendChild(waitLine("불러오는 중…"));
+      return;
+    }
+    if (cards.length === 0) {
+      container.appendChild(emptyStateCard("판정 대기 카드 없음", "새 카드가 올라오면 이 자리에 나타난다."));
+      return;
+    }
+    var grid = el("div", { class: "card-grid" });
+    cards.forEach(function (card) {
+      grid.appendChild(buildCard(card));
+    });
+    container.appendChild(grid);
+  }
+
+  function renderJudgments(cards) {
+    judgeState.cards = cards || [];
+    judgeState.error = false;
+    renderJudge();
+  }
+
+  function fetchJudgments() {
+    fetch("/judgments")
+      .then(function (res) {
+        if (!res.ok) throw new Error("judgments " + res.status);
+        return res.json();
+      })
+      .then(renderJudgments)
+      .catch(function () {
+        judgeState.error = true;
+        renderJudge();
+      });
+  }
+
+  // ---- 확장 탭(복습함 · 3역량 · 주간 롤업 · 레포 건강도) ----
+  // 서버가 준 문자열은 원장의 임의 텍스트다 — 전부 el()의 textContent로만 넣는다.
+  // 정렬 · 분류는 서버가 한 순서 그대로 그린다.
+
+  var AREA_LABEL = { fe: "FE", be: "BE", infra: "infra", domain: "도메인", "미분류": "미분류" };
+
+  function clear(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  // ---- 공통 컴포넌트 빌더 (DESIGN.md §5). 데이터는 textContent로만 ----
+  // 상태 이름 → 의미색(accent|attention|success|danger|neutral). 한 곳에서만 정한다.
+  var STATUS_TONE = {
+    "작업 중": "accent",
+    "승인 대기": "attention",
+    "입력 대기": "attention",
+    "막힘": "danger",
+    "완료": "success",
+    "정상": "success",
+    "신호 없음": "neutral",
+    "경로 없음": "neutral",
+    "파일 없음": "neutral",
+    "채점 없음": "neutral",
+    "형식 확인 필요": "attention"
+  };
+
+  function statusDotLabel(label, tone) {
+    var t = tone || STATUS_TONE[label] || "neutral";
+    return el("span", { class: "status-dot-label " + t }, [
+      el("span", { class: "dot", "aria-hidden": "true" }),
+      el("span", { text: label })
+    ]);
+  }
+
+  function chip(label, value) {
+    return el("button", { class: "chip", type: "button" }, [
+      el("span", { class: "chip-label", text: label }),
+      el("span", { class: "chip-sep", "aria-hidden": "true" }),
+      el("span", { class: "chip-value", text: value })
+    ]);
+  }
+
+  // cols: [{ name, width }] width는 grid 열 폭(예 "160px", "minmax(0, 1fr)").
+  // rows: 셀 배열의 배열. 셀은 문자열 또는 DOM 노드.
+  function dataTable(cols, rows) {
+    var table = el("div", { class: "data-table", role: "table" });
+    table.style.setProperty("--dt-cols", cols.map(function (c) { return c.width || "minmax(0, 1fr)"; }).join(" "));
+    var head = el("div", { class: "dt-head", role: "row" }, cols.map(function (c) {
+      return el("span", { role: "columnheader", tabindex: "0", "data-tooltip": c.name, text: c.name });
+    }));
+    table.appendChild(head);
+    (rows || []).forEach(function (cells) {
+      table.appendChild(el("div", { class: "dt-row", role: "row" }, cells.map(function (cell) {
+        var td = el("div", { class: "cell", role: "cell" });
+        if (cell && typeof cell === "object" && cell.nodeType) td.appendChild(cell);
+        else td.textContent = cell == null ? "" : String(cell);
+        return td;
+      })));
+    });
+    return table;
+  }
+
+  // delta가 없으면 자리째 숨긴다. deltaTone: danger | success | 없음(text-muted)
+  function kpiTile(label, value, delta, deltaTone) {
+    var kids = [
+      el("span", { class: "kpi-label", text: label }),
+      el("span", { class: "kpi-value", text: String(value) })
+    ];
+    if (delta) kids.push(el("span", { class: "kpi-delta" + (deltaTone ? " " + deltaTone : ""), text: delta }));
+    return el("div", { class: "kpi-tile" }, kids);
+  }
+
+  // 판정 카드 뼈대. opts: { title, meta, status, tone, options:[{text, rec, picked}], lockText, errorText }
+  // 반영 뒤(lockText)에는 선택지를 그리지 않고 잠금 문장만 둔다.
+  function decisionCard(opts) {
+    var kids = [
+      el("div", { class: "dc-head" }, [
+        el("div", {}, [
+          el("div", { class: "dc-title", text: opts.title || "" }),
+          opts.meta ? el("div", { class: "dc-meta", text: opts.meta }) : null
+        ]),
+        opts.status ? statusDotLabel(opts.status, opts.tone) : null
+      ])
+    ];
+    if (opts.lockText) {
+      kids.push(el("p", { class: "dc-lock", text: opts.lockText }));
+    } else {
+      (opts.options || []).forEach(function (o) {
+        var cls = "dc-opt" + (o.rec ? " rec" : "") + (o.picked ? " picked" : "");
+        kids.push(el("div", { class: cls, text: o.text }));
+      });
+    }
+    if (opts.errorText) kids.push(el("p", { class: "dc-error", text: opts.errorText }));
+    return el("div", { class: "decision-card" }, kids);
+  }
+
+  function emptyStateCard(reason, next) {
+    return el("div", { class: "empty-state-card" }, [
+      el("span", { class: "dot", "aria-hidden": "true" }),
+      el("span", { class: "esc-title", text: reason }),
+      next ? el("span", { class: "esc-next", text: next }) : null
+    ]);
+  }
+
+  // tone: neutral | attention | danger
+  function inlineNote(text, tone) {
+    return el("p", { class: "inline-note" + (tone && tone !== "neutral" ? " " + tone : "") }, [
+      el("span", { class: "dot", "aria-hidden": "true" }),
+      el("span", { text: text })
+    ]);
+  }
+
+  function waitLine(text) {
+    return el("p", { class: "wait-line", text: text || "불러오는 중" });
+  }
+
+  // variant: "accent"(강조) | 없음(기본). small: 표 행 안 작은 버튼
+  function button(text, onClick, variant, small) {
+    var cls = "btn" + (variant === "accent" ? " accent" : "") + (small ? " sm" : "");
+    var b = el("button", { class: cls, type: "button", text: text });
+    if (onClick) b.addEventListener("click", onClick);
+    return b;
+  }
+
+  // 확인 단계 있는 위험 동작: 첫 클릭은 라벨을 확인 문구로 바꾸고, 3초 안에 다시 눌러야 실행
+  function confirmButton(text, confirmText, onConfirm, small) {
+    var armed = false;
+    var timer = null;
+    var b = button(text, null, null, small);
+    b.addEventListener("click", function () {
+      if (!armed) {
+        armed = true;
+        b.textContent = confirmText;
+        b.classList.add("confirm-pending");
+        timer = setTimeout(reset, 3000);
+        return;
+      }
+      reset();
+      onConfirm();
+    });
+    function reset() {
+      armed = false;
+      if (timer) clearTimeout(timer);
+      b.textContent = text;
+      b.classList.remove("confirm-pending");
+    }
+    return b;
+  }
+
+  // 표 행 맨 앞 틴트 없는 상태 라벨 = statusDotLabel. 툴팁은 CSS([data-tooltip]) + 포커스 가능 헤더.
+
+  function postMark(path, body, done, onError) {
+    function fail(msg) {
+      if (onError) onError(msg);
+      else showBanner(msg);
+    }
+    fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Desk-Token": DESK_TOKEN },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        if (res.status === 200) { done(); return; }
+        if (res.status === 403) {
+          showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
+          if (onError) onError("토큰이 맞지 않아 저장하지 못했다");
+          return;
+        }
+        fail("저장하지 못했다");
+      })
+      .catch(function () {
+        fail("네트워크 오류로 저장하지 못했다");
+      });
+  }
+
+  // ---- 확장 화면 공통 ----
+
+  // config 안내(폴백 · 설정 없음 · 미등록 · 오류) = inline-note 배열
+  function cfgNotes(config) {
+    var notes = [];
+    if (!config) return notes;
+    if (config.source === "conductor") notes.push(inlineNote("폴백 사용 중", "neutral"));
+    if (config.source === "none") notes.push(inlineNote("설정 없음: 레포를 설정 파일에 등록하면 항목이 나타난다", "attention"));
+    if (config.unregistered && config.unregistered.length > 0) {
+      notes.push(inlineNote("미등록 레포 " + config.unregistered.length + "개: " + config.unregistered.join(", "), "attention"));
+    }
+    if (config.error) notes.push(inlineNote(String(config.error), "danger"));
+    return notes;
+  }
+
+  // missing 행은 숨기지 않는다: 상태(점 + 라벨) · 레포 · 대상
+  function missingTable(list) {
+    var rows = (list || []).map(function (m) {
+      return [
+        statusDotLabel(String(m.missing || "확인 필요")),
+        el("span", { class: "mono", text: m.repo || "" }),
+        el("span", { class: "muted", text: m.what || "" })
+      ];
+    });
+    if (rows.length === 0) return null;
+    return dataTable([
+      { name: "상태", width: "170px" },
+      { name: "레포", width: "180px" },
+      { name: "대상", width: "minmax(0, 1fr)" }
+    ], rows);
+  }
+
+  function screenBox(id, title, desc, config) {
+    var box = document.getElementById(id);
+    clear(box);
+    box.className = "screen";
+    box.appendChild(pageHead(title, desc));
+    cfgNotes(config).forEach(function (n) { box.appendChild(n); });
+    return box;
+  }
+
+  function sectionTitle(text) {
+    return el("h2", { class: "section-title", text: text });
+  }
+
+  // 레포 필터 칩: 누르면 다음 레포로 순환(트랙 화면과 같은 방식)
+  var extraRepo = { review: null, workflow: null, fullstack: null };
+  function repoFilterChip(key, repos, rerender) {
+    if (extraRepo[key] !== null && repos.indexOf(extraRepo[key]) === -1) extraRepo[key] = null;
+    var c = chip("레포", extraRepo[key] === null ? "전체" : extraRepo[key]);
+    c.setAttribute("aria-label", "레포 필터: 누르면 다음 레포로 바뀐다");
+    c.addEventListener("click", function () {
+      var order = [null].concat(repos);
+      extraRepo[key] = order[(order.indexOf(extraRepo[key]) + 1) % order.length];
+      rerender();
+    });
+    return el("div", { class: "chip-row" }, [c]);
+  }
+
+  function uniq(list) {
+    var out = [];
+    list.forEach(function (v) { if (v && out.indexOf(v) === -1) out.push(v); });
+    return out;
+  }
+
+  var lastExtra = { review: null, comp: null };
+  var reviewErrors = {};
+
+  function renderReview(data) {
+    lastExtra.review = data;
+    var box = screenBox("review-content", "복습함", "복습할 항목을 확인하고 반영한다.", data.config);
+    var items = data.items || [];
+    var missing = data.missing || [];
+    if (items.length === 0 && missing.length === 0) {
+      box.appendChild(emptyStateCard("복습할 항목 없음", "새 항목이 생기면 이 자리에 나타난다."));
+      return;
+    }
+    if (items.length > 0) {
+      box.appendChild(repoFilterChip("review", uniq(items.map(function (i) { return i.repo; })), function () { renderReview(data); }));
+      var rows = [];
+      items.forEach(function (it) {
+        if (extraRepo.review !== null && it.repo !== extraRepo.review) return;
+        var errKey = it.repo + "\u0000" + it.key;
+        var title = it.kind === "phase" ? "이해 증명 건너뜀 · " + it.title : it.title;
+        var info = [it.card_kind, it.where].filter(Boolean).join(" · ");
+        var cellKids = [el("div", { text: title })];
+        if (it.summary) cellKids.push(el("div", { class: "muted", text: it.summary }));
+        if (reviewErrors[errKey]) cellKids.push(el("p", { class: "row-error", text: reviewErrors[errKey] }));
+        var btn = button("복습함 반영", function () {
+          postMark("/review/done", { repo: it.repo, key: it.key }, function () {
+            delete reviewErrors[errKey];
+            fetchExtra("review");
+          }, function (msg) {
+            reviewErrors[errKey] = msg;
+            renderReview(data);
+          });
+        }, "accent", true);
+        rows.push([
+          it.status ? statusDotLabel(it.status) : el("span", { class: "muted", text: "" }),
+          el("div", {}, cellKids),
+          el("span", { class: "mono", text: it.repo || "" }),
+          el("span", { class: "muted", text: info }),
+          btn
+        ]);
+      });
+      box.appendChild(dataTable([
+        { name: "상태", width: "130px" },
+        { name: "항목", width: "minmax(0, 1fr)" },
+        { name: "레포", width: "150px" },
+        { name: "종류 · 위치", width: "170px" },
+        { name: "반영", width: "110px" }
+      ], rows));
+    }
+    var mt = missingTable(missing);
+    if (mt) {
+      box.appendChild(sectionTitle("확인하지 못한 레포"));
+      box.appendChild(mt);
+    }
+  }
+
+  var COMP_HEAD = {
+    workflow: ["AI워크플로우", "반복되는 패턴을 횟수순으로 본다. 3회 이상은 강조한다."],
+    proactive: ["적극성", "기준 메모, 소요시간, 임팩트 링크, 미반영 공유 파일을 본다."],
+    fullstack: ["풀스택", "영역별 학습 카드를 복습 순서로 본다."]
+  };
+
+  function renderWorkflow(box, data, rerender) {
+    var rows = data.rows || [];
+    var missing = data.missing || [];
+    if (rows.length === 0 && missing.length === 0) {
+      box.appendChild(emptyStateCard("열린 패턴 없음", "반복이 쌓이면 이 자리에 나타난다."));
+      return;
+    }
+    if (rows.length > 0) {
+      box.appendChild(repoFilterChip("workflow", uniq(rows.map(function (r) { return r.repo; })), rerender));
+      var trs = [];
+      rows.forEach(function (r) {
+        if (extraRepo.workflow !== null && r.repo !== extraRepo.workflow) return;
+        if (r.unparsed) {
+          trs.push([statusDotLabel("형식 확인 필요"), el("span", { class: "muted", text: "" }), "", "", ""]);
+          return;
+        }
+        var count = r.count === null || r.count === undefined ? "?" : String(r.count);
+        var countNode = el("span", { class: r.highlight ? "count-hl" : "", text: count });
+        trs.push([
+          el("div", {}, [
+            el("div", { text: r.pattern || "" }),
+            el("div", { class: "muted", text: [r.source, r.repo].filter(Boolean).join(" · ") })
+          ]),
+          el("span", { text: [r.kind, r.status].filter(Boolean).join(" · ") }),
+          countNode,
+          el("span", { class: "muted", text: r.last || "" })
+        ]);
+      });
+      // 형식 확인 필요 행은 4열에 맞춰 상태를 첫 칸에 둔다
+      trs = trs.map(function (cells) { return cells.length === 5 ? [cells[0], "", "", ""] : cells; });
+      box.appendChild(dataTable([
+        { name: "패턴", width: "minmax(0, 1fr)" },
+        { name: "종류", width: "160px" },
+        { name: "횟수", width: "70px" },
+        { name: "마지막", width: "110px" }
+      ], trs));
+    }
+    var mt = missingTable(missing);
+    if (mt) { box.appendChild(sectionTitle("확인하지 못한 레포")); box.appendChild(mt); }
+  }
+
+  function renderProactive(box, data) {
+    var crit = data.criteria || {};
+    var memo = crit.text !== null && crit.text !== undefined ? crit.text : (crit.note || "설정 없음");
+    box.appendChild(el("div", { class: "note-card" }, [
+      el("span", { class: "note-card-title", text: "기준 메모" }),
+      el("p", { class: "note-card-body", text: memo })
+    ]));
+
+    var speed = data.speed || {};
+    box.appendChild(sectionTitle("스피드"));
+    var durRows = (speed.durations || []).map(function (d) {
+      return [d.task, el("span", { class: "mono", text: d.repo }), d.minutes + "분"];
+    });
+    if (durRows.length > 0) {
+      box.appendChild(dataTable([
+        { name: "작업", width: "minmax(0, 1fr)" },
+        { name: "레포", width: "160px" },
+        { name: "소요시간", width: "110px" }
+      ], durRows));
+    }
+    if (speed.no_data) box.appendChild(inlineNote("시간 기록 없음 " + speed.no_data + "건", "neutral"));
+    if (speed.metric2) box.appendChild(el("p", { class: "muted-line", text: speed.metric2 }));
+    box.appendChild(el("div", { class: "chip-row" }, [
+      button("AI워크플로우 보기", function () { selectTab("comp", speed.workflow_link || "workflow"); }, null, true)
+    ]));
+
+    var impact = data.impact || {};
+    box.appendChild(sectionTitle("임팩트"));
+    var prdRows = (impact.prds || []).map(function (p) {
+      return [p.task, el("span", { class: "mono", text: p.repo }), el("span", { class: "mono", text: p.prd })];
+    });
+    if (prdRows.length > 0) {
+      box.appendChild(dataTable([
+        { name: "작업", width: "minmax(0, 1fr)" },
+        { name: "레포", width: "160px" },
+        { name: "PRD", width: "220px" }
+      ], prdRows));
+    }
+    if (Array.isArray(impact.evidence)) {
+      if (impact.evidence.length === 0) {
+        box.appendChild(inlineNote("최근 갱신분 없음", "neutral"));
+      } else {
+        box.appendChild(dataTable([
+          { name: "최근 갱신분", width: "minmax(0, 1fr)" },
+          { name: "레포", width: "160px" }
+        ], impact.evidence.map(function (e) {
+          return [el("span", { class: "mono", text: e.path }), el("span", { class: "mono", text: e.repo })];
+        })));
+      }
+    } else {
+      box.appendChild(inlineNote((impact.evidence && impact.evidence.note) || "경로 미설정", "attention"));
+    }
+
+    box.appendChild(sectionTitle("투명성"));
+    var tr = data.transparency || [];
+    if (tr.length === 0) {
+      box.appendChild(inlineNote("미반영 공유 파일 없음", "neutral"));
+    } else {
+      box.appendChild(dataTable([
+        { name: "공유 파일", width: "minmax(0, 1fr)" },
+        { name: "복사", width: "90px" },
+        { name: "공유함", width: "100px" }
+      ], tr.map(function (t) {
+        var copy = button("복사", function () {
+          if (!navigator.clipboard) { showBanner("이 브라우저에서는 복사할 수 없습니다."); return; }
+          navigator.clipboard.writeText(t.text).then(function () {
+            showBanner("복사했습니다.", 2000);
+          }, function () {
+            showBanner("복사하지 못했습니다.");
+          });
+        }, null, true);
+        var shared = button("공유함", function () {
+          postMark("/share/shared", { repo: t.repo, id: t.id }, function () {
+            fetchExtra("comp");
+          });
+        }, "accent", true);
+        return [
+          el("div", {}, [
+            el("div", { class: "mono", text: t.repo + " · " + t.id }),
+            el("div", { class: "share-text", text: t.text })
+          ]),
+          copy,
+          shared
+        ];
+      })));
+    }
+    var mt = missingTable(data.missing);
+    if (mt) { box.appendChild(sectionTitle("확인하지 못한 레포")); box.appendChild(mt); }
+  }
+
+  function renderFullstack(box, data, rerender) {
+    var groups = data.groups || {};
+    var missing = data.missing || [];
+    var allCards = [];
+    Object.keys(groups).forEach(function (a) { allCards = allCards.concat(groups[a] || []); });
+    if (allCards.length > 0) {
+      box.appendChild(repoFilterChip("fullstack", uniq(allCards.map(function (c) { return c.repo; })), rerender));
+    }
+    Object.keys(groups).forEach(function (area) {
+      box.appendChild(sectionTitle(AREA_LABEL[area] || area));
+      var cards = (groups[area] || []).filter(function (c) {
+        return extraRepo.fullstack === null || c.repo === extraRepo.fullstack;
+      });
+      if (cards.length === 0) {
+        box.appendChild(inlineNote("카드 없음", "neutral"));
+        return;
+      }
+      box.appendChild(dataTable([
+        { name: "카드", width: "minmax(0, 1fr)" },
+        { name: "레포 · 위치", width: "220px" },
+        { name: "상태", width: "150px" }
+      ], cards.map(function (c) {
+        var kids = [el("div", { text: c.title })];
+        if (c.summary) kids.push(el("div", { class: "muted", text: c.summary }));
+        return [
+          el("div", {}, kids),
+          el("span", { class: "mono", text: [c.repo, c.where].filter(Boolean).join(" · ") }),
+          c.status ? statusDotLabel(c.status) : ""
+        ];
+      })));
+    });
+    var mt = missingTable(missing);
+    if (mt) { box.appendChild(sectionTitle("확인하지 못한 레포")); box.appendChild(mt); }
+  }
+
+  function renderComp(sub, data) {
+    lastExtra.comp = { sub: sub, data: data };
+    var head = COMP_HEAD[sub] || COMP_HEAD.fullstack;
+    var box = screenBox("comp-content", head[0], head[1], data.config);
+    var rerender = function () { renderComp(sub, data); };
+    if (sub === "workflow") renderWorkflow(box, data, rerender);
+    else if (sub === "proactive") renderProactive(box, data);
+    else renderFullstack(box, data, rerender);
+  }
+
+  function renderWeekly(data) {
+    var box = screenBox("weekly-content", "주간 롤업", "지난 7일 합계와 레포별 진행을 본다.", data.config);
+    var w = data.week || {};
+    // 지난주 값을 주지 않으므로 증감은 없다 — kpiTile이 자리째 숨긴다
+    box.appendChild(el("div", { class: "kpi-row" }, [
+      kpiTile("세션", w.sessions),
+      kpiTile("프로젝트", w.projects),
+      kpiTile("커밋", w.commits),
+      kpiTile("학습카드", w.cards),
+      kpiTile("막힌 것", w.stuck)
+    ]));
+    box.appendChild(el("p", { class: "muted-line", text: "기록 있는 날 " + w.present + "/" + w.days }));
+    if ((w.missing || []).length > 0) {
+      box.appendChild(inlineNote("기록 없음: " + w.missing.join(", "), "attention"));
+    }
+    var repos = w.repos || [];
+    box.appendChild(sectionTitle("레포별"));
+    if (repos.length === 0) {
+      box.appendChild(emptyStateCard("레포별 진행 없음", "커밋이 쌓이면 이 자리에 나타난다."));
+      return;
+    }
+    box.appendChild(dataTable([
+      { name: "레포", width: "180px" },
+      { name: "커밋", width: "80px" },
+      { name: "내용", width: "minmax(0, 1fr)" }
+    ], repos.map(function (r) {
+      return [
+        el("span", { class: "mono", text: r.name }),
+        String(r.commits),
+        el("div", {}, (r.progress || []).map(function (p) { return el("div", { text: p }); }))
+      ];
+    })));
+  }
+
+  // 채점 도구가 주는 색 이름 → 의미색(DESIGN.md §2). 모르는 값은 neutral.
+  var GRADE_TONE = { green: "success", amber: "attention", red: "danger" };
+
+  function gradeBadge(grade, colorName) {
+    var tone = GRADE_TONE[String(colorName || "").toLowerCase()] || "neutral";
+    return el("span", { class: "grade-badge " + tone }, [
+      el("span", { class: "dot", "aria-hidden": "true" }),
+      el("span", { text: String(grade) })
+    ]);
+  }
+
+  function renderHealth(data) {
+    var box = screenBox("health-content", "레포 건강도", "레포별 AI 준비도 점수와 채점 경과일을 본다.", data.config);
+    var rows = data.repos || [];
+    if (rows.length === 0) {
+      box.appendChild(emptyStateCard("등록된 레포 없음", "레포를 설정 파일에 등록하면 점수가 나타난다."));
+      return;
+    }
+    var scored = rows.filter(function (r) { return !r.missing; });
+    var missing = rows.filter(function (r) { return r.missing; }).map(function (r) {
+      return { repo: r.repo, what: "", missing: r.missing };
+    });
+    if (scored.length > 0) {
+      box.appendChild(dataTable([
+        { name: "레포", width: "minmax(0, 1fr)" },
+        { name: "점수", width: "80px" },
+        { name: "등급", width: "170px" },
+        { name: "채점", width: "170px" }
+      ], scored.map(function (r) {
+        return [
+          el("span", { class: "mono", text: r.repo }),
+          el("span", { class: "score", text: String(r.total) }),
+          gradeBadge(r.grade, r.color || r.grade_color),
+          el("span", { class: "muted", text: r.age_days + "일 전 채점 (" + r.scored_on + ")" })
+        ];
+      })));
+    }
+    var mt = missingTable(missing);
+    if (mt) { box.appendChild(sectionTitle("채점하지 못한 레포")); box.appendChild(mt); }
+  }
+
+  function fetchExtra(tab) {
+    var url;
+    var render;
+    if (tab === "review") { url = "/review"; render = renderReview; }
+    else if (tab === "weekly") { url = "/weekly"; render = renderWeekly; }
+    else if (tab === "health") { url = "/repo-health"; render = renderHealth; }
+    else if (tab === "comp") {
+      var sub = activeSub;
+      url = "/competency/" + sub;
+      render = function (d) { renderComp(sub, d); };
+    } else return;
+    fetch(url)
+      .then(function (res) {
+        if (!res.ok) throw new Error(url + " " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        // 응답이 늦게 와도 지금 보는 탭 · 서브 탭 것만 그린다.
+        if (activeTab !== tab) return;
+        if (tab === "comp" && url !== "/competency/" + activeSub) return;
+        render(data);
+      })
+      .catch(function () {
+        // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+      });
+  }
+
+  // 보이는 확장 탭 하나만 부른다(ADR-010). 트랙 · 판정은 아래 기존 polling이 맡는다.
+  function loadVisibleExtra() {
+    if (activeTab === "track" || activeTab === "judge") return;
+    fetchExtra(activeTab);
+  }
+
+  // ---- 메뉴 배지 (ADR-014(임시)) — 메뉴는 항상 보이므로 탭 폴링과 별개로 부른다 ----
+
+  var navCounts = { judge: 0, review: 0 };
+
+  function renderNavBadges() {
+    ["judge", "review"].forEach(function (key) {
+      var badge = document.querySelector('[data-badge="' + key + '"]');
+      if (!badge) return;
+      var n = navCounts[key];
+      badge.textContent = n > 0 ? String(n) : "";
+      var item = badge.closest(".menu-item");
+      if (item) {
+        if (n > 0) item.setAttribute("data-has-badge", "1");
+        else item.removeAttribute("data-has-badge");
+      }
+    });
+  }
+
+  function fetchNavCounts() {
+    fetch("/nav-counts")
+      .then(function (res) {
+        if (res.status !== 200) throw new Error("nav-counts " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        ["judge", "review"].forEach(function (key) {
+          var v = data && data[key];
+          if (typeof v === "number" && isFinite(v) && v >= 0 && Math.floor(v) === v) {
+            navCounts[key] = v;
+          }
+        });
+        renderNavBadges();
+      })
+      .catch(function () { /* 배지는 부가 정보 — 마지막 값 유지, 에러 줄 없음 */ });
+  }
+
+  // ---- 시작 ----
+
+  renderTrack();
+  renderJudge();
+  fetchSessions();
+  fetchJudgments();
+  fetchNavCounts();
+  setInterval(fetchSessions, POLL_MS);
+  setInterval(fetchJudgments, POLL_MS);
+  setInterval(loadVisibleExtra, POLL_MS);
+  setInterval(fetchNavCounts, POLL_MS);
+})();
+</script>
+</body>
+</html>

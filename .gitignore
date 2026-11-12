@@ -17,3 +17,8 @@ _brain/internal/
 # ⚠️ 아래는 ignore 하지 않는다 — 이것들이 자산이다:
 #   .claude/harness.json  .claude/README.md  .claude/rules/  .claude/references/
 #   .gitignore 에 넣고 혼자 쓰면 자산이 아니라 dotfiles 다.
+
+# Python 바이트코드 캐시 — tests/__pycache__/*.pyc 가 커밋되면 sdd_runner judge 의
+# TEST_FILE 정규식(경로에 tests/ 포함)에 걸려 "테스트 파일을 고쳤다"로 오판된다(2026-11-07 실측, step 2).
+__pycache__/
+*.pyc

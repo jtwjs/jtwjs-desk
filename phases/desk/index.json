@@ -1,0 +1,73 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk",
+  "docs": "docs/desk-2026-11-03",
+  "after": [],
+  "steps": [
+    {
+      "step": 1,
+      "name": "desk-core",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T18:37:28+0900",
+      "summary": "desk/{paths,atomic,validate,sort}.py 생성 — 경로는 DESK_RUN/DESK_HOME을 호출 시점에 읽고, 쓰기는 write_json_atomic(os.replace) 하나, 검증은 ADR-006 필드 목록을 그대로 스키마로 삼아 실패를 리스트로 반환, 세션 dict 키는 status/lastAt(camelCase)이고 sort_sessions가 effectiveStatus를 덧붙여 정렬한다. tests/test_desk_core.py 52개 통과.",
+      "completed_at": "2026-11-07T18:45:39+0900"
+    },
+    {
+      "step": 2,
+      "name": "desk-hook",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T18:45:51+0900",
+      "summary": "hooks/{__init__,desk_hook,hooks}.py(.json) 생성 — ADR-002 이벤트→상태 표를 map_status/needs_server_check/needs_ntfy 순수 함수로, derive_repo/derive_branch/check_server_version/spawn_server/send_ntfy/ensure_server는 가변 쉘로 분리. ensure_server는 spec 그대로 check_fn=check_server_version, spawn_fn=spawn_server를 기본값으로 받고, main()은 인자 없이 ensure_server()·send_ntfy(...)를 호출해 테스트가 module-attribute patch로 가로챈다(default-binding 문제 없음, 둘 다 함수 바디 안의 bare global 참조라 호출 시점 조회). main은 전체를 try/except Exception으로 감싸 항상 exit 0, stdout/stderr 무출력. page/server.py 아직 없음(step 4 예정) — spawn_server는 경로만 참조. tests/test_desk_hook.py 30개 추가, 전체 82개 통과.",
+      "completed_at": "2026-11-07T18:58:32+0900",
+      "attempts": [
+        {
+          "at": "2026-11-07T18:56:52+0900",
+          "error": "GREEN: 테스트 파일을 고쳤다(되돌림): tests/__pycache__/test_desk_core.cpython-314.pyc, tests/__pycache__/test_desk_hook.cpython-314.pyc — 테스트는 그대로 두고 구현을 고친다"
+        },
+        {
+          "at": "2026-11-07T18:58:08+0900",
+          "error": "에이전트가 index.json 의 status 를 갱신하지 않음"
+        }
+      ],
+      "retries": 2
+    },
+    {
+      "step": 3,
+      "name": "desk-script",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T19:10:05+0900",
+      "summary": "scripts/{__init__,desk}.py 생성 — cmd_ask/cmd_picks_new/cmd_applied/cmd_prune 4개 서브커맨드. raw 인자는 항상 파일 경로 또는 '-'만 받고(JSON 텍스트 직접 금지), picks --new의 --since(float, epoch)는 pick.at(ISO 문자열)을 datetime.fromisoformat(...).timestamp()로 변환해 비교한다. applied는 재반영을 덮어쓰기로 허용(취소 수단이 없어서), prune은 세 파일(.json/.pick.json/.applied.json)을 없는 것은 무시하며 지운다. scripts/는 desk/만 import(hooks/·page/ 없음), 모든 쓰기는 write_json_atomic 경유. tests/test_desk_script.py 26개 추가, 전체 108개 통과.",
+      "completed_at": "2026-11-07T19:18:00+0900"
+    },
+    {
+      "step": 4,
+      "name": "desk-server",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-07T19:20:33+0900",
+      "summary": ".claude-plugin/plugin.json(version 0.1.0) · page/{__init__,server}.py · page/index.html 생성 — http.server(ThreadingHTTPServer) 표준 라이브러리만, page/는 desk/만 import(hooks/·scripts/ 없음). bind_or_exit(port)가 실제 소켓을 bind해 돌려주고 OSError면 None(ADR-003, 이미 떠 있음), serve_forever(port=None)가 bind 실패 시 즉시 return. check_host(headers, port)는 순수 함수로 Host 헤더만 본다. GET /version은 인증·host체크 없음, GET /sessions·/judgments는 check_host 통과해야 200(아니면 403). POST /pick은 토큰→Origin→check_host→ask존재→applied존재(409로 잠금)→validate_pick 순서로 검사하고, 통과하면 spawn_pick_candidate가 body에서 repo/id를 뺀 나머지+at=datetime.now().isoformat()(문자열, time.time() 아님)을 pick.json에 원자적으로 쓴다 — 이미 있으면 덮어써 반영 전 재선택을 허용한다. POST /shutdown은 토큰만 확인 후 self.server.shutdown(). GET /는 index.html의 __DESK_TOKEN__ 리터럴을 실제 토큰으로 치환(step 5가 이 자리표시자를 보존한 채 UI를 채운다). 모든 응답에 CORS 헤더 없음(grep 확인), server.json은 os.chmod 0600. tests/test_desk_server.py 27개 추가(스레드로 임시 포트에 실제 서버 띄워 GET/POST 통합 테스트 포함, POST /pick 성공 후 쓰인 pick.json이 desk.validate.validate_pick 통과 + scripts.desk.cmd_picks_new --since 필터까지 실제로 통과하는지 검증), 전체 135개 통과.",
+      "completed_at": "2026-11-07T20:08:50+0900"
+    },
+    {
+      "step": 5,
+      "name": "desk-page",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-07T20:08:57+0900",
+      "summary": "page/index.html 완성(step4의 __DESK_TOKEN__ 자리표시자는 그대로 보존, 그 자리에서 DESK_TOKEN 상수로 읽어 POST /pick의 X-Desk-Token 헤더에 쓴다) — 외부 CDN·프레임워크 없이 인라인 CSS/JS 하나. 탭 둘(트랙·판정)은 클라이언트에서만 전환(새 요청 없음), GET /sessions·GET /judgments를 각 15초 polling. 트랙 탭은 서버가 sort_sessions로 이미 정렬한 배열 순서를 그대로 쓰고 레포별로만 묶는다(재정렬 안 함, groupByRepoPreservingOrder가 첫 등장 순서·그룹 내부 순서를 둘 다 보존) — lastAt 기준 'n분 전'만 클라이언트 Date.now()로 표시용 계산. 판정 탭 카드는 question·why·options(recommended면 배지)·aiDecided(별도 칸)·premiseOpen 배지·see·직접 쓰기 textarea+메모/메모종류를 그리고, applied 있으면 .locked 클래스로 모든 입력 disabled + '반영됨' + applied.issue 링크. 옵션 클릭·직접쓰기 제출은 공통 submitPick()이 POST /pick(헤더 X-Desk-Token: DESK_TOKEN) 호출, 200은 judgments 재조회, 409는 배너 안내+재조회(재시도 없음), 403은 새로고침 유도 배너(영속 표시). 구현 중 발견한 버그: buildOptionButton 내부와 바깥 루프에서 클릭 핸들러를 중복 등록할 뻔했던 것을 제거해 옵션 클릭 시 POST가 한 번만 나가도록 고쳤다. python3 -m unittest discover -s tests 135개 전부 통과(새 테스트 없음, tdd:false). 수동 확인 5항목(DESK_RUN/DESK_HOME을 임시 폴더로 돌려 page/server.py를 실제로 띄우고 curl로 확인, 브라우저 미사용 한계 있음): ① GET /에서 치환된 HTML에 data-tab=\"track\"/\"judge\" 두 탭 버튼과 치환된 DESK_TOKEN 상수 존재, __DESK_TOKEN__ 리터럴은 0개(그 자리만 치환됨) — 통과. ② 가짜 세션 4개(승인 대기/신호 없음 유발용 10분 초과 작업중/입력 대기/작업 중) 심은 뒤 GET /sessions가 승인 대기 > 신호 없음 > 입력 대기 > 작업 중 순으로 정렬해 돌려줌을 확인, lastAt이 그대로 내려와 클라이언트 'n분 전' 계산 입력이 됨 — 통과(화면 렌더 자체는 브라우저가 없어 코드 리뷰로만 확인, 한계 아래 기재). ③ 가짜 ask 파일(options 2개 중 하나 recommended, aiDecided 1건, premiseOpen true, see 1건)을 GET /judgments로 조회해 모든 필드가 응답에 그대로 있음을 확인 — 통과(카드 HTML 렌더는 node --check로 두 <script> 블록 문법 검사만 통과, 실제 DOM 렌더링은 브라우저 미사용으로 확인 못함). ④ 해당 카드에 실제 X-Desk-Token/Origin 헤더로 POST /pick 호출 → ask-open.pick.json이 choice/note/noteKind/at(문자열)로 생성됨을 cat으로 확인 — 통과. ⑤ pick+applied(issue URL 포함)를 미리 심은 카드에 같은 POST /pick을 보내 409가 돎을 확인(서버가 잠금을 강제) — 통과, applied.issue 필드가 GET /judgments 응답에 포함되어 있어 UI가 링크를 그릴 데이터는 있음(렌더 자체는 미확인). 한계: 이 환경에는 GUI 브라우저가 없어 '화면에 보이는가'는 전부 HTTP 응답 바디에 해당 요소·데이터가 포함되는지와 JS 문법 검사(node --check)로만 판단했다 — 실제 클릭 상호작용·CSS 레이아웃·탭 전환 애니메이션 등은 사람이 브라우저로 열어 확인해야 한다.",
+      "completed_at": "2026-11-07T20:16:22+0900"
+    },
+    {
+      "step": 6,
+      "name": "desk-skill-doc",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-07T20:16:30+0900",
+      "summary": "skills/decision-inbox/SKILL.md 생성(frontmatter name: decision-inbox + Use when 절) — ask · picks --new --repo/--since · applied --issue를 ${CLAUDE_PLUGIN_ROOT}/scripts/desk.py CLI 호출로만 절차화(ADR-006, PRD 사용자 시나리오 ③), desk/·page/ import 없음·내부 구현 재서술 없음. 서브커맨드 이름(ask/picks/applied)을 step 3 scripts/desk.py의 add_parser 호출과 grep 대조해 일치 확인. 코드 변경 없음(tdd:false) — python3 -m unittest discover -s tests 135개 전부 통과(verify 전체, phase 마지막 step).",
+      "completed_at": "2026-11-07T22:40:55+0900"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-ledger-tabs",
+  "docs": "docs/desk-2026-11-11",
+  "after": [
+    "desk"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "name": "desk-config",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T15:53:43+0900",
+      "summary": "desk/config.py(load_config·unregistered)·desk/paths.py(config_path·conductor_path·review_dir·share_dir) 추가, tests/test_desk_config.py. load_config 키: source·repos·vault·criteria_file·daily_dir·evidence_globs·error",
+      "completed_at": "2026-11-11T15:55:23+0900"
+    },
+    {
+      "step": 2,
+      "name": "ledger-learn",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T15:55:30+0900",
+      "summary": "desk/ledger.py 신규(parse_inbox·review_cards·classify_area·fullstack_order·card_key·phase_key·skipped_phases, 순수 함수), tests/test_desk_ledger_learn.py. 카드 dict 키: title·date·kind·status·where·vault·summary. step 3이 같은 파일에 함수 추가",
+      "completed_at": "2026-11-11T15:57:03+0900"
+    },
+    {
+      "step": 3,
+      "name": "ledger-signals",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T15:57:09+0900",
+      "summary": "desk/ledger.py에 parse_observations·parse_friction·workflow_rows·parse_score·find_score_file·age_days 추가(순수 함수, find_score_file만 디렉터리 목록 조회), tests/test_desk_ledger_signals.py. friction 못 읽는 행은 원문 없이 {\"unparsed\":True}, score는 reports 최신 날짜 폴더→docs→.claude→루트 순",
+      "completed_at": "2026-11-11T15:58:55+0900"
+    },
+    {
+      "step": 4,
+      "name": "rollup",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T15:59:01+0900",
+      "summary": "desk/rollup.py 신규(week_dates·aggregate, 순수 함수) + tests/test_desk_rollup.py. aggregate 반환 키 days·present·missing·sessions·stuck·commits·cards(개수만)·projects·repos, 새 dict라 원문 키 차단, 관대한 읽기",
+      "completed_at": "2026-11-11T16:00:28+0900"
+    },
+    {
+      "step": 5,
+      "name": "server-review",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:00:35+0900",
+      "summary": "page/server.py에 ALLOWED_REL·read_ledger·list_phase_indexes·read_vault_friction·config_block·missing_row·_check_post_guard·이름검증 + GET /review(build_review)·POST /review/done 추가, tests/test_desk_server_review.py; 뒤 step은 ALLOWED_REL에 항목 추가",
+      "completed_at": "2026-11-11T16:03:07+0900"
+    },
+    {
+      "step": 6,
+      "name": "server-workflow-fullstack",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:03:14+0900",
+      "summary": "page/server.py에 build_workflow·build_fullstack + GET /competency/workflow·/competency/fullstack 추가(step 5 부품 재사용, 쓰기·subprocess 없음), tests/test_desk_server_workflow.py. missing_row what 값: observations·inbox·repo·friction(repo=(vault)); 설정 none이면 빈 rows/groups",
+      "completed_at": "2026-11-11T16:06:31+0900"
+    },
+    {
+      "step": 7,
+      "name": "server-proactive-share",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:06:37+0900",
+      "summary": "page/server.py에 build_proactive(_phase_minutes·_safe_rel·_evidence_files·_read_criteria) + GET /competency/proactive + POST /share/shared 추가, tests/test_desk_server_proactive.py. 응답 키 config·criteria·speed{durations,no_data,metric2,workflow_link}·impact{prds,evidence(상위5 또는 note),ignored}·transparency·missing; 공유 마킹은 <id>.shared.json(at만), .md 쓰기·삭제 없음",
+      "completed_at": "2026-11-11T16:47:23+0900"
+    },
+    {
+      "step": 8,
+      "name": "server-weekly-health",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-11T16:50:52+0900",
+      "summary": "page/server.py에 _today·build_weekly·build_repo_health + GET /weekly·/repo-health 추가(daily_dir의 YYYY-MM-DD.json만 읽고 aggregate 결과만 응답, score는 find_score_file 후보 4곳만, 설정 none이면 빈 week/repos), tests/test_desk_server_weekly.py(subprocess 금지 grep 포함)",
+      "completed_at": "2026-11-11T17:10:03+0900"
+    },
+    {
+      "step": 9,
+      "name": "page-tabs",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-11T17:10:15+0900",
+      "summary": "page/index.html만 변경: 탭 6개+3역량 서브탭 3개, 보이는 탭 엔드포인트만 GET(탭 열 때+15초, 숨은 탭 무요청), config 한 줄·missing 행, 복습함 반영(POST /review/done)·공유함(POST /share/shared)·복사 버튼. 서버 응답 값은 전부 el()/textContent로 넣어 새 코드에 innerHTML 이어붙이기 없음(기존 container.innerHTML=\"\" 2곳만 남음), __DESK_TOKEN__ 1곳 유지, verify.test 269건 통과, JS 문법 node --check 통과. 수동 확인(브라우저 미실행) 전부 미확인: 탭·서브탭 전환, 네트워크 탭 숨은 탭 무요청, config 한 줄, missing 행, 복습 반영 버튼, 적극성 순서, 복사, 공유함 버튼",
+      "completed_at": "2026-11-11T18:16:02+0900"
+    },
+    {
+      "step": 10,
+      "name": "guard-test",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-11T18:16:08+0900",
+      "summary": "tests/test_desk_guard.py 추가(ast로 desk/*.py·page/*.py의 subprocess import·os.system/os.popen/Popen 호출·hooks/scripts import 금지, glob 대상, 파일:줄 메시지). desk/atomic.py에 import subprocess를 임시 주입해 실패 확인 후 git checkout으로 되돌림(소스 변경 없음). verify.test 273건 통과",
+      "completed_at": "2026-11-11T18:18:02+0900"
+    }
+  ],
+  "reviews": [
+    {
+      "at": "2026-11-12T02:24:25+09:00",
+      "head": "ce1ceb405fa2fc9400366b16f2670a4db068daeb",
+      "issues": []
+    }
+  ]
+}

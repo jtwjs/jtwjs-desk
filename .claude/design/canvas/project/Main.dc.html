@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>색 토큰</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif}
+</style>
+</helmet>
+<div style="width: 1280px; height: 1180px; box-sizing: border-box; padding: 48px; background: #202432; color: #B9BFCF; display: flex; flex-direction: column; gap: 32px; font-family: Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #FFFFFF">색</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #959DB6">바탕 세 단과 한 단 밝은 구분선으로 계층을 만든다. 그림자는 없다. 값 출처: 바탕·글자는 레퍼런스 이미지 측정, 의미색은 Tailwind v3.4.17, 대비는 계산값.</p>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">바탕 · 구분선</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div style="border: 1px solid #2A303F; border-radius: 8px; overflow: hidden">
+<div style="height: 72px; background: #202432; border-bottom: 1px solid #2A303F"></div>
+<div style="padding: 12px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 600; color: #FFFFFF">surface-content</span><span style="font-family: ui-monospace,Menlo,monospace; font-size: 13px; color: #B9BFCF">#202432</span><span style="font-size: 12px; color: #959DB6">본문 영역 · 표 행 바탕</span></div>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; overflow: hidden">
+<div style="height: 72px; background: #232837; border-bottom: 1px solid #2A303F"></div>
+<div style="padding: 12px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 600; color: #FFFFFF">surface-panel</span><span style="font-family: ui-monospace,Menlo,monospace; font-size: 13px; color: #B9BFCF">#232837</span><span style="font-size: 12px; color: #959DB6">메뉴 패널 · 상단 바 · 칩 · 표 헤더</span></div>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; overflow: hidden">
+<div style="height: 72px; background: #2A303F; border-bottom: 1px solid #2A303F"></div>
+<div style="padding: 12px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 600; color: #FFFFFF">surface-raised</span><span style="font-family: ui-monospace,Menlo,monospace; font-size: 13px; color: #B9BFCF">#2A303F</span><span style="font-size: 12px; color: #959DB6">선택 항목 · 입력 · 버튼 · 구분선</span></div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">글자</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; background: #232837">
+<span style="font-size: 20px; font-weight: 600; color: #FFFFFF">제목 · 메뉴 라벨</span>
+<span style="font-size: 13px; color: #B9BFCF"><span style="font-family: ui-monospace,Menlo,monospace">text-strong #FFFFFF</span></span>
+<span style="font-size: 12px; color: #959DB6">대비 15.44 / 14.68 / 13.18</span>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; background: #232837">
+<span style="font-size: 14px; color: #B9BFCF">본문 · 표 셀 글자</span>
+<span style="font-size: 13px; color: #B9BFCF"><span style="font-family: ui-monospace,Menlo,monospace">text-body #B9BFCF</span></span>
+<span style="font-size: 12px; color: #959DB6">대비 8.40 / 7.98 / 7.17</span>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; background: #232837">
+<span style="font-size: 14px; color: #959DB6">표 헤더 · 설명 · 보조</span>
+<span style="font-size: 13px; color: #B9BFCF"><span style="font-family: ui-monospace,Menlo,monospace">text-muted #959DB6</span></span>
+<span style="font-size: 12px; color: #959DB6">대비 5.72 / 5.44 / 4.88</span>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">의미색 — 점 + 라벨 + 색을 함께 쓴다</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px">
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #FFFFFF"><span style="width: 8px; height: 8px; border-radius: 50%; background: #7C87F7"></span>작업 중</span>
+<span style="font-size: 13px; font-weight: 600; color: #FFFFFF">선택 · 진행</span>
+<span style="font-family: ui-monospace,Menlo,monospace; font-size: 12px; color: #B9BFCF">accent #7C87F7</span>
+<span style="font-size: 12px; line-height: 1.4; color: #959DB6">content 4.90 · panel 4.66 · raised 4.18. 올림면 위 글자는 흰색, 틴트 없음</span>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 2px 8px; border-radius: 6px; background: rgba(251,191,36,0.10); font-size: 13px; font-weight: 500; color: #FBBF24"><span style="width: 8px; height: 8px; border-radius: 50%; background: #FBBF24"></span>승인 대기</span>
+<span style="font-size: 13px; font-weight: 600; color: #FFFFFF">사람 차례 · 주의</span>
+<span style="font-family: ui-monospace,Menlo,monospace; font-size: 12px; color: #B9BFCF">attention #FBBF24</span>
+<span style="font-size: 12px; line-height: 1.4; color: #959DB6">content 9.25 · panel 8.80 · raised 7.90. 틴트 10%까지</span>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 2px 8px; border-radius: 6px; background: rgba(52,211,153,0.10); font-size: 13px; font-weight: 500; color: #34D399"><span style="width: 8px; height: 8px; border-radius: 50%; background: #34D399"></span>반영됨</span>
+<span style="font-size: 13px; font-weight: 600; color: #FFFFFF">정상 · 완료</span>
+<span style="font-family: ui-monospace,Menlo,monospace; font-size: 12px; color: #B9BFCF">success #34D399</span>
+<span style="font-size: 12px; line-height: 1.4; color: #959DB6">content 8.03 · panel 7.64 · raised 6.86. 틴트 10%까지</span>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 2px 8px; border-radius: 6px; background: rgba(248,113,113,0.10); font-size: 13px; font-weight: 500; color: #F87171"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F87171"></span>막힘</span>
+<span style="font-size: 13px; font-weight: 600; color: #FFFFFF">오류 · 막힘</span>
+<span style="font-family: ui-monospace,Menlo,monospace; font-size: 12px; color: #B9BFCF">danger #F87171</span>
+<span style="font-size: 12px; line-height: 1.4; color: #959DB6">content 5.58 · panel 5.31 · raised 4.77. 틴트 10%까지</span>
+</div>
+<div style="border: 1px solid #2A303F; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 2px 8px; border-radius: 6px; background: rgba(148,163,184,0.10); font-size: 13px; font-weight: 500; color: #94A3B8"><span style="width: 8px; height: 8px; border-radius: 50%; background: #94A3B8"></span>경로 없음</span>
+<span style="font-size: 13px; font-weight: 600; color: #FFFFFF">중립 · 비활성</span>
+<span style="font-family: ui-monospace,Menlo,monospace; font-size: 12px; color: #B9BFCF">neutral #94A3B8</span>
+<span style="font-size: 12px; line-height: 1.4; color: #959DB6">content 6.02 · panel 5.73 · raised 5.14. 틴트 10%까지</span>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">브랜드 채움 면</h2>
+<div style="display: flex; align-items: center; gap: 24px; border: 1px solid #2A303F; border-radius: 8px; padding: 16px">
+<span style="display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 6px; background: #5B63D3; color: #FFFFFF; font-size: 14px; font-weight: 500">채움 버튼</span>
+<span style="font-size: 13px; line-height: 1.5; color: #B9BFCF"><span style="font-family: ui-monospace,Menlo,monospace">#5B63D3</span> 위 흰 글자 5.04. 글자 · 선에는 쓰지 않는다(바탕 위 3.07 / 2.92 / 2.62).</span>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">쓰지 않는 값</h2>
+<ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #B9BFCF">
+<li><span style="font-family: ui-monospace,Menlo,monospace">#656D84</span> 글자 — 대비 3.00 이하</li>
+<li>slate-500 선 — 올림면 위 2.77. 구분선은 surface-raised</li>
+<li>인디고 틴트 위 글자 — 6%에서도 panel 위 4.27</li>
+<li>로고 색 <span style="font-family: ui-monospace,Menlo,monospace">#0B0C14</span> — UI 바탕이 아니다</li>
+</ul>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1180}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

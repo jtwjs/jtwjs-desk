@@ -21,6 +21,7 @@
 
 - **[셸 · 검증]** 검증 명령을 `| grep`·`| tail`에 물린 채 `$?`로 통과를 판정하지 않는다 — 파이프 끝 명령의 종료 코드가 나와, 빌드가 성공했는데 grep이 못 찾아 `1`이 찍혔다. `set -o pipefail` 또는 `${PIPESTATUS[0]}`, 아니면 출력은 파일로 돌리고 종료 코드를 따로 본다. (2026-10-07 실측)
 - **[셸 · zsh]** 변수에 담은 여러 단어 명령(`TASKS="compileKotlin compileTestKotlin"; ./gradlew $TASKS`)은 zsh에서 쪼개지지 않아 한 인자로 넘어간다. 배열이나 `${=TASKS}`를 쓴다. (2026-09-29 실측)
+- **[sdd_runner · git]** `judge`는 RED 커밋 시점 검증 때 detached checkout → `feature/{task}` 브랜치로 되돌아오는데, 이 `git checkout <branch>`가 **`phases/{task}/`의 미커밋 변경(step*.md 포함)까지 통째로 버린다** — 제외 대상(`:(exclude)phases/{task}`)은 러너의 `add -A`에만 적용되지, 브랜치 체크아웃의 파일 되돌림에는 적용 안 됨. step*.md를 러너 가동 중에 고치면 **고친 즉시 커밋**한다(judge 호출 전). (2026-11-07 실측 — step4.md 수정이 step3 judge 1회 호출로 통째로 사라짐)
 
 ---
 
@@ -30,3 +31,7 @@ harness-doctor 검사 3이 이 파일이 계속 비어 있는지 본다.
 
 첫 항목은 harness-init 인터뷰 ②("처음 온 사람이 당하는 함정은?")의 답이 들어간다.
 -->
+
+## 이 레포에서 당한 것
+
+- **[서버 · 화면]** 화면이 읽는 필드를 서버가 실제로 보내는지는 서버·파서 단위 테스트만으로 확인하지 않는다 — 건강도 배지가 항상 회색이었다: 화면은 `grade_color`를 읽는데 서버가 점수 파일에서 그 키를 버렸고, 297개 테스트는 둘이 따로 통과했다. 새 필드는 가짜 데이터로 서버를 띄워 브라우저에서 한 번 본다. (2026-11-12 실측, `desk/ledger.py` `parse_score` · `page/server.py` `build_repo_health`)

@@ -1,0 +1,117 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-redesign-ui",
+  "docs": "docs/desk-2026-11-12",
+  "after": [
+    "desk-ledger-tabs"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "name": "nav-counts-endpoint",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T02:35:49+0900",
+      "summary": "page/server.py에 count_nav(cfg)와 GET /nav-counts({judge,review}) 추가, tests/test_desk_server_navcounts.py 7개(judge=pick 없는 카드, review=설정 없으면 0)",
+      "completed_at": "2026-11-12T02:39:59+0900"
+    },
+    {
+      "step": 2,
+      "name": "pretendard-bundle",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:40:27+0900",
+      "summary": "page/fonts/PretendardVariable.woff2(2,057,688바이트, v1.3.9 가변)와 LICENSE-Pretendard.txt(SIL OFL 1.1) 추가, 용량 미측정 해소",
+      "completed_at": "2026-11-12T02:41:58+0900"
+    },
+    {
+      "step": 3,
+      "name": "font-route",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T02:41:58+0900",
+      "summary": "page/server.py에 GET /fonts/PretendardVariable.woff2(font/woff2, check_host 403, 고정 경로 상수 _FONT_PATH, 다른 이름·.. ·파일 없음 404) 추가, tests/test_desk_server_font.py 6개",
+      "completed_at": "2026-11-12T02:44:41+0900"
+    },
+    {
+      "step": 4,
+      "name": "tokens-and-shell",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:44:41+0900",
+      "summary": "page/index.html만 수정: :root 다크 토큰(색 hex는 :root에만)·Pretendard @font-face·nav#menu(264/64 접기, 3역량 그룹, aria-label·툴팁, 배지 빈 span data-badge=judge|review)·selectTab/syncMenu로 data-tab/data-sub 보존, 기존 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T02:49:07+0900"
+    },
+    {
+      "step": 5,
+      "name": "shared-components",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:49:08+0900",
+      "summary": "page/index.html에 신규 부품만 추가(기존 렌더 불변): CSS 클래스 status-dot-label·chip·data-table·kpi-tile·decision-card·empty-state-card·inline-note·wait-line·tooltip·btn(accent·sm·confirm-pending)과 빌더 statusDotLabel·chip·dataTable·kpiTile·decisionCard·emptyStateCard·inlineNote·waitLine·button·confirmButton, 상태→의미색 매핑 STATUS_TONE 한 객체(STATUS_ICON은 step 6·7 교체 전까지 유지). 적용값: 행 패딩 12/16·헤더 8/16, 칩 높이 32, 버튼 36(표 행 작은 버튼 28), 툴팁은 포커스 가능 열 이름의 data-tooltip(hover·focus-visible). 색 hex는 :root에만, 데이터는 textContent만, 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T02:51:54+0900"
+    },
+    {
+      "step": 6,
+      "name": "screens-track-judge",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T02:51:54+0900",
+      "summary": "page/index.html만 수정: 트랙(pageHead·레포 순환 칩·dataTable 상태/레포·브랜치/마지막 신호·빈·로딩·에러 inlineNote)과 판정(decision-card 라디오 선택지+직접 쓰기+메모+반영 버튼, 카드별 초안 drafts로 폴링 후 입력 유지, 저장 실패 카드 안 한 줄, 반영됨은 선택 1행+잠금 문장만) 재배치, POST /pick 형식·토큰 헤더 불변, STATUS_ICON·구 트랙/판정 CSS 제거, 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T04:02:37+0900"
+    },
+    {
+      "step": 7,
+      "name": "screens-review-comp-weekly-health",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T04:02:37+0900",
+      "summary": "page/index.html만 수정: 복습함(조밀한 표·행 안 작은 반영 버튼·실패 오류는 그 행 한 줄)·3역량 3화면(dataTable, 워크플로우·풀스택 레포 칩, 적극성 메모/스피드/임팩트/투명성)·주간 롤업(kpiTile 5칸, 증감은 서버 값이 없어 숨김, 레포별 표)·레포 건강도(점수+등급 배지 점+라벨+10% 틴트, data의 color→success/attention/danger, 없으면 neutral)로 재배치. config=inlineNote, missing=상태 점+라벨 표. POST /review/done·/share/shared 형식과 보이는 탭만 폴링 불변, 구 row/memo CSS·cfgLine·missingRows 제거, 테스트 288개 통과. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T06:04:12+0900"
+    },
+    {
+      "step": 8,
+      "name": "nav-badge-wiring",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T06:04:13+0900",
+      "summary": "page/index.html에 fetchNavCounts(15초, 탭 폴링과 별개, 실패 시 마지막 값 유지·숫자 아니면 무시, textContent, 0이면 숨김, 접힘은 data-has-badge 점) + tests/test_desk_redesign_integration.py 1개(/ · /nav-counts · 폰트 200 · 임의 이름 404), 테스트 289개 통과. 미확인: 브라우저 렌더 — 순서: 서버 띄워 메뉴 펼침/접힘 → 판정·복습 배지(숫자/점, 0이면 숨김) → 6화면 순회",
+      "completed_at": "2026-11-12T06:06:22+0900"
+    },
+    {
+      "step": 9,
+      "name": "score-parse-grade-color",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T13:43:07+0900",
+      "summary": "desk/ledger.py parse_score가 grade_color(green/amber/red, 소문자화)를 읽어 유효할 때만 키를 넣음, 그 외엔 기존 {total,grade} 그대로. tests/test_desk_ledger_signals.py에 TestParseScoreGradeColor 5개, 테스트 294개 통과. 서버 전달은 step 10",
+      "completed_at": "2026-11-12T13:46:26+0900"
+    },
+    {
+      "step": 10,
+      "name": "health-send-grade-color",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T13:46:30+0900",
+      "summary": "page/server.py build_repo_health가 parse_score의 grade_color가 있을 때만 점수 행에 같은 값으로 전달(없거나 모르는 색이면 키 없음, missing 행 불변). tests/test_desk_server_weekly.py에 3개 추가, 테스트 297개 통과",
+      "completed_at": "2026-11-12T13:49:50+0900"
+    }
+  ],
+  "reviews": [
+    {
+      "at": "2026-11-12T13:32:07+09:00",
+      "head": "a1998f2",
+      "issues": [
+        "브라우저 렌더 미확인(확장 미연결)",
+        "주간 롤업 KPI 5칸·증감 숨김 등 step 파일과 다른 점",
+        "ADR-014~016 번호 임시",
+        "화면 제목 '지휘 책상'이 index.html title에 남음"
+      ]
+    },
+    {
+      "at": "2026-11-12T14:20:00+09:00",
+      "head": "45186fb",
+      "issues": []
+    }
+  ]
+}

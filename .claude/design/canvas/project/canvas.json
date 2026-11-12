@@ -1,0 +1,161 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-11T12:00:00Z"
+  },
+  "title": "desk 디자인 시스템",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [
+    {
+      "id": "ds",
+      "name": "디자인 시스템"
+    },
+    {
+      "id": "comp",
+      "name": "컴포넌트"
+    },
+    {
+      "id": "work1",
+      "name": "작업: 미정 항목 정리"
+    },
+    {
+      "id": "screens",
+      "name": "작업: 화면"
+    }
+  ],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 1180,
+      "title": "색",
+      "page": "ds"
+    },
+    "Type.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 860,
+      "title": "타이포그래피",
+      "page": "ds"
+    },
+    "Shape.dc.html": {
+      "x": 2720,
+      "y": 0,
+      "w": 1280,
+      "h": 760,
+      "title": "모양 · 간격 · 깊이 · 모션",
+      "page": "ds"
+    },
+    "Nav.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 1520,
+      "title": "앱 셸 · 메뉴",
+      "page": "comp"
+    },
+    "Data.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 1240,
+      "title": "표 · 칩 · 카드 · 버튼",
+      "page": "comp"
+    },
+    "Judge.dc.html": {
+      "x": 2720,
+      "y": 0,
+      "w": 1280,
+      "h": 1360,
+      "title": "판정 카드 · 상태별",
+      "page": "comp"
+    },
+    "States.dc.html": {
+      "x": 4080,
+      "y": 0,
+      "w": 1280,
+      "h": 900,
+      "title": "상태 모음",
+      "page": "comp"
+    },
+    "Work1.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 1640,
+      "title": "미정 4가지 시안",
+      "page": "work1"
+    },
+    "Screen1Track.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 760,
+      "title": "트랙",
+      "page": "screens"
+    },
+    "Screen2Judge.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 880,
+      "title": "판정",
+      "page": "screens"
+    },
+    "Screen3Review.dc.html": {
+      "x": 2720,
+      "y": 0,
+      "w": 1280,
+      "h": 760,
+      "title": "복습함",
+      "page": "screens"
+    },
+    "Screen4Competency.dc.html": {
+      "x": 4080,
+      "y": 0,
+      "w": 1280,
+      "h": 2540,
+      "title": "3역량 (3개 화면)",
+      "page": "screens"
+    },
+    "Screen5Weekly.dc.html": {
+      "x": 5440,
+      "y": 0,
+      "w": 1280,
+      "h": 860,
+      "title": "주간 롤업",
+      "page": "screens"
+    },
+    "Screen6Health.dc.html": {
+      "x": 6800,
+      "y": 0,
+      "w": 1280,
+      "h": 760,
+      "title": "레포 건강도",
+      "page": "screens"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Type.dc.html",
+    "Shape.dc.html",
+    "Nav.dc.html",
+    "Data.dc.html",
+    "Judge.dc.html",
+    "States.dc.html",
+    "Work1.dc.html",
+    "Screen1Track.dc.html",
+    "Screen2Judge.dc.html",
+    "Screen3Review.dc.html",
+    "Screen4Competency.dc.html",
+    "Screen5Weekly.dc.html",
+    "Screen6Health.dc.html"
+  ],
+  "notes": {},
+  "designSystems": []
+}

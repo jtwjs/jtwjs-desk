@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>모양 간격 깊이 모션</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif}
+</style>
+</helmet>
+<div style="width: 1280px; height: 760px; box-sizing: border-box; padding: 48px; background: #202432; color: #B9BFCF; display: flex; flex-direction: column; gap: 32px; font-family: Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #FFFFFF">모양 · 간격 · 깊이 · 모션</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #959DB6">레퍼런스 이미지의 확대 배율을 몰라 CSS px로 환산하지 못했다. 아래 값은 모두 제안이고 구현 화면에서 검증한다.</p>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">간격 — 4 기준 배수</h2>
+<div style="display: flex; align-items: flex-end; gap: 24px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><div style="width: 4px; height: 4px; background: #7C87F7"></div><span style="font-size: 12px; color: #959DB6">4</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><div style="width: 8px; height: 8px; background: #7C87F7"></div><span style="font-size: 12px; color: #959DB6">8</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><div style="width: 12px; height: 12px; background: #7C87F7"></div><span style="font-size: 12px; color: #959DB6">12</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><div style="width: 16px; height: 16px; background: #7C87F7"></div><span style="font-size: 12px; color: #959DB6">16</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; background: #7C87F7"></div><span style="font-size: 12px; color: #959DB6">24</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><div style="width: 32px; height: 32px; background: #7C87F7"></div><span style="font-size: 12px; color: #959DB6">32</span></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">반경 — 알약 모양은 쓰지 않는다</h2>
+<div style="display: flex; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px; width: 200px"><div style="height: 56px; border: 1px solid #2A303F; border-radius: 6px; background: #232837"></div><span style="font-size: 13px; color: #B9BFCF">컨트롤 6 — 입력 · 버튼 · 칩</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; width: 200px"><div style="height: 56px; border: 1px solid #2A303F; border-radius: 8px; background: #232837"></div><span style="font-size: 13px; color: #B9BFCF">카드 · 패널 8</span></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">깊이 — 그림자 없음</h2>
+<div style="display: flex; gap: 0; width: 520px; border: 1px solid #2A303F; border-radius: 8px; overflow: hidden">
+<div style="flex: 1; height: 72px; background: #202432; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #959DB6">content</div>
+<div style="flex: 1; height: 72px; background: #232837; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #959DB6; border-left: 1px solid #2A303F">panel</div>
+<div style="flex: 1; height: 72px; background: #2A303F; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #B9BFCF">raised</div>
+</div>
+<span style="font-size: 13px; color: #B9BFCF">구분은 톤 차이와 1 두께 선(surface-raised)으로만 한다.</span>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600; color: #FFFFFF">모션</h2>
+<p style="margin: 0; font-size: 13px; line-height: 1.6; color: #B9BFCF">상태 변화를 알리는 데만 쓴다. 색 · 배경 전환은 150ms 이내, 이동 · 크기 애니메이션은 없다. 메뉴 그룹 펼침은 즉시 또는 150ms 이내 높이 변화 하나. <span style="font-family: ui-monospace,Menlo,monospace">prefers-reduced-motion</span>이면 전부 끈다. 폴링 갱신은 값만 바꾸고 흔들리지 않는다.</p>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
