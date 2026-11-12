@@ -63,9 +63,12 @@
     {
       "step": 7,
       "name": "routine-integration-check",
-      "status": "pending",
+      "status": "completed",
       "tdd": false,
-      "kind": "measure"
+      "kind": "measure",
+      "started_at": "2026-11-12T20:49:53+0900",
+      "summary": "실측 통과(코드 변경 0). 임시 폴더(스크래치패드)에 가짜 config.json·질문함(오늘 6문항[설명·복습·재시험·결정·원칙·샘플종류]+어제 미답 1+깨진 줄 1)을 만들고 `DESK_HOME=… DESK_CONFIG=… DESK_PORT=47999 python3 page/server.py`로 서버를 띄워 `curl -X POST /routine/rollover`(토큰·Origin 헤더) → `curl /routine` → `curl /nav-counts` 실행. 결과: rollover {ok:true, skipped:1}, 재호출 skipped:0(멱등, 답함 1줄 유지). GET /routine 최상위 키 config·date·groups·past·broken·missing, 문항 키 id·date·kind·text·input·options·state·value·note, 그룹 키 kind·items, config 키 source·unregistered·error — index.html 화면 코드 grep(`data.broken/groups/missing/past`, `g.items/kind`, `it.input/options/state/value/note/text/kind/date/id`, `m.what/reason`, `o.key/label`)과 하나도 빠짐없이 일치. 입력 모양: 설명=long, 복습=choice(known/unsure 채움), 재시험·원칙·샘플종류=line, 결정=choice(options 유지). 어제 문항은 rollover 뒤 past에서 state=skipped, broken=1. `/nav-counts` = {judge:0, review:0, routine:6, errors:{}} (오늘 미답 6과 일치). 질문함 파일 없음 설정: missing=[{what:질문함, reason:파일 없음}], routine=0. 서버 종료·임시 폴더 삭제 확인, `python3 -m unittest discover -s tests` 413 tests OK. 레포 git status는 phases index.json 하나뿐(러너 몫). 미확인: 브라우저 렌더(카드 모양·배지 눈 확인은 메인 세션이 가짜 데이터 서버로)",
+      "completed_at": "2026-11-12T21:01:03+0900"
     }
   ]
 }
