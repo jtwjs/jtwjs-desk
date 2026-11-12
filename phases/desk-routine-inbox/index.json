@@ -1,0 +1,53 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-routine-inbox",
+  "docs": "docs/desk-routine-inbox-2026-11-12",
+  "after": [
+    "desk-redesign-ui"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "name": "routine-mailbox-parse",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 2,
+      "name": "routine-config",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 3,
+      "name": "routine-mailbox-write",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 4,
+      "name": "count-nav-routine",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 5,
+      "name": "routine-endpoints",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 6,
+      "name": "routine-screen",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 7,
+      "name": "routine-integration-check",
+      "status": "pending",
+      "tdd": false,
+      "kind": "measure"
+    }
+  ]
+}
