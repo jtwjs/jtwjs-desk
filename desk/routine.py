@@ -12,7 +12,9 @@
 """
 import json
 import re
-from datetime import date
+import threading
+from datetime import date, datetime
+from pathlib import Path
 
 ANSWER_MAX_CHARS = 4000
 REVIEW_DEFAULT_OPTIONS = [{"key": "known", "label": "알았다"},
@@ -172,3 +174,77 @@ def unanswered_today_count(questions: dict, answers: dict, today: date) -> int:
     return sum(1 for q in questions.values()
                if date.fromisoformat(q["date"]) == today
                and question_state(q, answers) == "unanswered")
+
+
+# --- 답함 쓰기 껍질(파일 I/O). 답함에 쓰는 모든 경로가 _LOCK을 잡는다 -------------------
+# 서버가 ThreadingHTTPServer라 요청이 겹칠 수 있고, 마지막 줄이 이기는 규칙 때문에
+# 답 뒤에 건너뜀이 덧붙으면 답이 지워진다. 질문함은 desk가 절대 쓰지 않는다.
+_LOCK = threading.Lock()
+
+
+def read_text_or_none(path):
+    """파일 내용. 경로가 None이거나 없거나 못 읽으면 None(예외 없음)."""
+    if path is None:
+        return None
+    try:
+        return Path(path).read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _append_unlocked(answers_path, line: dict) -> None:
+    path = Path(answers_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(line, ensure_ascii=False) + "\n"
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, 2)
+            if f.tell() > 0:
+                f.seek(-1, 2)
+                if f.read(1) != b"\n":
+                    payload = "\n" + payload
+    except OSError:
+        pass
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(payload)
+
+
+def append_answer(answers_path, line: dict) -> None:
+    """답함에 JSON 한 줄을 한 번의 write로 덧붙인다. 끝 개행이 없으면 개행부터 쓴다."""
+    with _LOCK:
+        _append_unlocked(answers_path, line)
+
+
+def save_answer(questions_path, answers_path, body, now: datetime) -> list:
+    """검증 통과 시 answered 줄을 덧붙이고 [], 위반이면 쓰지 않고 위반 필드 목록."""
+    with _LOCK:
+        questions, _ = parse_questions(read_text_or_none(questions_path) or "")
+        qid = body.get("id") if isinstance(body, dict) else None
+        q = questions.get(qid) if isinstance(qid, str) else None
+        checked = {**body, "status": "answered"} if isinstance(body, dict) else body
+        bad = validate_answer(q, checked)
+        if bad:
+            return bad
+        line = {"id": qid, "status": "answered", "value": body["value"]}
+        if body.get("note") is not None:
+            line["note"] = body["note"]
+        line["at"] = now.isoformat()
+        _append_unlocked(answers_path, line)
+        return []
+
+
+def rollover(questions_path, answers_path, today: date, now: datetime) -> int:
+    """지난 날짜 + 답 줄이 하나도 없는 문항에만 skipped를 덧붙인다. 덧붙인 줄 수(멱등)."""
+    with _LOCK:
+        qtext = read_text_or_none(questions_path)
+        if qtext is None:
+            return 0
+        questions, _ = parse_questions(qtext)
+        answers, _ = parse_answers(read_text_or_none(answers_path) or "")
+        count = 0
+        for q in questions.values():
+            if date.fromisoformat(q["date"]) < today and q["id"] not in answers:
+                _append_unlocked(answers_path,
+                                 {"id": q["id"], "status": "skipped", "at": now.isoformat()})
+                count += 1
+        return count
