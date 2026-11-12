@@ -6,13 +6,57 @@
     "desk-routine-inbox"
   ],
   "steps": [
-    { "step": 1, "name": "trends-core", "status": "pending", "tdd": true },
-    { "step": 2, "name": "trends-config", "status": "pending", "tdd": true },
-    { "step": 3, "name": "trends-write", "status": "pending", "tdd": true },
-    { "step": 4, "name": "trends-get", "status": "pending", "tdd": true },
-    { "step": 5, "name": "trends-post", "status": "pending", "tdd": true },
-    { "step": 6, "name": "trends-screen-today", "status": "pending", "tdd": false },
-    { "step": 7, "name": "trends-screen-lists", "status": "pending", "tdd": false },
-    { "step": 8, "name": "trends-verify", "status": "pending", "tdd": false, "kind": "measure" }
+    {
+      "step": 1,
+      "name": "trends-core",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T00:37:57+0900",
+      "summary": "desk/trends.py 순수 함수: parse_items→(id→글,깨진수)·parse_reads→(set,깨진수)·parse_marks→(id→bool,깨진수)·split_items(items,reads,marks,today)→{today,past_unread}·heatmap(items,reads,today,days=365)→[{date,total,read}]·bookmark_list·unread_count; 글 모양 {id,date,title,url,summary,read,bookmarked}",
+      "completed_at": "2026-11-13T00:41:50+0900"
+    },
+    {
+      "step": 2,
+      "name": "trends-config",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 3,
+      "name": "trends-write",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 4,
+      "name": "trends-get",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 5,
+      "name": "trends-post",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 6,
+      "name": "trends-screen-today",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 7,
+      "name": "trends-screen-lists",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 8,
+      "name": "trends-verify",
+      "status": "pending",
+      "tdd": false,
+      "kind": "measure"
+    }
   ]
 }
