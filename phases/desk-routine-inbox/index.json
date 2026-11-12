@@ -9,8 +9,11 @@
     {
       "step": 1,
       "name": "routine-mailbox-parse",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T17:10:17+0900",
+      "summary": "desk/routine.py 순수 함수: parse_questions/parse_answers(text)->(id→마지막 줄 dict, 깨진 줄 수), input_shape, effective_options, question_state, validate_answer(q, body)->어긴 필드 목록, split_by_date(questions, answers, today)->{today, past}(각 문항에 input·options·state·value·note), group_by_kind->[{kind, items}], unanswered_today_count; 상수 ANSWER_MAX_CHARS=4000, REVIEW_DEFAULT_OPTIONS",
+      "completed_at": "2026-11-12T17:15:03+0900"
     },
     {
       "step": 2,
