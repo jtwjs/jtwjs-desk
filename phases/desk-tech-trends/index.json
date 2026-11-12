@@ -70,8 +70,11 @@
     {
       "step": 7,
       "name": "trends-screen-lists",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-13T01:19:23+0900",
+      "summary": "page/index.html: renderTrendsUnread(past_unread 날짜 내림차순 전체·줄=날짜/제목/요약 한 줄/링크/북마크)·renderTrendsBookmarks(칩 전체·안 읽음·읽음 건수, 줄 맨 오른쪽 북마크 열)·buildTrendRow(step 6의 onTrendRead/onTrendMark 재사용)·trendsListPrelude. 브라우저로 본 것: 안 읽은 글 13줄 내림차순+링크 클릭 시 줄 빠짐·배지 16→15·잔디 11-12 칸 read 2, 북마크 칩 4/3/1 건수대로 거름·버튼 맨 오른쪽, 북마크 0건·필터 0건·안 읽은 글 0건 문구 서로 다름, 북마크 글 읽어도 유지·끄면 줄 빠짐, reads/marks 비운 서버에서 토글 disabled+이유 한 줄(오늘·안 읽은 글·북마크), 쓰기 실패 서버에서 읽음·북마크 에러 줄 따로(줄 남고 읽음 상태 불변), 설정 없음·파일 없음·형식 확인 필요(+깨진 줄 2개)·오늘 0건 이유 행. 못 본 것: 실제 마우스 클릭(JS click 사용), 접힌 메뉴 점 모양, 키보드 포커스 링. 참고: 배지는 오늘 안 읽은 글도 센다(지난 글 0건이어도 3) — 보드 문구 '배지도 사라진다'는 뺐다. 읽음 기록·되돌릴 수 없다 안내 문구 없음. 테스트 518개 통과",
+      "completed_at": "2026-11-13T01:26:13+0900"
     },
     {
       "step": 8,
