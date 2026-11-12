@@ -17,7 +17,7 @@
 
 ## 작업
 
-러너가 이 step을 테스트 먼저 → 구현으로 한 호출에서 돌린다. **`page/server.py`의 `count_nav`와 새 테스트 파일 `tests/test_desk_server_navcounts_routine.py`만** 다룬다(기존 navcounts 테스트는 수정하지 않는다).
+러너가 이 step을 테스트 먼저 → 구현으로 한 호출에서 돌린다. **`page/server.py`의 `count_nav`, 새 테스트 파일 `tests/test_desk_server_navcounts_routine.py`, 그리고 아래 기존 단언 2곳만** 다룬다. 응답에 `routine` 키가 생기면 기존 테스트 둘이 키 집합을 정확히 단언해서 깨진다. 그 둘의 **단언만** `routine` 키를 허용하도록 고치고(`tests/test_desk_server_navcounts.py`의 `assertEqual(body, {"judge": 0, "review": 0})` → `routine`은 0을 포함해 비교, `tests/test_desk_redesign_integration.py`의 `set(counts) == {"judge", "review"}` → `routine` 포함), **이 두 수정은 RED 테스트 커밋에 새 테스트와 함께 넣는다**(구현 커밋에서 테스트 파일을 고치면 judge가 되돌린다). 다른 기존 테스트는 수정하지 않는다.
 
 - `count_nav(cfg)`의 반환에 `routine`(정수 | `None`)을 더한다: `desk.routine.unanswered_today_count`를 질문함·답함(설정 `routine_questions` · `routine_answers`)을 `read_text_or_none`으로 읽어 센다. 설정이 없거나(`None`) 질문함이 없으면 `0`
 - **항목별 격리**: `judge` · `review` · `routine` 각각을 따로 `try/except Exception`으로 감싼다. 한 항목이 예외를 내면 그 항목 값은 `None`이 되고 `routine_error` 식의 이유 키 하나(`{"judge": ..., "review": ..., "routine": None, "errors": {"routine": "<예외 이름 한 줄>"}}`처럼 `errors` 객체)를 붙인다. 예외 메시지 원문 · 경로는 싣지 않는다(`type(exc).__name__`만). 이유 키는 오류가 없으면 `errors`가 빈 객체이거나 아예 없다 — 하나로 정하고 그 모양을 테스트가 고정한다
@@ -32,7 +32,7 @@
 ## Acceptance Criteria
 
 - `.claude/harness.json`의 `verify.test`(`python3 -m unittest discover -s tests`) 통과. `typecheck` · `lint` · `build`는 이 레포에 없다
-- 새 테스트 단언: 설정이 없으면 `routine == 0` · 오늘 미답 문항 수를 센다(건너뜀·답함·지난 날짜·미래 날짜 제외) · 질문함이 깨져도 `judge` · `review`는 숫자가 나오고 `routine`만 `None` + 이유 · `judge`를 읽는 쪽이 예외를 내도(`unittest.mock.patch`로 `list_judgments`가 예외) `review` · `routine`은 나온다 · 기존 `/nav-counts` 테스트가 그대로 통과한다
+- 새 테스트 단언: 설정이 없으면 `routine == 0` · 오늘 미답 문항 수를 센다(건너뜀·답함·지난 날짜·미래 날짜 제외) · 질문함이 깨져도 `judge` · `review`는 숫자가 나오고 `routine`만 `None` + 이유 · `judge`를 읽는 쪽이 예외를 내도(`unittest.mock.patch`로 `list_judgments`가 예외) `review` · `routine`은 나온다 · 기존 `/nav-counts` 테스트가 위 단언 2곳 수정 외에는 그대로 통과한다
 - 엣지 5축: 빈 값 · 비정상 입력(깨진 질문함) · 실패 경로(항목 하나 예외) · 상태 전이(답하면 줄어듦) · 동시성(해당 없음 — 읽기 전용)
 
 ## 검증 절차
