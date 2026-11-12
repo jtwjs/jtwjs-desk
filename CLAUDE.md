@@ -9,7 +9,6 @@
 - **테스트 선행**: `tdd-guard` 훅은 이 레포에서 꺼져 있다(Python 짝 테스트 이름을 못 찾음, `harness.json` tdd 참고). 대신 sdd 러너가 git 기록으로 RED → GREEN을 판정한다. 무엇을 테스트하는지는 → [testing.md](.claude/rules/testing.md) §0
 - **hook 우회 금지** (`--no-verify` 등)
 - **PR은 `claude-harness:pr-write` 스킬로 만든다.** `gh pr create`를 직접 부르지 않는다
-- **push·이슈·PR은 gh 계정 jtwjs로.** 평소 계정(jtw-219)으로는 이 private 레포가 안 보인다. 끝나면 jtw-219로 되돌린다
 
 ## 검증
 
