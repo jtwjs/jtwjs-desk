@@ -61,8 +61,11 @@
     {
       "step": 6,
       "name": "trends-screen-today",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-13T01:09:18+0900",
+      "summary": "page/index.html: 메뉴 그룹 「기술 동향」(오늘·안 읽은 글·북마크, 그룹 펼침 일반화) · tab-trends · renderTrendsToday(카드 3+잔디 365칸 4단계) · fetchTrends · nav 배지 trends · renderTrendsUnread/Bookmarks 「준비 중」 자리. 잔디 색 l0 #2A303F · l1 rgba(52,211,153,0.40) · l2 rgba(52,211,153,0.70) · l3 #34D399(보드 값, success 기반 color-mix; 브리프의 accent 계열 아님). 북마크 버튼 꺼짐 bg #232837/테두리 #2A303F/글자 #B9BFCF/아이콘 외곽선 #959DB6, 켜짐 bg #2A303F/글자 #FFFFFF/아이콘 채움 #7C87F7. 브라우저로 본 것: 오늘 3건 카드+요약+잔디, 링크 읽음(POST 200→카드 읽음→오늘 칸 l1, 배지 6→5), 북마크 aria-pressed 전환, 배지, 설정 없음 이유 행, script/javascript: 무실행, 접힌 메뉴 부모 점 속성. 못 본 것: 실제 마우스 클릭(탭이 비활성이라 안 먹어 JS click으로 대체), 읽음/북마크 쓰기 실패 에러 줄, can_record_read=false·can_bookmark=false 화면, 파일 없음·형식 확인 필요·오늘 0건·깨진 줄 안내, 접힌 메뉴 점의 실제 렌더 모양. Finn 지시로 「읽음 기록·되돌릴 수 없다」류 안내 문구 삭제(오류·불가 사유 문구는 유지).",
+      "completed_at": "2026-11-13T01:19:19+0900"
     },
     {
       "step": 7,
