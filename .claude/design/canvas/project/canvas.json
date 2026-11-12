@@ -163,8 +163,16 @@
       "x": 2720,
       "y": 0,
       "w": 1280,
-      "h": 2400,
+      "h": 3100,
       "title": "상태 모음",
+      "page": "trends"
+    },
+    "Trends4Bookmarks.dc.html": {
+      "x": 4080,
+      "y": 0,
+      "w": 1280,
+      "h": 1500,
+      "title": "북마크",
       "page": "trends"
     }
   },
@@ -185,7 +193,8 @@
     "Screen6Health.dc.html",
     "Trends1Today.dc.html",
     "Trends2Unread.dc.html",
-    "Trends3States.dc.html"
+    "Trends3States.dc.html",
+    "Trends4Bookmarks.dc.html"
   ],
   "notes": {},
   "designSystems": []
