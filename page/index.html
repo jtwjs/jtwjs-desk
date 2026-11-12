@@ -574,6 +574,7 @@
     </div>
     <button type="button" class="menu-item" data-tab="weekly" aria-label="주간 롤업"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="label">주간 롤업</span><span class="tip" role="tooltip">주간 롤업</span></button>
     <button type="button" class="menu-item" data-tab="health" aria-label="레포 건강도"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="label">레포 건강도</span><span class="tip" role="tooltip">레포 건강도</span></button>
+    <button type="button" class="menu-item" data-tab="routine" aria-label="회고"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span class="label">회고</span><span class="badge-count" data-badge="routine"></span><span class="tip" role="tooltip">회고</span></button>
   </div>
 </nav>
 <main>
@@ -594,6 +595,9 @@
   </section>
   <section id="tab-health" class="tab-panel" hidden>
     <div id="health-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-routine" class="tab-panel" hidden>
+    <div id="routine-content"><p class="empty-msg">불러오는 중…</p></div>
   </section>
 </main>
 <div id="banner" hidden></div>
@@ -625,7 +629,8 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     review: document.getElementById("tab-review"),
     comp: document.getElementById("tab-comp"),
     weekly: document.getElementById("tab-weekly"),
-    health: document.getElementById("tab-health")
+    health: document.getElementById("tab-health"),
+    routine: document.getElementById("tab-routine")
   };
   var activeTab = "track";
   var activeSub = "workflow";
@@ -661,7 +666,9 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     });
     if (target === "comp") setCompOpen(true);
     syncMenu();
-    loadVisibleExtra();
+    // 회고는 탭이 선택될 때만 rollover(POST) 뒤 GET. 폴링은 GET만(loadVisibleExtra).
+    if (target === "routine") fetchRoutine(true);
+    else loadVisibleExtra();
   }
 
   tabItems.forEach(function (btn) {
@@ -1325,7 +1332,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     return out;
   }
 
-  var lastExtra = { review: null, comp: null };
+  var lastExtra = { review: null, comp: null, routine: null };
   var reviewErrors = {};
 
   function renderReview(data) {
@@ -1637,6 +1644,211 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     if (mt) { box.appendChild(sectionTitle("채점하지 못한 레포")); box.appendChild(mt); }
   }
 
+  // ---- 회고 화면 ----
+  // 서버가 준 input("choice" | "long" | "line")만 보고 그린다. 종류 이름으로 분기하지 않는다.
+  // 서버가 준 문자열은 전부 textContent로만 넣는다.
+
+  var ROUTINE_STATE_LABEL = {
+    unanswered: ["미답", "attention"],
+    answered: ["답함", "success"],
+    skipped: ["건너뜀", "neutral"]
+  };
+  var routineDrafts = {};
+
+  function routineDraft(it) {
+    if (!routineDrafts[it.id]) {
+      routineDrafts[it.id] = {
+        choice: it.input === "choice" && it.value ? it.value : null,
+        value: it.value || "",
+        note: it.note || "",
+        saving: false,
+        error: ""
+      };
+    }
+    return routineDrafts[it.id];
+  }
+
+  function saveRoutine(it, draft, errorEl, syncActions) {
+    var value = it.input === "choice" ? draft.choice : String(draft.value || "").trim();
+    function fail(msg) {
+      draft.saving = false;
+      draft.error = msg;
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+      syncActions();
+    }
+    if (!value) {
+      fail(it.input === "choice" ? "선택지를 골라야 한다." : "답을 입력해야 한다.");
+      return;
+    }
+    var body = { id: it.id, value: value };
+    var note = String(draft.note || "").trim();
+    if (note) body.note = note;
+    draft.saving = true;
+    draft.error = "";
+    errorEl.hidden = true;
+    syncActions();
+    fetch("/routine/answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Desk-Token": DESK_TOKEN },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        if (res.status === 200) {
+          delete routineDrafts[it.id];
+          fetchRoutine(false);
+          return;
+        }
+        if (res.status === 403) {
+          draft.saving = false;
+          syncActions();
+          showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
+          return;
+        }
+        if (res.status === 404) { fail("저장하지 못했다: 질문함에서 이 문항을 찾지 못했다. 입력한 내용은 그대로 두었다."); return; }
+        return res.json().then(function (data) {
+          var msg = (data && data.violations && data.violations.join(", ")) || (data && data.error) || "저장하지 못했다";
+          fail("저장하지 못했다: " + msg + ". 입력한 내용은 그대로 두었다.");
+        }, function () { fail("저장하지 못했다. 입력한 내용은 그대로 두었다."); });
+      })
+      .catch(function () {
+        fail("저장하지 못했다: 서버에 연결되지 않았다. 입력한 내용은 그대로 두었다.");
+      });
+  }
+
+  function buildRoutineCard(it) {
+    var draft = routineDraft(it);
+    var st = ROUTINE_STATE_LABEL[it.state] || ROUTINE_STATE_LABEL.unanswered;
+    var kids = [
+      el("div", { class: "dc-head" }, [
+        el("div", {}, [
+          el("div", { class: "dc-title", text: it.text || "" }),
+          el("div", { class: "dc-meta", text: [it.kind, it.date].filter(Boolean).join(" · ") })
+        ]),
+        statusDotLabel(st[0], st[1])
+      ])
+    ];
+    var errorEl = el("p", { class: "dc-error", role: "alert" });
+    errorEl.hidden = !draft.error;
+    errorEl.textContent = draft.error;
+    var saveBtn = button(it.state === "answered" ? "고쳐서 저장" : "저장", null, "accent", true);
+
+    function syncActions() {
+      saveBtn.disabled = draft.saving;
+      if (draft.saving) saveBtn.textContent = "저장 중…";
+      else saveBtn.textContent = it.state === "answered" ? "고쳐서 저장" : "저장";
+    }
+
+    var noteInput = null;
+    if (it.input === "choice") {
+      var opts = (it.options || []).map(function (o) {
+        var b = el("button", { class: "dc-opt", type: "button", role: "radio" }, [
+          el("span", { class: "dc-radio", "aria-hidden": "true" }),
+          el("span", { text: o.label || o.key || "" })
+        ]);
+        return { key: o.key, btn: b };
+      });
+      var syncOpts = function () {
+        opts.forEach(function (o) {
+          var on = draft.choice === o.key;
+          o.btn.classList.toggle("picked", on);
+          o.btn.setAttribute("aria-checked", on ? "true" : "false");
+        });
+      };
+      opts.forEach(function (o) {
+        o.btn.addEventListener("click", function () {
+          if (draft.saving) return;
+          draft.choice = o.key;
+          syncOpts();
+        });
+      });
+      syncOpts();
+      kids.push(el("div", { class: "dc-options", role: "radiogroup", "aria-label": "선택지" }, opts.map(function (o) { return o.btn; })));
+      noteInput = el("input", { type: "text", placeholder: "이유(선택)", "aria-label": "이유" });
+      noteInput.value = draft.note;
+      noteInput.addEventListener("input", function () { draft.note = noteInput.value; });
+      kids.push(el("div", { class: "dc-note-row" }, [noteInput]));
+    } else if (it.input === "long") {
+      var ta = el("textarea", { placeholder: "여러 줄로 쓴다", "aria-label": "답" });
+      ta.value = draft.value;
+      ta.addEventListener("input", function () { draft.value = ta.value; });
+      kids.push(ta);
+    } else {
+      var line = el("input", { type: "text", placeholder: "한 줄로 쓴다", "aria-label": "답" });
+      line.value = draft.value;
+      line.addEventListener("input", function () { draft.value = line.value; });
+      kids.push(el("div", { class: "dc-note-row" }, [line]));
+    }
+
+    kids.push(errorEl);
+    saveBtn.addEventListener("click", function () {
+      if (draft.saving) return;
+      saveRoutine(it, draft, errorEl, syncActions);
+    });
+    syncActions();
+    kids.push(el("div", { class: "dc-actions" }, [saveBtn]));
+    return el("div", { class: "decision-card" }, kids);
+  }
+
+  function renderRoutine(data) {
+    lastExtra.routine = data;
+    var container = document.getElementById("routine-content");
+    // 글을 쓰는 중이면 폴링이 입력칸을 지우지 않도록 다음 주기로 미룬다.
+    var active = document.activeElement;
+    if (active && container.contains(active) && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) return;
+
+    var box = screenBox("routine-content", "회고", "오늘 문항에 답한다. 못 답한 날은 건너뜀으로 남고, 지금이라도 답할 수 있다.", data.config);
+    var groups = data.groups || [];
+    var past = data.past || [];
+    var missing = data.missing || [];
+
+    missing.forEach(function (m) {
+      box.appendChild(emptyStateCard(String(m.what || "확인 필요") + ": " + String(m.reason || "확인 필요"), "설정과 파일을 확인하면 이 자리에 문항이 나타난다."));
+    });
+    if (data.broken > 0) {
+      box.appendChild(inlineNote("깨진 줄 " + data.broken + "개 건너뜀", "attention"));
+    }
+    if (groups.length === 0 && missing.length === 0) {
+      box.appendChild(emptyStateCard("오늘 문항 없음", "새 문항이 올라오면 이 자리에 나타난다."));
+    }
+    groups.forEach(function (g) {
+      box.appendChild(sectionTitle(String(g.kind || "")));
+      var grid = el("div", { class: "card-grid" });
+      (g.items || []).forEach(function (it) { grid.appendChild(buildRoutineCard(it)); });
+      box.appendChild(grid);
+    });
+    if (past.length > 0) {
+      box.appendChild(sectionTitle("지난 건너뜀"));
+      var pgrid = el("div", { class: "card-grid" });
+      past.forEach(function (it) { pgrid.appendChild(buildRoutineCard(it)); });
+      box.appendChild(pgrid);
+    }
+  }
+
+  // withRollover: 탭이 선택될 때만 true. rollover(POST)가 끝난 뒤 GET을 부른다(실패해도 GET은 부른다).
+  function fetchRoutine(withRollover) {
+    function get() {
+      fetch("/routine")
+        .then(function (res) {
+          if (!res.ok) throw new Error("routine " + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          if (activeTab !== "routine") return;
+          renderRoutine(data);
+        })
+        .catch(function () {
+          // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+        });
+    }
+    if (!withRollover) { get(); return; }
+    fetch("/routine/rollover", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Desk-Token": DESK_TOKEN },
+      body: "{}"
+    }).then(get, get);
+  }
+
   function fetchExtra(tab) {
     var url;
     var render;
@@ -1667,12 +1879,14 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   // 보이는 확장 탭 하나만 부른다(ADR-010). 트랙 · 판정은 아래 기존 polling이 맡는다.
   function loadVisibleExtra() {
     if (activeTab === "track" || activeTab === "judge") return;
+    if (activeTab === "routine") { fetchRoutine(false); return; }
     fetchExtra(activeTab);
   }
 
   // ---- 메뉴 배지 (ADR-014(임시)) — 메뉴는 항상 보이므로 탭 폴링과 별개로 부른다 ----
 
   var navCounts = { judge: 0, review: 0 };
+  var routineBadge = { n: 0, reason: "" };
 
   function renderNavBadges() {
     ["judge", "review"].forEach(function (key) {
@@ -1686,6 +1900,19 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         else item.removeAttribute("data-has-badge");
       }
     });
+    // 회고: 숫자가 null이면 배지를 숨기고 항목 툴팁(title)에 이유를 준다.
+    var rb = document.querySelector('[data-badge="routine"]');
+    if (rb) {
+      var rn = routineBadge.n;
+      rb.textContent = typeof rn === "number" && rn > 0 ? String(rn) : "";
+      var ritem = rb.closest(".menu-item");
+      if (ritem) {
+        if (typeof rn === "number" && rn > 0) ritem.setAttribute("data-has-badge", "1");
+        else ritem.removeAttribute("data-has-badge");
+        if (rn === null && routineBadge.reason) ritem.setAttribute("title", "미답 수를 세지 못했다: " + routineBadge.reason);
+        else ritem.removeAttribute("title");
+      }
+    }
   }
 
   function fetchNavCounts() {
@@ -1701,6 +1928,13 @@ const DESK_TOKEN = "__DESK_TOKEN__";
             navCounts[key] = v;
           }
         });
+        var rv = data && data.routine;
+        if (rv === null) {
+          var why = data.errors && data.errors.routine;
+          routineBadge = { n: null, reason: typeof why === "string" ? why : "" };
+        } else if (typeof rv === "number" && isFinite(rv) && rv >= 0 && Math.floor(rv) === rv) {
+          routineBadge = { n: rv, reason: "" };
+        }
         renderNavBadges();
       })
       .catch(function () { /* 배지는 부가 정보 — 마지막 값 유지, 에러 줄 없음 */ });
