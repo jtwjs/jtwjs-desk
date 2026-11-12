@@ -2143,7 +2143,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     var on = it.bookmarked === true;
     var bm = el("button", { class: "bm-btn", type: "button", "aria-pressed": on ? "true" : "false", "data-trend-id": String(it.id), "data-trend-kind": "mark" });
     bm.appendChild(bookmarkIcon());
-    bm.appendChild(document.createTextNode(on ? "북마크됨" : "북마크"));
+    bm.appendChild(document.createTextNode("북마크"));
     if (!data.can_bookmark) bm.disabled = true;
     else bm.addEventListener("click", function () { onTrendMark(it); });
     var right = [bm];
@@ -2234,7 +2234,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     });
     if (data.broken > 0) box.appendChild(inlineNote("깨진 줄 " + data.broken + "개 건너뜀", "attention"));
     if (missing.length > 0) return;
-    var today = (data.today || []).slice(0, 3);
+    var today = data.today || [];
     if (today.length === 0) {
       box.appendChild(emptyStateCard("오늘 동향 0건", "오늘 글이 올라오면 이 자리에 나타난다."));
     } else {
@@ -2263,7 +2263,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     var on = it.bookmarked === true;
     var bm = el("button", { class: "bm-btn tr-bm", type: "button", "aria-pressed": on ? "true" : "false", "data-trend-id": String(it.id), "data-trend-kind": "mark" });
     bm.appendChild(bookmarkIcon());
-    bm.appendChild(document.createTextNode(on ? "북마크됨" : "북마크"));
+    bm.appendChild(document.createTextNode("북마크"));
     if (!data.can_bookmark) bm.disabled = true;
     else bm.addEventListener("click", function () { onTrendMark(it); });
 

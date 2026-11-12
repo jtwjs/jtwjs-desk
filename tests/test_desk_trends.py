@@ -186,6 +186,11 @@ class 잔디를_계산할_때(unittest.TestCase):
         self.assertEqual(cell["read"], 3)
         self.assertEqual(cell["total"], 4)
 
+    def test_오늘_글이_4건이면_split은_4건을_다_준다(self):
+        items = items_of(*[item(f"n{i}", "2026-11-13") for i in range(4)])
+        out = trends.split_items(items, set(), {}, TODAY)
+        self.assertEqual(len(out["today"]), 4)
+
     def test_기간_밖_날짜와_미래_글은_칸에_안_들어간다(self):
         items = items_of(item("old", "2020-01-01"), item("fut", "2026-11-14"))
         cells = trends.heatmap(items, {"old", "fut"}, TODAY)
