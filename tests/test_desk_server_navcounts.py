@@ -16,7 +16,8 @@ class 통합_GET_nav_counts(_ReviewCase):
     def test_아무것도_없으면_0_0이다(self):
         status, body = self._get("/nav-counts")
         self.assertEqual(status, 200)
-        self.assertEqual(body, {"judge": 0, "review": 0})
+        self.assertEqual({k: body[k] for k in ("judge", "review", "routine")},
+                         {"judge": 0, "review": 0, "routine": 0})
 
     def test_pick이_없는_카드만_judge로_센다(self):
         self._write_ask("repo-a", "ask-1")
