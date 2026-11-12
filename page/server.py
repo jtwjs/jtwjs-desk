@@ -718,6 +718,14 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._handle_review_done()
             return
 
+        if parsed.path == "/trends/read":
+            self._handle_trends_write(mark=False)
+            return
+
+        if parsed.path == "/trends/mark":
+            self._handle_trends_write(mark=True)
+            return
+
         if parsed.path == "/routine/answer":
             self._handle_routine_answer()
             return
@@ -773,6 +781,42 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             {"at": datetime.now().isoformat()},
         )
         self._send_json(200, {"ok": True})
+
+    def _handle_trends_write(self, mark: bool):
+        """POST /trends/read · /trends/mark — 읽음·북마크 한 줄 덧붙이기(멱등, ADR-009)."""
+        if not self._check_post_guard():
+            return
+        try:
+            body = self._read_json_body()
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._send_json(400, {"error": "bad json"})
+            return
+        cfg = config.load_config()
+        target = cfg.get("trends_marks" if mark else "trends_reads")
+        if cfg.get("trends_items") is None or target is None:
+            self._send_json(400, {"error": "not configured"})
+            return
+        item_id = body.get("id") if isinstance(body, dict) else None
+        if not isinstance(item_id, str) or not item_id:
+            self._send_json(400, {"error": "bad id"})
+            return
+        try:
+            if mark:
+                on = body.get("on")
+                if not isinstance(on, bool):
+                    self._send_json(400, {"error": "bad on"})
+                    return
+                result = trends.record_mark(cfg["trends_items"], target, item_id, on,
+                                            datetime.now())
+            else:
+                result = trends.record_read(cfg["trends_items"], target, item_id, datetime.now())
+        except OSError:
+            self._send_json(500, {"error": "write failed"})
+            return
+        if result == "unknown_id":
+            self._send_json(400, {"error": "unknown id"})
+            return
+        self._send_json(200, {"ok": True, "changed": result == "ok"})
 
     def _handle_routine_answer(self):
         if not self._check_post_guard():
