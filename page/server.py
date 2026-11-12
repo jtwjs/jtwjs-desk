@@ -713,6 +713,10 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": "repo/id required"})
             return
 
+        if not valid_repo_name(repo) or not valid_repo_name(id_):
+            self._send_json(400, {"error": "bad repo/id"})
+            return
+
         ask_path = paths.inbox_dir(repo) / f"{id_}.json"
         if not ask_path.exists():
             self._send_json(404, {"error": "ask not found"})
