@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, config, ledger, paths, rollup, sort, validate  # noqa: E402
+from desk import atomic, config, ledger, paths, rollup, routine, sort, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
@@ -443,10 +443,33 @@ def list_judgments(repo: str | None = None) -> list:
 
 
 def count_nav(cfg: dict) -> dict:
-    """메뉴 배지 건수 — 판정 = pick 없는 카드 수, 복습 = 대기 items 수. 읽기만 한다(ADR-009)."""
-    judge = sum(1 for c in list_judgments() if "pick" not in c)
-    review = 0 if cfg["source"] == "none" else len(build_review(cfg)["items"])
-    return {"judge": judge, "review": review}
+    """메뉴 배지 건수 — 판정 = pick 없는 카드 수, 복습 = 대기 items 수, 루틴 = 오늘 미답 문항 수.
+
+    읽기만 한다(ADR-009). 항목별로 격리한다 — 한 항목이 예외를 내면 그 값은 None이고
+    errors[항목]에 예외 이름만 싣는다(메시지·경로 없음). 오류가 없으면 errors는 빈 객체다.
+    """
+    errors = {}
+
+    def isolated(name, fn):
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001 — 항목 하나가 전체 응답을 죽이지 않게
+            errors[name] = type(exc).__name__
+            return None
+
+    def count_routine():
+        q_text = routine.read_text_or_none(cfg.get("routine_questions"))
+        if q_text is None:
+            return 0
+        questions, _ = routine.parse_questions(q_text)
+        a_text = routine.read_text_or_none(cfg.get("routine_answers"))
+        answers, _ = routine.parse_answers(a_text) if a_text is not None else ({}, 0)
+        return routine.unanswered_today_count(questions, answers, _today())
+
+    judge = isolated("judge", lambda: sum(1 for c in list_judgments() if "pick" not in c))
+    review = isolated("review", lambda: 0 if cfg["source"] == "none" else len(build_review(cfg)["items"]))
+    return {"judge": judge, "review": review,
+            "routine": isolated("routine", count_routine), "errors": errors}
 
 
 def spawn_pick_candidate(body: dict) -> dict:
