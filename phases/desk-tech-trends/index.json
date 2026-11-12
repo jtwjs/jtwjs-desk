@@ -1,0 +1,18 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-tech-trends",
+  "docs": "docs/desk-tech-trends-2026-11-12",
+  "after": [
+    "desk-routine-inbox"
+  ],
+  "steps": [
+    { "step": 1, "name": "trends-core", "status": "pending", "tdd": true },
+    { "step": 2, "name": "trends-config", "status": "pending", "tdd": true },
+    { "step": 3, "name": "trends-write", "status": "pending", "tdd": true },
+    { "step": 4, "name": "trends-get", "status": "pending", "tdd": true },
+    { "step": 5, "name": "trends-post", "status": "pending", "tdd": true },
+    { "step": 6, "name": "trends-screen-today", "status": "pending", "tdd": false },
+    { "step": 7, "name": "trends-screen-lists", "status": "pending", "tdd": false },
+    { "step": 8, "name": "trends-verify", "status": "pending", "tdd": false, "kind": "measure" }
+  ]
+}
