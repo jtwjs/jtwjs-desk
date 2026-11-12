@@ -90,8 +90,11 @@
     {
       "step": 10,
       "name": "health-send-grade-color",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T13:46:30+0900",
+      "summary": "page/server.py build_repo_health가 parse_score의 grade_color가 있을 때만 점수 행에 같은 값으로 전달(없거나 모르는 색이면 키 없음, missing 행 불변). tests/test_desk_server_weekly.py에 3개 추가, 테스트 297개 통과",
+      "completed_at": "2026-11-12T13:49:50+0900"
     }
   ],
   "reviews": [
