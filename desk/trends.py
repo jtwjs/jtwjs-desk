@@ -11,7 +11,11 @@
 """
 import json
 import re
-from datetime import date, timedelta
+import threading
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+from desk import routine
 
 HEATMAP_DAYS = 365
 HEATMAP_MAX = 3
@@ -134,3 +138,53 @@ def unread_count(items: dict, reads, today: date) -> int:
     """미래 글을 뺀, 동향에 있고 읽음 집합에 없는 글 수."""
     return sum(1 for row in items.values()
                if date.fromisoformat(row["date"]) <= today and row["id"] not in reads)
+
+
+# --- 쓰기 껍질(파일 I/O). 읽음 · 북마크 파일에 쓰는 모든 경로가 _LOCK을 잡는다 -------------
+# 서버가 ThreadingHTTPServer라 요청이 겹칠 수 있다. 락 안에서 파일을 다시 읽어 멱등을 지킨다.
+# 동향 파일은 wiki가 쓰고 desk는 읽기만 한다. OSError는 삼키지 않고 올린다(서버가 500으로 바꾼다).
+_LOCK = threading.Lock()
+
+
+def _append_line(path: Path, line: dict) -> None:
+    """JSON 한 줄을 한 번의 write로 덧붙인다. 끝 개행이 없으면 개행부터. 락은 호출자가 잡는다."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(line, ensure_ascii=False) + "\n"
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, 2)
+            if f.tell() > 0:
+                f.seek(-1, 2)
+                if f.read(1) != b"\n":
+                    payload = "\n" + payload
+    except OSError:
+        pass
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(payload)
+
+
+def record_read(items_path, reads_path, item_id: str, now: datetime) -> str:
+    """"unknown_id"(동향에 없음) · "duplicate"(이미 읽음) · "ok"(한 줄 덧붙임)."""
+    with _LOCK:
+        items, _ = parse_items(routine.read_text_or_none(items_path) or "")
+        if item_id not in items:
+            return "unknown_id"
+        reads, _ = parse_reads(routine.read_text_or_none(reads_path) or "")
+        if item_id in reads:
+            return "duplicate"
+        _append_line(reads_path, {"id": item_id, "at": now.isoformat()})
+        return "ok"
+
+
+def record_mark(items_path, marks_path, item_id: str, on: bool, now: datetime) -> str:
+    """"unknown_id" · "same"(현재 상태가 on과 같음, 없으면 꺼짐) · "ok"(한 줄 덧붙임)."""
+    with _LOCK:
+        items, _ = parse_items(routine.read_text_or_none(items_path) or "")
+        if item_id not in items:
+            return "unknown_id"
+        marks, _ = parse_marks(routine.read_text_or_none(marks_path) or "")
+        if bool(marks.get(item_id, False)) == on:
+            return "same"
+        _append_line(marks_path, {"id": item_id, "on": on, "at": now.isoformat()})
+        return "ok"
