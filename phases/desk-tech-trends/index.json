@@ -37,7 +37,17 @@
       "step": 4,
       "name": "trends-get",
       "status": "pending",
-      "tdd": true
+      "tdd": true,
+      "started_at": "2026-11-13T00:50:05+0900",
+      "base": "1224c8c6fd81ad7921ad61ab79cb7c4858835835",
+      "attempts": [
+        {
+          "at": "2026-11-13T00:56:11+0900",
+          "error": "GREEN: 테스트 파일을 고쳤다(되돌림): tests/test_desk_redesign_integration.py — 테스트는 그대로 두고 구현을 고친다"
+        }
+      ],
+      "retries": 1,
+      "last_error": "GREEN: 테스트 파일을 고쳤다(되돌림): tests/test_desk_redesign_integration.py — 테스트는 그대로 두고 구현을 고친다"
     },
     {
       "step": 5,

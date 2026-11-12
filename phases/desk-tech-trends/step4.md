@@ -31,6 +31,7 @@
 - `missing` 이유는 구분한다: `trends_items`가 None이면 `{"what":"동향","reason":"설정 없음"}`, 파일이 없으면 `"파일 없음"`, 읽을 수 없거나 파싱 결과가 전부 깨졌으면 `"형식 확인 필요"`. 설정이 있고 읽었는데 오늘 글이 0건이면 `missing`은 비고 `today`가 `[]`다(화면이 「오늘 동향 0건」을 그린다). 이 경우에도 응답은 200이고 서버는 죽지 않는다
 - `trends_reads` · `trends_marks`가 None이면 해당 파일은 빈 것으로 취급하고 `can_record_read`/`can_bookmark`가 false다. 파일이 없을 뿐이면(설정은 있음) 빈 것으로 취급하고 can_*는 true
 - `GET /nav-counts` 응답에 키 **`trends`**(= `unread_count`) 하나를 더한다. `isolated`로 격리 — 이 값을 못 구하면 `trends: null`과 `errors["trends"]`만 바뀌고 `judge` · `review` · `routine`은 그대로다. 기존 키와 동작은 바뀌지 않는다
+- **기존 테스트 한 줄**: `tests/test_desk_redesign_integration.py` 36행의 `/nav-counts` 키 집합 단언(`{"judge","review","routine","errors"}`)에 `"trends"`를 더해야 전체가 통과한다. 이 수정은 **반드시 RED 커밋(테스트만 담은 커밋)에 넣는다** — GREEN 단계에서 테스트 파일을 고치면 러너가 되돌리고 실패시킨다(step 4 1회차 실측)
 
 ## 작업
 
