@@ -24,6 +24,10 @@
     {
       "id": "screens",
       "name": "작업: 화면"
+    },
+    {
+      "id": "trends",
+      "name": "작업: 기술 동향"
     }
   ],
   "boards": {
@@ -138,6 +142,30 @@
       "h": 760,
       "title": "레포 건강도",
       "page": "screens"
+    },
+    "Trends1Today.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 1160,
+      "title": "오늘 (정상)",
+      "page": "trends"
+    },
+    "Trends2Unread.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 820,
+      "title": "안 읽은 글",
+      "page": "trends"
+    },
+    "Trends3States.dc.html": {
+      "x": 2720,
+      "y": 0,
+      "w": 1280,
+      "h": 1880,
+      "title": "상태 모음",
+      "page": "trends"
     }
   },
   "order": [
@@ -154,7 +182,10 @@
     "Screen3Review.dc.html",
     "Screen4Competency.dc.html",
     "Screen5Weekly.dc.html",
-    "Screen6Health.dc.html"
+    "Screen6Health.dc.html",
+    "Trends1Today.dc.html",
+    "Trends2Unread.dc.html",
+    "Trends3States.dc.html"
   ],
   "notes": {},
   "designSystems": []
