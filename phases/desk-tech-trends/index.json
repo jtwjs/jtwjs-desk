@@ -52,8 +52,11 @@
     {
       "step": 5,
       "name": "trends-post",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T01:03:53+0900",
+      "summary": "page/server.py: POST /trends/read {id} · /trends/mark {id,on} → 200 {ok,changed}(멱등) · 400 not configured/bad id/bad on/unknown id/bad json · 403 가드 · 500 write failed; tests/test_desk_server_trends_post.py",
+      "completed_at": "2026-11-13T01:09:09+0900"
     },
     {
       "step": 6,
