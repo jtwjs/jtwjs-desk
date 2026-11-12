@@ -54,8 +54,11 @@
     {
       "step": 6,
       "name": "routine-screen",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-12T20:30:19+0900",
+      "summary": "page/index.html에 '회고' 메뉴(data-tab=routine, 배지 data-badge=routine, null이면 숨김+title 이유)와 화면 추가: 탭 선택 시 POST /routine/rollover 후 GET /routine(폴링은 GET만), input(choice/long/line)만 보고 카드 렌더, POST /routine/answer 저장(400 violations 카드 내 표시·입력 유지·중복 클릭 방지), missing·broken·지난 건너뜀 구역, 종류 이름은 모든 카드 머리에 표시. 함수 renderRoutine·fetchRoutine·buildRoutineCard. 미확인: 브라우저 렌더",
+      "completed_at": "2026-11-12T20:49:48+0900"
     },
     {
       "step": 7,
