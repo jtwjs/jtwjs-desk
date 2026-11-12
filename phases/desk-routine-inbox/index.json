@@ -36,8 +36,11 @@
     {
       "step": 4,
       "name": "count-nav-routine",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-12T17:37:51+0900",
+      "summary": "page/server.py count_nav(cfg)가 {judge, review, routine, errors}를 반환(항목별 try/except, 실패 항목은 None + errors[항목]=예외 이름, 오류 없으면 errors={}). routine=오늘 미답 수(설정·질문함 없으면 0). 테스트 tests/test_desk_server_navcounts_routine.py, 기존 단언 2곳 routine 허용.",
+      "completed_at": "2026-11-12T17:42:29+0900"
     },
     {
       "step": 5,
