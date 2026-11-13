@@ -528,6 +528,12 @@
   .hyp-legend .lg.wrong { background: var(--danger); }
   .hyp-legend .lg.pending { border: 1px solid var(--neutral); }
   .hyp-card .hc-noreason { font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--surface-raised); padding-top: 8px; }
+  .hyp-diff { display: flex; flex-direction: column; gap: 8px; }
+  .hyp-diff .hd-title { font-size: 13px; font-weight: 600; color: var(--text-strong); }
+  .hyp-diff table { border-collapse: collapse; font-size: 13px; align-self: flex-start; }
+  .hyp-diff th { font-weight: 400; color: var(--text-muted); text-align: right; padding: 4px 16px; }
+  .hyp-diff th.hd-corner, .hyp-diff th.hd-row { text-align: left; padding-left: 0; }
+  .hyp-diff td { color: var(--text-body); text-align: right; padding: 4px 16px; font-variant-numeric: tabular-nums; }
   button.hyp-toggle {
     appearance: none; border: 0; width: 100%; text-align: left; font: inherit; font-size: 13px; line-height: 1.4; cursor: pointer;
   }
@@ -1803,6 +1809,24 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     ]);
   }
 
+  var HYP_DIFF_ROWS = [["easy", "쉬움"], ["mid", "보통"], ["hard", "어려움"], ["none", "미정"]];
+  var HYP_DIFF_COLS = [["right", "맞음"], ["partial", "부분"], ["wrong", "틀림"], ["pending", "판정 전"]];
+
+  // 서버가 센 난이도 × 상태 건수를 그대로 그린다(합계 · 비율 · 판정 색 없음).
+  function hypDiffTable(diff) {
+    var head = el("tr", {}, [el("th", { class: "hd-corner", scope: "col", text: "" })].concat(
+      HYP_DIFF_COLS.map(function (c) { return el("th", { scope: "col", text: c[1] }); })));
+    var rows = HYP_DIFF_ROWS.map(function (r) {
+      var line = diff[r[0]] || {};
+      return el("tr", {}, [el("th", { class: "hd-row", scope: "row", text: r[1] })].concat(
+        HYP_DIFF_COLS.map(function (c) { return el("td", { text: String(line[c[0]] === undefined ? 0 : line[c[0]]) }); })));
+    });
+    return el("div", { class: "hyp-diff" }, [
+      el("div", { class: "hd-title", text: "난이도별 적중" }),
+      el("table", {}, [el("thead", {}, [head]), el("tbody", {}, rows)])
+    ]);
+  }
+
   function renderHypBand(band) {
     var focusToggle = document.activeElement && document.activeElement.id === "hyp-broken-toggle";
     clear(band);
@@ -1836,6 +1860,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     band.appendChild(el("div", { class: "hyp-cards" }, HYP_AREAS.map(function (pair) {
       return hypCard(pair[1], areas[pair[0]] || {}, mode);
     })));
+    if (mode === "ok" && d.diff && typeof d.diff === "object") band.appendChild(hypDiffTable(d.diff));
 
     if (mode === "ok" || mode === "empty") {
       var broken = Array.isArray(d.broken) ? d.broken : [];
