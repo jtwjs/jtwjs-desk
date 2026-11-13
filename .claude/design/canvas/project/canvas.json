@@ -20,10 +20,6 @@
     {
       "id": "comp",
       "name": "컴포넌트"
-    },
-    {
-      "id": "work1",
-      "name": "작업: 미정 항목 정리"
     }
   ],
   "boards": {
@@ -82,14 +78,6 @@
       "h": 900,
       "title": "상태 모음",
       "page": "comp"
-    },
-    "Work1.dc.html": {
-      "x": 0,
-      "y": 0,
-      "w": 1280,
-      "h": 1640,
-      "title": "미정 4가지 시안",
-      "page": "work1"
     },
     "Screen1Track.dc.html": {
       "x": 0,
@@ -196,7 +184,6 @@
     "Data.dc.html",
     "Judge.dc.html",
     "States.dc.html",
-    "Work1.dc.html",
     "Screen1Track.dc.html",
     "Screen2Judge.dc.html",
     "Screen3Review.dc.html",
