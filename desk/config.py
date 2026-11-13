@@ -50,6 +50,8 @@ def load_config() -> dict:
         "trends_items": None,
         "trends_reads": None,
         "trends_marks": None,
+        "hypothesis_ledger": None,
+        "hypothesis_streak_threshold": None,
         "error": None,
     }
     try:
@@ -106,12 +108,20 @@ def load_config() -> dict:
                 "trends_items",
                 "trends_reads",
                 "trends_marks",
+                "hypothesis_ledger",
             ):
                 if key in data:
                     if not isinstance(data[key], str):
                         errors.append(f"{key} 타입 오류")
                     else:  # 빈 문자열은 설정 없음(None)
                         result[key] = _path(data[key])
+            if "hypothesis_streak_threshold" in data:
+                n = data["hypothesis_streak_threshold"]
+                # bool은 int의 하위 타입이라 따로 거른다(True가 1로 읽히지 않게)
+                if isinstance(n, int) and not isinstance(n, bool) and n >= 1:
+                    result["hypothesis_streak_threshold"] = n
+                else:
+                    errors.append("hypothesis_streak_threshold 타입 오류")
         if errors:
             result["error"] = "; ".join(errors)
     except Exception as exc:  # 서버가 요청마다 부른다 — 밖으로 던지지 않는다

@@ -478,6 +478,66 @@
   .section-title { margin: 8px 0 -8px; font-size: 14px; font-weight: 600; color: var(--text-strong); }
   .muted-line { margin: 0; font-size: 13px; color: var(--text-muted); }
   .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+
+  /* ---- 풀스택 신호 띠(가설 게이트, 읽기 전용) ---- */
+  .hyp-band { display: flex; flex-direction: column; gap: 12px; }
+  .hyp-reason {
+    display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 6px 14px;
+    border: 1px solid var(--surface-raised); border-radius: var(--radius-card);
+    background: var(--surface-panel); font-size: 13px; color: var(--text-body);
+  }
+  .hyp-reason .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--neutral); }
+  .hyp-reason.attention .dot { background: var(--attention); }
+  .hyp-reason.danger .dot { background: var(--danger); }
+  .hyp-summary {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 12px 16px;
+    border: 1px solid var(--surface-raised); border-radius: var(--radius-card); background: var(--surface-content);
+  }
+  .hyp-summary .hyp-scope {
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    padding-right: 16px; border-right: 1px solid var(--surface-raised);
+  }
+  .hyp-summary .hyp-sep { width: 1px; height: 20px; background: var(--surface-raised); }
+  .hyp-stat { display: flex; align-items: baseline; gap: 8px; }
+  .hyp-stat .hs-label { font-size: 12px; color: var(--text-muted); }
+  .hyp-stat .hs-value { font-size: 18px; font-weight: 600; color: var(--text-strong); }
+  .hyp-stat .hs-sub { font-size: 12px; color: var(--text-muted); }
+  .hyp-stat .hs-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-body); }
+  .hyp-stat .hs-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--attention); }
+  .hyp-summary .hyp-ref { margin-left: auto; font-size: 12px; color: var(--text-muted); }
+  .hyp-cards { display: flex; gap: 12px; }
+  .hyp-card {
+    flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px;
+    border: 1px solid var(--surface-raised); border-radius: var(--radius-card); background: var(--surface-content);
+  }
+  .hyp-card .hc-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .hyp-card .hc-name { font-size: 13px; font-weight: 600; color: var(--text-strong); }
+  .hyp-card .hc-count { font-size: 12px; color: var(--text-muted); }
+  .hyp-card b { font-weight: 600; color: var(--text-strong); }
+  .hyp-card .hc-count b { font-size: 16px; }
+  .hyp-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; background: var(--surface-raised); }
+  .hyp-bar .seg-right { background: var(--success); }
+  .hyp-bar .seg-partial { background: var(--attention); }
+  .hyp-bar .seg-wrong { background: var(--danger); }
+  .hyp-bar .seg-pending { background: transparent; border: 1px solid var(--neutral); }
+  .hyp-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .hyp-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-body); }
+  .hyp-legend .lg { width: 8px; height: 8px; border-radius: 50%; }
+  .hyp-legend .lg.right { background: var(--success); }
+  .hyp-legend .lg.partial { background: var(--attention); }
+  .hyp-legend .lg.wrong { background: var(--danger); }
+  .hyp-legend .lg.pending { border: 1px solid var(--neutral); }
+  .hyp-card .hc-noreason { font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--surface-raised); padding-top: 8px; }
+  .hyp-diff { display: flex; flex-direction: column; gap: 8px; }
+  .hyp-diff .hd-title { font-size: 13px; font-weight: 600; color: var(--text-strong); }
+  .hyp-diff table { border-collapse: collapse; font-size: 13px; align-self: flex-start; }
+  .hyp-diff th { font-weight: 400; color: var(--text-muted); text-align: right; padding: 4px 16px; }
+  .hyp-diff th.hd-corner, .hyp-diff th.hd-row { text-align: left; padding-left: 0; }
+  .hyp-diff td { color: var(--text-body); text-align: right; padding: 4px 16px; font-variant-numeric: tabular-nums; }
+  button.hyp-toggle {
+    appearance: none; border: 0; width: 100%; text-align: left; font: inherit; font-size: 13px; line-height: 1.4; cursor: pointer;
+  }
+  .hyp-broken-list { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; font-size: 13px; color: var(--text-muted); }
   .note-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--surface-raised); border-radius: var(--radius-card); }
   .note-card-title { font-size: 14px; font-weight: 600; color: var(--text-strong); }
   .note-card-body { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); white-space: pre-wrap; }
@@ -1530,7 +1590,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   var COMP_HEAD = {
     workflow: ["AI워크플로우", "반복되는 패턴을 횟수순으로 본다. 3회 이상은 강조한다."],
     proactive: ["적극성", "기준 메모, 소요시간, 임팩트 링크, 미반영 공유 파일을 본다."],
-    fullstack: ["풀스택", "영역별 학습 카드를 복습 순서로 본다."]
+    fullstack: ["풀스택", "설계 결정 카드와 맡김 신호를 한 화면에서 봅니다"]
   };
 
   function renderWorkflow(box, data, rerender) {
@@ -1664,14 +1724,249 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     if (mt) { box.appendChild(sectionTitle("확인하지 못한 레포")); box.appendChild(mt); }
   }
 
+
+  // ---- 풀스택 신호 띠(가설 게이트) ----
+  // 서버(GET /hypothesis-signal)가 센 숫자를 그대로 그린다. pct · n · m을 다시 계산하지 않고 목록도 자르지 않는다.
+  // 응답 문자열은 textContent로만 넣는다(el()). 읽기 전용: 폼 · 버튼(펼침 토글 제외) · 쓰기 요청 없음.
+
+  var hypState = { data: null, repo: null, okAt: null, error: false, loaded: false, open: false, cardsFailed: false };
+  var HYP_AREAS = [["FE", "FE"], ["BE", "BE"], ["infra", "infra"], ["domain", "도메인"]];
+  var HYP_REASON = {
+    "설정 없음": ["neutral", "원장 경로 설정 없음 · 설정의 hypothesis_ledger에 경로를 넣으세요 · 값을 못 냄"],
+    "파일 없음": ["neutral", "원장 파일 없음 · 설정의 경로를 확인하세요 · 값을 못 냄"],
+    "형식 확인 필요": ["attention", "원장 형식 확인 필요 · 읽을 수 없는 파일입니다 · 값을 못 냄"]
+  };
+
+  function hypReasonRow(tone, text) {
+    return el("div", { class: "hyp-reason" + (tone === "neutral" ? "" : " " + tone) }, [
+      el("span", { class: "dot", "aria-hidden": "true" }),
+      el("span", { text: text })
+    ]);
+  }
+
+  function hhmm(d) {
+    function two(n) { return (n < 10 ? "0" : "") + n; }
+    return two(d.getHours()) + ":" + two(d.getMinutes());
+  }
+
+  // 값 자리 글자: 로딩 = …, 못 읽음 · 값 없음 = —
+  function hypStat(label, ratio, mode) {
+    var kids = [el("span", { class: "hs-label", text: label })];
+    if (mode === "loading") {
+      kids.push(el("span", { class: "hs-value", text: "…" }));
+    } else if (mode === "dash" || !ratio || ratio.pct === null || ratio.pct === undefined) {
+      kids.push(el("span", { class: "hs-value", text: "—" }));
+      if (mode === "empty") kids.push(el("span", { class: "hs-sub", text: "기록 없음" }));
+    } else {
+      kids.push(el("span", { class: "hs-value", text: ratio.pct + "%" }));
+      kids.push(el("span", { class: "hs-sub", text: "(" + ratio.n + "/" + ratio.m + ")" }));
+    }
+    return el("div", { class: "hyp-stat" }, kids);
+  }
+
+  function hypNumStat(label, value, mode, badge) {
+    var kids = [el("span", { class: "hs-label", text: label })];
+    kids.push(el("span", { class: "hs-value", text: mode === "loading" ? "…" : (mode === "dash" ? "—" : String(value)) }));
+    if (badge) {
+      kids.push(el("span", { class: "hs-badge" }, [
+        el("span", { class: "dot", "aria-hidden": "true" }),
+        el("span", { text: "가설 재요구 중" })
+      ]));
+    }
+    return el("div", { class: "hyp-stat" }, kids);
+  }
+
+  function hypCard(name, a, mode) {
+    var val = function (v) { return mode === "loading" ? "…" : (mode === "dash" ? "—" : String(v)); };
+    var bar = el("div", { class: "hyp-bar", "aria-hidden": "true" });
+    if (mode === "ok" || mode === "empty") {
+      [["right", a.right], ["partial", a.partial], ["wrong", a.wrong], ["pending", a.pending]].forEach(function (seg) {
+        if (seg[1] > 0) {
+          var d = el("div", { class: "seg-" + seg[0] });
+          d.style.flex = String(seg[1]);
+          bar.appendChild(d);
+        }
+      });
+    }
+    function lg(cls, label, v) {
+      return el("span", {}, [
+        el("span", { class: "lg " + cls, "aria-hidden": "true" }),
+        document.createTextNode(label + " "),
+        el("b", { text: val(v) })
+      ]);
+    }
+    var anr = a.acc_no_reason || {};
+    var anrText = mode === "ok" || mode === "empty" ? anr.n + "/" + anr.m : val("");
+    var count = el("span", { class: "hc-count" }, [document.createTextNode("입력 "), el("b", { text: val(a.count) })]);
+    return el("div", { class: "hyp-card" }, [
+      el("div", { class: "hc-head" }, [el("span", { class: "hc-name", text: name }), count]),
+      bar,
+      el("div", { class: "hyp-legend" }, [
+        lg("right", "맞음", a.right), lg("partial", "부분", a.partial),
+        lg("wrong", "틀림", a.wrong), lg("pending", "판정 전", a.pending)
+      ]),
+      el("div", { class: "hc-noreason" }, [document.createTextNode("이유 없는 수락 "), el("b", { text: anrText })])
+    ]);
+  }
+
+  var HYP_DIFF_ROWS = [["easy", "쉬움"], ["mid", "보통"], ["hard", "어려움"], ["none", "미정"]];
+  var HYP_DIFF_COLS = [["right", "맞음"], ["partial", "부분"], ["wrong", "틀림"], ["pending", "판정 전"]];
+
+  // 서버가 센 난이도 × 상태 건수를 그대로 그린다(합계 · 비율 · 판정 색 없음).
+  function hypDiffTable(diff) {
+    var head = el("tr", {}, [el("th", { class: "hd-corner", scope: "col", text: "" })].concat(
+      HYP_DIFF_COLS.map(function (c) { return el("th", { scope: "col", text: c[1] }); })));
+    var rows = HYP_DIFF_ROWS.map(function (r) {
+      var line = diff[r[0]] || {};
+      return el("tr", {}, [el("th", { class: "hd-row", scope: "row", text: r[1] })].concat(
+        HYP_DIFF_COLS.map(function (c) { return el("td", { text: String(line[c[0]] === undefined ? 0 : line[c[0]]) }); })));
+    });
+    return el("div", { class: "hyp-diff" }, [
+      el("div", { class: "hd-title", text: "난이도별 적중" }),
+      el("table", {}, [el("thead", {}, [head]), el("tbody", {}, rows)])
+    ]);
+  }
+
+  function renderHypBand(band) {
+    var focusToggle = document.activeElement && document.activeElement.id === "hyp-broken-toggle";
+    clear(band);
+    var d = hypState.data;
+    var mode;
+    if (d && d.missing) mode = "dash";
+    else if (d) mode = d.empty ? "empty" : "ok";
+    else mode = hypState.error ? "dash" : "loading";
+
+    if (hypState.error) {
+      var tail = d && hypState.okAt ? hhmm(hypState.okAt) + " 기준 값을 보여 줍니다 · " : "";
+      band.appendChild(hypReasonRow("danger", "신호를 불러오지 못함 · " + tail + "15초 뒤 다시 시도합니다"));
+    }
+    if (d && d.missing) {
+      var r = HYP_REASON[d.missing] || ["attention", "원장 " + String(d.missing) + " · 값을 못 냄"];
+      band.appendChild(hypReasonRow(r[0], r[1]));
+    }
+    var vals = mode === "ok" || mode === "empty" ? d : {};
+    var areas = vals.areas || {};
+    band.appendChild(el("div", { class: "hyp-summary" }, [
+      el("span", { class: "hyp-scope", text: (d ? hypState.repo : extraRepo.fullstack) === null ? "전체" : String(d ? hypState.repo : extraRepo.fullstack) }),
+      hypStat("가설 먼저", vals.hyp_first, mode),
+      el("span", { class: "hyp-sep", "aria-hidden": "true" }),
+      hypStat("이유 없는 수락", vals.acc_no_reason, mode),
+      el("span", { class: "hyp-sep", "aria-hidden": "true" }),
+      hypNumStat("연속", vals.streak, mode, mode !== "loading" && !!vals.reasked),
+      el("span", { class: "hyp-sep", "aria-hidden": "true" }),
+      hypNumStat("건너뜀", vals.skipped, mode),
+      el("span", { class: "hyp-ref", text: "참고값: 모델이 선언한 값" })
+    ]));
+    band.appendChild(el("div", { class: "hyp-cards" }, HYP_AREAS.map(function (pair) {
+      return hypCard(pair[1], areas[pair[0]] || {}, mode);
+    })));
+    if (mode === "ok" && d.diff && typeof d.diff === "object") band.appendChild(hypDiffTable(d.diff));
+
+    if (mode === "ok" || mode === "empty") {
+      var broken = Array.isArray(d.broken) ? d.broken : [];
+      var noIdent = d.no_ident || 0;
+      var parts = [];
+      if (broken.length > 0) parts.push("깨진 줄 " + broken.length + " (숫자가 낮을 수 있음)");
+      if (noIdent > 0) parts.push("식별 없는 줄 " + noIdent + " (연속에서 제외)");
+      if (parts.length > 0) {
+        var noteText = parts.join(" · ");
+        if (broken.length > 0) {
+          var btn = el("button", {
+            class: "inline-note attention hyp-toggle", type: "button", id: "hyp-broken-toggle",
+            "aria-expanded": hypState.open ? "true" : "false"
+          }, [
+            el("span", { class: "dot", "aria-hidden": "true" }),
+            el("span", { text: noteText })
+          ]);
+          btn.addEventListener("click", function () {
+            hypState.open = !hypState.open;
+            renderHypBand(band);
+          });
+          band.appendChild(btn);
+          if (hypState.open) {
+            band.appendChild(el("div", { class: "hyp-broken-list" }, broken.map(function (b) {
+              var t = "줄 " + b.line + " · " + b.reason;
+              if (b.fix !== undefined && b.fix !== null) t += " · 수정 후보: " + String(b.fix);
+              return el("div", { text: t });
+            })));
+          }
+        } else {
+          band.appendChild(inlineNote(noteText, "attention"));
+        }
+      }
+    }
+    if (focusToggle) {
+      var again = document.getElementById("hyp-broken-toggle");
+      if (again) again.focus();
+    }
+  }
+
+  function hypBandNode() { return document.getElementById("hyp-band"); }
+
+  // 카드 요청과 독립으로 부른다. 실패해도 카드 화면은 건드리지 않는다.
+  function fetchHypothesis() {
+    function showable() { return activeTab === "comp" && activeSub === "fullstack"; }
+    // 레포 칩 값이 있으면 그 레포 줄만으로 서버가 다시 계산한다(숫자는 화면에서 다시 계산하지 않는다).
+    var repo = extraRepo.fullstack;
+    fetch(repo === null ? "/hypothesis-signal" : "/hypothesis-signal?repo=" + encodeURIComponent(repo))
+      .then(function (res) {
+        if (!res.ok) throw new Error("hypothesis-signal " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        // 응답이 늦게 와도 지금 고른 레포 것만 반영한다.
+        if (extraRepo.fullstack !== repo) return;
+        hypState.data = data;
+        hypState.repo = repo;
+        hypState.okAt = new Date();
+        hypState.error = false;
+        hypState.loaded = true;
+        afterHypUpdate(showable());
+      })
+      .catch(function () {
+        hypState.error = true;
+        hypState.loaded = true;
+        afterHypUpdate(showable());
+      });
+  }
+
+  // 칩 선택지: 카드 레포 목록 ∪ 신호 응답의 repos(중복 없이). 카드가 0건이어도 repos가 있으면 보인다.
+  var fsChipCtx = null; // { cards: [...], rerender: fn }
+  function fillFsChipSlot(slot) {
+    while (slot.firstChild) slot.removeChild(slot.firstChild);
+    if (!fsChipCtx) return;
+    var sigRepos = hypState.data && Array.isArray(hypState.data.repos) ? hypState.data.repos : [];
+    var repos = uniq(fsChipCtx.cards.map(function (c) { return c.repo; }).concat(sigRepos));
+    if (repos.length > 0) slot.appendChild(repoFilterChip("fullstack", repos, fsChipCtx.rerender));
+  }
+
+  function afterHypUpdate(visible) {
+    if (!visible) return;
+    var chipSlot = document.getElementById("fs-chip-slot");
+    if (chipSlot) fillFsChipSlot(chipSlot);
+    var band = hypBandNode();
+    if (band) { renderHypBand(band); return; }
+    // 카드 요청이 실패해 풀스택 화면이 아직 없으면 띠만이라도 그린다(독립 처리).
+    if (hypState.cardsFailed) {
+      var box = screenBox("comp-content", COMP_HEAD.fullstack[0], COMP_HEAD.fullstack[1], null);
+      band = el("div", { class: "hyp-band", id: "hyp-band" });
+      box.appendChild(band);
+      renderHypBand(band);
+    }
+  }
+
   function renderFullstack(box, data, rerender) {
     var groups = data.groups || {};
     var missing = data.missing || [];
     var allCards = [];
     Object.keys(groups).forEach(function (a) { allCards = allCards.concat(groups[a] || []); });
-    if (allCards.length > 0) {
-      box.appendChild(repoFilterChip("fullstack", uniq(allCards.map(function (c) { return c.repo; })), rerender));
-    }
+    fsChipCtx = { cards: allCards, rerender: rerender };
+    var chipSlot = el("div", { id: "fs-chip-slot" });
+    box.appendChild(chipSlot);
+    fillFsChipSlot(chipSlot);
+    var hypBand = el("div", { class: "hyp-band", id: "hyp-band" });
+    box.appendChild(hypBand);
+    renderHypBand(hypBand);
     Object.keys(groups).forEach(function (area) {
       box.appendChild(sectionTitle(AREA_LABEL[area] || area));
       var cards = (groups[area] || []).filter(function (c) {
@@ -1703,7 +1998,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     lastExtra.comp = { sub: sub, data: data };
     var head = COMP_HEAD[sub] || COMP_HEAD.fullstack;
     var box = screenBox("comp-content", head[0], head[1], data.config);
-    var rerender = function () { renderComp(sub, data); };
+    var rerender = function () {
+      renderComp(sub, data);
+      if (sub === "fullstack") fetchHypothesis(); // 칩이 바뀌면 신호도 다시 요청한다
+    };
     if (sub === "workflow") renderWorkflow(box, data, rerender);
     else if (sub === "proactive") renderProactive(box, data);
     else renderFullstack(box, data, rerender);
@@ -1998,7 +2296,8 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     else if (tab === "comp") {
       var sub = activeSub;
       url = "/competency/" + sub;
-      render = function (d) { renderComp(sub, d); };
+      render = function (d) { hypState.cardsFailed = false; renderComp(sub, d); };
+      if (sub === "fullstack") fetchHypothesis();
     } else return;
     fetch(url)
       .then(function (res) {
@@ -2013,6 +2312,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       })
       .catch(function () {
         // 다음 polling에서 다시 시도한다 — 화면을 지우지 않는다.
+        if (tab === "comp" && activeTab === "comp" && url === "/competency/" + activeSub && activeSub === "fullstack") {
+          hypState.cardsFailed = true;
+          if (hypState.loaded) afterHypUpdate(true);
+        }
       });
   }
 

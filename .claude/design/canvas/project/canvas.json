@@ -10,24 +10,16 @@
   },
   "pages": [
     {
+      "id": "current",
+      "name": "현행"
+    },
+    {
       "id": "ds",
       "name": "디자인 시스템"
     },
     {
       "id": "comp",
       "name": "컴포넌트"
-    },
-    {
-      "id": "work1",
-      "name": "작업: 미정 항목 정리"
-    },
-    {
-      "id": "screens",
-      "name": "작업: 화면"
-    },
-    {
-      "id": "trends",
-      "name": "작업: 기술 동향"
     }
   ],
   "boards": {
@@ -87,21 +79,13 @@
       "title": "상태 모음",
       "page": "comp"
     },
-    "Work1.dc.html": {
-      "x": 0,
-      "y": 0,
-      "w": 1280,
-      "h": 1640,
-      "title": "미정 4가지 시안",
-      "page": "work1"
-    },
     "Screen1Track.dc.html": {
       "x": 0,
       "y": 0,
       "w": 1280,
       "h": 760,
       "title": "트랙",
-      "page": "screens"
+      "page": "current"
     },
     "Screen2Judge.dc.html": {
       "x": 1360,
@@ -109,7 +93,7 @@
       "w": 1280,
       "h": 880,
       "title": "판정",
-      "page": "screens"
+      "page": "current"
     },
     "Screen3Review.dc.html": {
       "x": 2720,
@@ -117,7 +101,7 @@
       "w": 1280,
       "h": 760,
       "title": "복습함",
-      "page": "screens"
+      "page": "current"
     },
     "Screen4Competency.dc.html": {
       "x": 4080,
@@ -125,7 +109,7 @@
       "w": 1280,
       "h": 2540,
       "title": "3역량 (3개 화면)",
-      "page": "screens"
+      "page": "current"
     },
     "Screen5Weekly.dc.html": {
       "x": 5440,
@@ -133,7 +117,7 @@
       "w": 1280,
       "h": 860,
       "title": "주간 롤업",
-      "page": "screens"
+      "page": "current"
     },
     "Screen6Health.dc.html": {
       "x": 6800,
@@ -141,39 +125,55 @@
       "w": 1280,
       "h": 760,
       "title": "레포 건강도",
-      "page": "screens"
+      "page": "current"
     },
     "Trends1Today.dc.html": {
       "x": 0,
-      "y": 0,
+      "y": 2700,
       "w": 1280,
       "h": 1200,
       "title": "오늘 (정상)",
-      "page": "trends"
+      "page": "current"
     },
     "Trends2Unread.dc.html": {
       "x": 1360,
-      "y": 0,
+      "y": 2700,
       "w": 1280,
       "h": 1900,
       "title": "안 읽은 글",
-      "page": "trends"
+      "page": "current"
     },
     "Trends3States.dc.html": {
       "x": 2720,
-      "y": 0,
+      "y": 2700,
       "w": 1280,
       "h": 3100,
       "title": "상태 모음",
-      "page": "trends"
+      "page": "current"
     },
     "Trends4Bookmarks.dc.html": {
       "x": 4080,
-      "y": 0,
+      "y": 2700,
       "w": 1280,
       "h": 1500,
       "title": "북마크",
-      "page": "trends"
+      "page": "current"
+    },
+    "Hyp1Normal.dc.html": {
+      "x": 0,
+      "y": 6000,
+      "w": 1280,
+      "h": 560,
+      "title": "신호 띠 (정상)",
+      "page": "current"
+    },
+    "Hyp2States.dc.html": {
+      "x": 1360,
+      "y": 6000,
+      "w": 1280,
+      "h": 1540,
+      "title": "상태 모음",
+      "page": "current"
     }
   },
   "order": [
@@ -184,7 +184,6 @@
     "Data.dc.html",
     "Judge.dc.html",
     "States.dc.html",
-    "Work1.dc.html",
     "Screen1Track.dc.html",
     "Screen2Judge.dc.html",
     "Screen3Review.dc.html",
@@ -194,7 +193,9 @@
     "Trends1Today.dc.html",
     "Trends2Unread.dc.html",
     "Trends3States.dc.html",
-    "Trends4Bookmarks.dc.html"
+    "Trends4Bookmarks.dc.html",
+    "Hyp1Normal.dc.html",
+    "Hyp2States.dc.html"
   ],
   "notes": {},
   "designSystems": []
