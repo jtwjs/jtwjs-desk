@@ -10,6 +10,7 @@ import json
 
 AREAS = ("FE", "BE", "infra", "domain")
 HITS = ("right", "partial", "wrong")
+UNKNOWN_REPO = "(알수없음)"
 
 
 def parse_ledger(text: str) -> tuple:
@@ -120,6 +121,33 @@ def _apply_corrections(rows: list) -> list:
         key = str(r.get("ts"))
         out.append({**r, "gate": fixes[key]} if key in fixes else r)
     return out
+
+
+def _repo_of(row: dict) -> str:
+    return _text(row.get("repo")) or UNKNOWN_REPO
+
+
+def repos_of(rows: list) -> list:
+    """맡김 줄(ref 없음)의 레포 이름을 나온 순서로 중복 없이. 「(알수없음)」은 있으면 맨 뒤 한 번."""
+    names, unknown = [], False
+    for row in rows:
+        if _is_hit(row):
+            continue
+        name = _repo_of(row)
+        if name == UNKNOWN_REPO:
+            unknown = True
+        elif name not in names:
+            names.append(name)
+    return names + [UNKNOWN_REPO] if unknown else names
+
+
+def filter_rows(rows: list, repo) -> list:
+    """repo 맡김 줄과, ref가 그 줄의 ts인 적중·보정 줄만. repo가 None이거나 모르는 이름이면 rows 그대로."""
+    if repo is None or repo not in repos_of(rows):
+        return rows
+    kept = {str(r.get("ts")) for r in rows if not _is_hit(r) and _repo_of(r) == repo}
+    return [r for r in rows
+            if (str(r["ref"]) in kept if _is_hit(r) else _repo_of(r) == repo)]
 
 
 def compute_signal(rows: list, broken: list, streak_threshold=None) -> dict:
