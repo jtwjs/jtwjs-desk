@@ -1881,12 +1881,16 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   // 카드 요청과 독립으로 부른다. 실패해도 카드 화면은 건드리지 않는다.
   function fetchHypothesis() {
     function showable() { return activeTab === "comp" && activeSub === "fullstack"; }
-    fetch("/hypothesis-signal")
+    // 레포 칩 값이 있으면 그 레포 줄만으로 서버가 다시 계산한다(숫자는 화면에서 다시 계산하지 않는다).
+    var repo = extraRepo.fullstack;
+    fetch(repo === null ? "/hypothesis-signal" : "/hypothesis-signal?repo=" + encodeURIComponent(repo))
       .then(function (res) {
         if (!res.ok) throw new Error("hypothesis-signal " + res.status);
         return res.json();
       })
       .then(function (data) {
+        // 응답이 늦게 와도 지금 고른 레포 것만 반영한다.
+        if (extraRepo.fullstack !== repo) return;
         hypState.data = data;
         hypState.okAt = new Date();
         hypState.error = false;
@@ -1900,8 +1904,20 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       });
   }
 
+  // 칩 선택지: 카드 레포 목록 ∪ 신호 응답의 repos(중복 없이). 카드가 0건이어도 repos가 있으면 보인다.
+  var fsChipCtx = null; // { cards: [...], rerender: fn }
+  function fillFsChipSlot(slot) {
+    while (slot.firstChild) slot.removeChild(slot.firstChild);
+    if (!fsChipCtx) return;
+    var sigRepos = hypState.data && Array.isArray(hypState.data.repos) ? hypState.data.repos : [];
+    var repos = uniq(fsChipCtx.cards.map(function (c) { return c.repo; }).concat(sigRepos));
+    if (repos.length > 0) slot.appendChild(repoFilterChip("fullstack", repos, fsChipCtx.rerender));
+  }
+
   function afterHypUpdate(visible) {
     if (!visible) return;
+    var chipSlot = document.getElementById("fs-chip-slot");
+    if (chipSlot) fillFsChipSlot(chipSlot);
     var band = hypBandNode();
     if (band) { renderHypBand(band); return; }
     // 카드 요청이 실패해 풀스택 화면이 아직 없으면 띠만이라도 그린다(독립 처리).
@@ -1918,9 +1934,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     var missing = data.missing || [];
     var allCards = [];
     Object.keys(groups).forEach(function (a) { allCards = allCards.concat(groups[a] || []); });
-    if (allCards.length > 0) {
-      box.appendChild(repoFilterChip("fullstack", uniq(allCards.map(function (c) { return c.repo; })), rerender));
-    }
+    fsChipCtx = { cards: allCards, rerender: rerender };
+    var chipSlot = el("div", { id: "fs-chip-slot" });
+    box.appendChild(chipSlot);
+    fillFsChipSlot(chipSlot);
     var hypBand = el("div", { class: "hyp-band", id: "hyp-band" });
     box.appendChild(hypBand);
     renderHypBand(hypBand);
@@ -1955,7 +1972,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     lastExtra.comp = { sub: sub, data: data };
     var head = COMP_HEAD[sub] || COMP_HEAD.fullstack;
     var box = screenBox("comp-content", head[0], head[1], data.config);
-    var rerender = function () { renderComp(sub, data); };
+    var rerender = function () {
+      renderComp(sub, data);
+      if (sub === "fullstack") fetchHypothesis(); // 칩이 바뀌면 신호도 다시 요청한다
+    };
     if (sub === "workflow") renderWorkflow(box, data, rerender);
     else if (sub === "proactive") renderProactive(box, data);
     else renderFullstack(box, data, rerender);
