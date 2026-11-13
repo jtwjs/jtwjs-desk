@@ -11,3 +11,6 @@
 - 남긴 자산: `.claude/rules/non-obvious-patterns.md` 두 줄(「sdd · 응답 키 추가」, 「디자인 · 현행 탭」)
 - 지울 후보: 없음
 - 다음 후보: ARCHITECTURE에 `diff` 응답 키 · 난이도 표 행 추가 / 미실행 화면 경로 확인 / 원장 고정 칸 목록과 sdd 쪽 허용 값(`gate`) 대조
+- REFLECT 건너뜀: 지식 정리 — `_brain` 없음, PRD 「결정」 절이 정본
+- REFLECT 건너뜀: task-observer — `.claude/observations.md` 없음, 3회 반복 항목 없음
+- REFLECT 건너뜀: 이해 증명(설명 리허설) — Finn이 건너뛰기 선택(2026-11-14)
