@@ -531,7 +531,7 @@ def build_trends(cfg: dict) -> dict:
             "broken": i_broken + r_broken + m_broken, "missing": []}
 
 
-def build_hypothesis_signal(cfg: dict) -> dict:
+def build_hypothesis_signal(cfg: dict, repo: str | None = None) -> dict:
     """가설 게이트 신호 띠 응답 — 원장을 열어 읽기만 한다. 계산은 desk/signal.py."""
     path = cfg.get("hypothesis_ledger")
     if path is None:
@@ -542,8 +542,9 @@ def build_hypothesis_signal(cfg: dict) -> dict:
     if text is None:
         return {"missing": "형식 확인 필요"}
     rows, broken = signal.parse_ledger(text)
-    result = signal.compute_signal(rows, broken, cfg.get("hypothesis_streak_threshold"))
-    return {**result, "missing": None}
+    result = signal.compute_signal(signal.filter_rows(rows, repo), broken,
+                                   cfg.get("hypothesis_streak_threshold"))
+    return {**result, "repos": signal.repos_of(rows), "missing": None}
 
 
 def spawn_pick_candidate(body: dict) -> dict:
@@ -654,7 +655,8 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(403, {"error": "bad host"})
                 return
             try:
-                payload = build_hypothesis_signal(config.load_config())
+                repo = parse_qs(parsed.query).get("repo", [None])[0] or None
+                payload = build_hypothesis_signal(config.load_config(), repo)
             except Exception:  # noqa: BLE001 — 신호 실패가 500이 되지 않게
                 payload = {"missing": "형식 확인 필요"}
             self._send_json(200, payload)
