@@ -16,8 +16,11 @@
     {
       "step": 2,
       "name": "signal-config",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T16:07:09+0900",
+      "summary": "desk/config.py load_config에 hypothesis_ledger(경로, 빈 문자열·없음=None, 타입 오류는 error)·hypothesis_streak_threshold(양의 정수, 기본 None=재요구 판정 안 함, bool·문자열·0은 None+error) 추가. 테스트 tests/test_desk_config_hypothesis.py",
+      "completed_at": "2026-11-13T16:11:38+0900"
     },
     {
       "step": 3,
