@@ -7,12 +7,14 @@
 - `CLAUDE.md`, `docs/desk-hypothesis-gate-2026-11-12/PRD.md` 「결정」 표의 **레포별 보기** 행 · 수용 조건 표(읽기 전용 · 원문 없음 · 레포별 보기)
 - `page/server.py`의 `build_hypothesis_signal` · `/hypothesis-signal` 라우트(`parsed.path == "/hypothesis-signal"`). 쿼리 읽는 다른 라우트가 있으면 그 방식을 따른다
 - `desk/signal.py` (step 7 결과: `repos_of` · `filter_rows`)
-- `tests/test_desk_server_hypothesis.py` (서버 테스트 모양 참고, **고치지 않는다**)
+- `tests/test_desk_server_hypothesis.py` (서버 테스트 모양 참고. 단 아래 「RED 커밋에 넣는다」의 한 줄만 고친다)
 - `.claude/rules/testing.md` §0 · `.claude/rules/non-obvious-patterns.md` 「서버 · 화면」
 
 ## 작업
 
-**`page/server.py`만 고친다**(+ 테스트 파일 한 개: `tests/test_desk_server_hypothesis_repo.py`).
+**`page/server.py`만 고친다**(+ 새 테스트 파일 `tests/test_desk_server_hypothesis_repo.py`).
+
+**RED 커밋에 넣는다(🔴 GREEN에서 고치면 러너가 되돌리고 실패시킨다):** 기존 `tests/test_desk_server_hypothesis.py`의 `test_정상_원장이면_compute_signal과_같은_값에_missing_null이다`는 응답에서 `missing`만 빼고 `compute_signal` 결과와 같다고 단언해서, 새 응답 키 `repos`와 부딪힌다. 새 응답 계약 기준으로 `missing`과 `repos` 둘 다 빼고 비교하도록 그 단언 한 줄만 바꾼다. 이 수정은 새 테스트 파일과 **같은 test 커밋(RED)** 에 넣는다. 그 뒤 테스트 파일은 안 건드린다.
 
 - `build_hypothesis_signal(cfg, repo=None)`: 파싱한 뒤 `repos = signal.repos_of(rows)`, 거른 줄로 `compute_signal`을 부르고 응답에 `"repos": repos`를 더한다. `repos`는 **거르기 전** 전체 줄에서 뽑는다(칩 선택지가 고른 레포 하나로 줄지 않게). `missing` 응답(설정 없음 · 파일 없음 · 형식 확인 필요)에는 `repos`를 더하지 않는다
 - 라우트는 쿼리 `repo=`를 읽어 `build_hypothesis_signal`에 넘긴다. 쿼리가 없거나 빈 문자열이면 `None`(전체). 값은 문자열로만 쓰고 파일 경로로 쓰지 않는다
@@ -44,4 +46,4 @@
 ## 금지사항
 
 - hook 우회(`--no-verify`) · 요청 범위 밖 수정 · **테스트 파일 수정**(구현 단계에서) 금지
-- `page/server.py`와 위 테스트 파일 밖은 고치지 않는다. 기존 테스트도 고치지 않는다. 쌓기만 하는 기록은 고치지 않는다
+- `page/server.py`와 위 테스트 파일 밖은 고치지 않는다. 기존 테스트는 위 한 단언만 RED 커밋에서 고친다. 쌓기만 하는 기록은 고치지 않는다
