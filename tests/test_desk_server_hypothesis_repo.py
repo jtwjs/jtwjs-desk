@@ -44,7 +44,7 @@ def _expected(repo):
 
 
 def _strip(body):
-    return {k: v for k, v in body.items() if k not in ("missing", "repos")}
+    return {k: v for k, v in body.items() if k not in ("missing", "repos", "diff")}
 
 
 class _RepoCase(_ReviewCase):
