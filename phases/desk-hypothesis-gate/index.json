@@ -4,10 +4,39 @@
   "docs": "docs/desk-hypothesis-gate-2026-11-12",
   "after": [],
   "steps": [
-    { "step": 1, "name": "signal-core", "status": "pending", "tdd": true },
-    { "step": 2, "name": "signal-config", "status": "pending", "tdd": true },
-    { "step": 3, "name": "signal-get", "status": "pending", "tdd": true },
-    { "step": 4, "name": "signal-screen", "status": "pending", "tdd": false },
-    { "step": 5, "name": "signal-verify", "status": "pending", "tdd": false, "kind": "measure" }
+    {
+      "step": 1,
+      "name": "signal-core",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T15:57:27+0900",
+      "summary": "desk/signal.py 순수 함수 parse_ledger(text)->(rows, broken)·compute_signal(rows, broken, streak_threshold=None)->계약 dict(areas·hyp_first·acc_no_reason·streak·reasked·skipped·no_ident·broken·meaningful·empty). 테스트 tests/test_desk_signal.py",
+      "completed_at": "2026-11-13T16:05:30+0900"
+    },
+    {
+      "step": 2,
+      "name": "signal-config",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 3,
+      "name": "signal-get",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 4,
+      "name": "signal-screen",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 5,
+      "name": "signal-verify",
+      "status": "pending",
+      "tdd": false,
+      "kind": "measure"
+    }
   ]
 }
