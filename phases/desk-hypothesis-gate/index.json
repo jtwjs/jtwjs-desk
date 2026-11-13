@@ -43,9 +43,12 @@
     {
       "step": 5,
       "name": "signal-verify",
-      "status": "pending",
+      "status": "completed",
       "tdd": false,
-      "kind": "measure"
+      "kind": "measure",
+      "started_at": "2026-11-13T16:24:19+0900",
+      "summary": "측정 전용, 코드·문서·캔버스 변경 없음. 명령: 스크래치패드에 가짜 원장 JSONL(영역 4종·ref 적중 줄·같은 ref 2줄·깨진 줄 1·task null 2·SECRET-TEXT 칸 포함) 작성 후 `DESK_HOME=… DESK_CONFIG=… DESK_PORT=47701 python3 page/server.py`(임계값 2) 외 4대(설정 없음·빈 파일·파일 없음·읽을 수 없는 파일)를 띄움. `curl -s http://127.0.0.1:47701/hypothesis-signal` → 가설 먼저 6/7(86%)·이유 없는 수락 3/5(60%)·연속 1·재요구 true·건너뜀 1·식별 없음 2·깨진 [줄7 JSON 아님]·영역 FE2/BE3/infra1/domain1(적중 BE right1(같은 ref는 마지막 줄)·FE partial1·domain wrong1, 판정 전 FE1·BE2). 손으로 센 값과 일치. `curl … | grep -c SECRET-TEXT` → 0. `shasum ledger.jsonl` 요청 전·브라우저 확인 뒤 동일. `curl -X POST …/hypothesis-signal` → 404. 설정 없음 `{missing:'설정 없음'}`·파일 없음·형식 확인 필요 응답 확인. 본 것(새 Chrome 탭, 기존 탭 미접촉, 확인 뒤 탭 닫음): 풀스택 탭 요약 4칸·영역 카드 4장 값이 응답과 일치 / 깨진 줄 주석 클릭 시 '줄 7 · JSON 아님' 펼침(aria-expanded true) / '가설 재요구 중' 배지 / 화면 HTML에 SECRET-TEXT 0건(`split().length-1`) / 설정 없음·파일 없음·형식 확인 필요 서버에서 각 이유 행 + 값 — / 빈 파일 서버에서 기록 0건이 '기록 없음'+0 값으로 이유 행과 구별되어 띠 유지 / 신호 응답 8초 지연 프록시(47706)에서 로딩 '…' 후 값 표시. 값 어긋남 없음. `python3 -m unittest discover -s tests` 579 OK. 못 본 것: 서버 종료 후 폴링 이유 행은 이번에 재확인 안 함(step 4에서 봄), 카드 실패+신호 성공 역방향, 처음부터 신호 실패(마지막 값 없음), 키보드 조작, 15초 폴링 갱신 자체, Hyp 보드와 픽셀 대조. 서버·프록시·픽스처 정리 완료.",
+      "completed_at": "2026-11-13T16:29:55+0900"
     }
   ]
 }
