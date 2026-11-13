@@ -71,8 +71,11 @@
     {
       "step": 8,
       "name": "signal-repo-param",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T22:59:15+0900",
+      "summary": "page/server.py: build_hypothesis_signal(cfg, repo=None)가 filter_rows로 거른 줄로 계산하고 응답에 repos(거르기 전 전체 줄의 repos_of)를 더함(missing 응답엔 없음). GET /hypothesis-signal?repo=이름 라우트(없음·빈 값=전체). 테스트 tests/test_desk_server_hypothesis_repo.py + 기존 단언 한 줄(missing·repos 제외)을 RED 커밋에 수정, 전체 613 OK",
+      "completed_at": "2026-11-13T23:05:07+0900"
     },
     {
       "step": 9,
