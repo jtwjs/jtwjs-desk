@@ -542,9 +542,9 @@ def build_hypothesis_signal(cfg: dict, repo: str | None = None) -> dict:
     if text is None:
         return {"missing": "형식 확인 필요"}
     rows, broken = signal.parse_ledger(text)
-    result = signal.compute_signal(signal.filter_rows(rows, repo), broken,
-                                   cfg.get("hypothesis_streak_threshold"))
-    return {**result, "repos": signal.repos_of(rows), "missing": None}
+    kept = signal.filter_rows(rows, repo)
+    result = signal.compute_signal(kept, broken, cfg.get("hypothesis_streak_threshold"))
+    return {**result, "diff": signal.diff_table(kept), "repos": signal.repos_of(rows), "missing": None}
 
 
 def spawn_pick_candidate(body: dict) -> dict:

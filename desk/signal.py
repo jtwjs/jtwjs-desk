@@ -150,6 +150,24 @@ def filter_rows(rows: list, repo) -> list:
             if (str(r["ref"]) in kept if _is_hit(r) else _repo_of(r) == repo)]
 
 
+def diff_table(rows: list) -> dict:
+    """의미 있는 줄(보정 반영)을 난이도(easy·mid·hard·none) × 상태(right·partial·wrong·pending)로 센다."""
+    hits = _last_hits(rows)
+    table = {k: {"right": 0, "partial": 0, "wrong": 0, "pending": 0}
+             for k in ("easy", "mid", "hard", "none")}
+    for row in _apply_corrections(rows):
+        if not _meaningful(row):
+            continue
+        level = row.get("diff")
+        cell = table[level if level in ("easy", "mid", "hard") else "none"]
+        hit = hits.get(str(row.get("ts")))
+        if hit:
+            cell[hit] += 1
+        elif _flag(row, "hyp"):
+            cell["pending"] += 1
+    return table
+
+
 def compute_signal(rows: list, broken: list, streak_threshold=None) -> dict:
     hits = _last_hits(rows)
     ledger = _apply_corrections(rows)
