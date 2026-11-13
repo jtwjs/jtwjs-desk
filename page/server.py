@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, config, ledger, paths, rollup, routine, sort, trends, validate  # noqa: E402
+from desk import atomic, config, ledger, paths, rollup, routine, signal, sort, trends, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
@@ -531,6 +531,21 @@ def build_trends(cfg: dict) -> dict:
             "broken": i_broken + r_broken + m_broken, "missing": []}
 
 
+def build_hypothesis_signal(cfg: dict) -> dict:
+    """가설 게이트 신호 띠 응답 — 원장을 열어 읽기만 한다. 계산은 desk/signal.py."""
+    path = cfg.get("hypothesis_ledger")
+    if path is None:
+        return {"missing": "설정 없음"}
+    if not Path(path).is_file():
+        return {"missing": "파일 없음"}
+    text = routine.read_text_or_none(path)
+    if text is None:
+        return {"missing": "형식 확인 필요"}
+    rows, broken = signal.parse_ledger(text)
+    result = signal.compute_signal(rows, broken, cfg.get("hypothesis_streak_threshold"))
+    return {**result, "missing": None}
+
+
 def spawn_pick_candidate(body: dict) -> dict:
     """요청 바디에서 repo·id를 뺀 나머지 + at(ISO 문자열)을 더한 pick 후보.
 
@@ -632,6 +647,17 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(403, {"error": "bad host"})
                 return
             self._send_json(200, build_trends(config.load_config()))
+            return
+
+        if parsed.path == "/hypothesis-signal":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            try:
+                payload = build_hypothesis_signal(config.load_config())
+            except Exception:  # noqa: BLE001 — 신호 실패가 500이 되지 않게
+                payload = {"missing": "형식 확인 필요"}
+            self._send_json(200, payload)
             return
 
         if parsed.path == "/review":
