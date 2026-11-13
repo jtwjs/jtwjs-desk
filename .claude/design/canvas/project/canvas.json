@@ -28,6 +28,10 @@
     {
       "id": "trends",
       "name": "작업: 기술 동향"
+    },
+    {
+      "id": "hyp",
+      "name": "작업: 가설 게이트 신호"
     }
   ],
   "boards": {
@@ -174,6 +178,22 @@
       "h": 1500,
       "title": "북마크",
       "page": "trends"
+    },
+    "Hyp1Normal.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 524,
+      "title": "신호 띠 (정상)",
+      "page": "hyp"
+    },
+    "Hyp2States.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 1540,
+      "title": "상태 모음",
+      "page": "hyp"
     }
   },
   "order": [
@@ -194,7 +214,9 @@
     "Trends1Today.dc.html",
     "Trends2Unread.dc.html",
     "Trends3States.dc.html",
-    "Trends4Bookmarks.dc.html"
+    "Trends4Bookmarks.dc.html",
+    "Hyp1Normal.dc.html",
+    "Hyp2States.dc.html"
   ],
   "notes": {},
   "designSystems": []
