@@ -107,8 +107,11 @@
     {
       "step": 12,
       "name": "signal-diff-screen",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-13T23:35:46+0900",
+      "summary": "page/index.html만: hypDiffTable(diff)이 응답 diff를 난이도 4행(쉬움·보통·어려움·미정)×4열(맞음·부분·틀림·판정 전) 건수 표로 그림(제목 「난이도별 적중」, mode ok이고 diff 있을 때만, 합계·비율·판정 색 없음, textContent만, .hyp-diff 스타일 토큰 재사용). 본 것(새 Chrome 탭, 가짜 원장 repo-a·b, 기존 탭 미접촉, 탭 닫음): 전체에서 표 값이 curl diff와 일치(easy 2/0/0/1·mid 0/1/0/0·hard 0/0/1/0·none 0/0/0/2) / 칩 repo-a 선택 시 표가 ?repo=repo-a 값(easy 1/0/0/1·mid 0/1/0/0·none 0/0/0/1)으로 바뀜 / 기록 0건 서버에서 표 없음 / 원장 shasum 전후 동일 / 테스트 630 OK. 못 본 것: 칩 b 선택 시 표, missing·로딩·신호 실패(마지막 값 유지) 때 표, 카드 실패+신호 성공, 키보드·스크린리더 조작, 좁은 폭, 응답에 diff 없을 때 화면(코드 분기만).",
+      "completed_at": "2026-11-13T23:41:04+0900"
     }
   ],
   "reviews": [
