@@ -89,8 +89,11 @@
     {
       "step": 10,
       "name": "signal-scope-label",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-13T23:14:51+0900",
+      "summary": "page/index.html만: hypState.repo에 응답 반영 때 쓴 레포를 저장하고 띠 머리 hyp-scope 라벨을 그 값(데이터 없으면 현재 칩 값)으로 textContent 표시(null=전체). 테스트 613 OK. 본 것(새 Chrome 탭, 가짜 원장 repo-a·b): 칩 전체일 때 라벨 전체 / a 선택 후 라벨 repo-a, 가설 먼저 50% 1/2·이유 없는 수락 100% 2/2·연속 2·재요구 중이 curl ?repo=repo-a와 일치 / b 선택 시 라벨 repo-b 값 변경 / 전체로 복귀 시 라벨 전체. 못 본 것: 칩 바꾼 직후 이전 숫자가 남는 순간의 라벨(응답 지연 상황), 서버 실패 때 라벨, missing 응답 화면, 키보드 조작, repo-b 값을 curl과 직접 대조(화면만 확인)",
+      "completed_at": "2026-11-13T23:19:46+0900"
     }
   ],
   "reviews": [
