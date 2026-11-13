@@ -85,6 +85,12 @@
       "started_at": "2026-11-13T23:05:32+0900",
       "summary": "page/index.html만: fetchHypothesis가 extraRepo.fullstack 값이면 /hypothesis-signal?repo=encodeURIComponent로 요청(폴링 동일, 늦은 응답은 레포가 바뀌었으면 버림), 칩 선택지=카드 레포 ∪ 신호 repos(#fs-chip-slot을 신호 도착 때도 다시 채움), 칩 클릭 시 카드·신호 둘 다 다시 그림. 테스트 613 OK. 본 것(새 Chrome 탭, 가짜 원장 repo-a·b): 칩 전체→a→b→전체 순환 / a일 때 띠(가설 먼저 50% 1/2·이유 없는 수락 100% 2/2·연속 2·FE 입력 2 맞음 1)가 curl ?repo=repo-a 값과 일치 / 카드 목록도 같은 레포로 걸림 / 카드 0건+원장만인 서버에서 칩 보이고 a 선택 시 띠 변경. 못 본 것: 카드 실패+신호 성공 역방향, missing 응답 화면, 레포 바꾼 직후 이전 숫자가 잠깐 보이는 것, 키보드 조작, 늦은 응답 버림 경로, 띠 머리 라벨이 레포 선택 때도 '전체'로 보임(이번 범위 밖)",
       "completed_at": "2026-11-13T23:10:54+0900"
+    },
+    {
+      "step": 10,
+      "name": "signal-scope-label",
+      "status": "pending",
+      "tdd": false
     }
   ],
   "reviews": [
@@ -93,6 +99,13 @@
       "head": "89b0409672b84be648d1ad786cc3c4d12b60f1f8",
       "issues": [
         "ARCHITECTURE 「연속·건너뜀 계산」에 보정 줄(유효 gate) 반영이 안 적혀 있음(PRD엔 있음)"
+      ]
+    },
+    {
+      "at": "2026-11-13T23:14:00+09:00",
+      "head": "3a45d4cb7dc155e53356c5cf5521c5031811d87a",
+      "issues": [
+        "strip head label fixed to '전체' while repo chip selected (page/index.html:1826)"
       ]
     }
   ]
