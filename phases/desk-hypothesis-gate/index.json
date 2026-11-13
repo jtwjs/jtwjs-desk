@@ -128,6 +128,14 @@
       "issues": [
         "strip head label fixed to '전체' while repo chip selected (page/index.html:1826)"
       ]
+    },
+    {
+      "at": "2026-11-13T23:46:00+09:00",
+      "head": "bc9ac4a020971986f65c48a1fa80a58084b3ee21",
+      "issues": [
+        "ARCHITECTURE에 난이도 표(diff 응답 키, diff_table) 결정 행이 없음(PRD에는 있음)",
+        "repo-b 표 · 신호 실패/없음 상태의 표 · 응답에 diff 없는 경우 · 칩 전환 직후 라벨은 화면에서 실제로 지나가 보지 못함(확인필요 — 미실행)"
+      ]
     }
   ]
 }
