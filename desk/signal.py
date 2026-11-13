@@ -104,9 +104,27 @@ def _streak_and_reask(entries: list, threshold) -> tuple:
     return streak, reasked
 
 
+def _is_correction(row: dict) -> bool:
+    return "ref" in row and "gate" in row and row.get("hit") not in HITS
+
+
+def _apply_corrections(rows: list) -> list:
+    """맡김 줄 목록에 보정(같은 ref는 마지막)을 덮어쓴 새 목록. 없는 ref의 보정은 무시한다."""
+    fixes = {str(r["ref"]): r["gate"] for r in rows if _is_correction(r)}
+    if not fixes:
+        return [r for r in rows if not _is_hit(r)]
+    out = []
+    for r in rows:
+        if _is_hit(r):
+            continue
+        key = str(r.get("ts"))
+        out.append({**r, "gate": fixes[key]} if key in fixes else r)
+    return out
+
+
 def compute_signal(rows: list, broken: list, streak_threshold=None) -> dict:
     hits = _last_hits(rows)
-    ledger = [r for r in rows if not _is_hit(r)]
+    ledger = _apply_corrections(rows)
     meaningful = [r for r in ledger if _meaningful(r)]
 
     areas = {a: {"count": 0, "right": 0, "partial": 0, "wrong": 0, "pending": 0,
