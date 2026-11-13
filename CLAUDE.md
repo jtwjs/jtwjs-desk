@@ -9,6 +9,7 @@
 - **테스트 선행**: `tdd-guard` 훅은 이 레포에서 꺼져 있다(Python 짝 테스트 이름을 못 찾음, `harness.json` tdd 참고). 대신 sdd 러너가 git 기록으로 RED → GREEN을 판정한다. 무엇을 테스트하는지는 → [testing.md](.claude/rules/testing.md) §0
 - **hook 우회 금지** (`--no-verify` 등)
 - **PR은 `claude-harness:pr-write` 스킬로 만든다.** `gh pr create`를 직접 부르지 않는다
+- **UI가 바뀐 PR의 스크린샷은 Claude가 직접 찍어 본문에 채운다.** pr-write의 "이미지는 사람이 올린다"를 따르지 않는다 — 가짜 데이터로 서버를 띄워 찍고 `upload_image`로 올린다(확장자는 실제 형식에 맞춤, [non-obvious-patterns](.claude/rules/non-obvious-patterns.md) 「PR · 스크린샷」)
 
 ## 검증
 
