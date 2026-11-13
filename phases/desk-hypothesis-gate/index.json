@@ -58,6 +58,24 @@
       "started_at": "2026-11-13T16:34:49+0900",
       "summary": "desk/signal.py에 보정 줄({ref,gate,by}, hit 유효값 없는 줄) 반영 추가: _is_correction·_apply_corrections로 같은 ref 마지막 보정을 맡김 줄 gate에 덮어쓴 유효 gate 기준으로 센다(보정은 맡김 줄 수에 안 듦, 없는 ref 무시, 응답 키 불변). 테스트 tests/test_desk_signal_correction.py, 전체 591 OK",
       "completed_at": "2026-11-13T16:47:04+0900"
+    },
+    {
+      "step": 7,
+      "name": "signal-repo-rows",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 8,
+      "name": "signal-repo-param",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 9,
+      "name": "signal-repo-chip",
+      "status": "pending",
+      "tdd": false
     }
   ],
   "reviews": [
