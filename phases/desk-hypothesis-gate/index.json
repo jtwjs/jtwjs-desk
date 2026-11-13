@@ -62,8 +62,11 @@
     {
       "step": 7,
       "name": "signal-repo-rows",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "summary": "desk/signal.py에 순수 함수 repos_of(rows)(맡김 줄 repo를 나온 순서·중복 없이, 빈 repo는 「(알수없음)」 맨 뒤 한 번)·filter_rows(rows, repo)(None·모르는 이름은 rows 그대로, 아니면 그 레포 맡김 줄 + ref가 남은 ts인 적중·보정 줄만)와 상수 UNKNOWN_REPO 추가. compute_signal·응답 키 불변(repos는 step 8). 테스트 tests/test_desk_signal_repo.py, 전체 604 OK",
+      "tdd": true,
+      "started_at": "2026-11-13T22:43:33+0900",
+      "completed_at": "2026-11-13T22:48:42+0900"
     },
     {
       "step": 8,
