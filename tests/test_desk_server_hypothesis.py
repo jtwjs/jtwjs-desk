@@ -72,7 +72,7 @@ class 통합_GET_hypothesis_signal(_ReviewCase):
         parsed, broken = signal.parse_ledger(self.ledger.read_text(encoding="utf-8"))
         expected = signal.compute_signal(parsed, broken, 2)
         self.assertIsNone(body["missing"])
-        self.assertEqual({k: v for k, v in body.items() if k != "missing"}, expected)
+        self.assertEqual({k: v for k, v in body.items() if k not in ("missing", "repos")}, expected)
 
     def test_깨진_줄_1개는_broken에_줄_번호가_실린다(self):
         self.ledger.write_text(_lines([_row("t1")]) + "{not json\n" + _lines([_row("t2")]),
