@@ -98,8 +98,11 @@
     {
       "step": 11,
       "name": "signal-diff-table",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-13T23:28:17+0900",
+      "summary": "desk/signal.py에 순수 함수 diff_table(rows)->{easy|mid|hard|none: {right,partial,wrong,pending}} 추가(보정 반영 의미 있는 줄만, 집합 밖·null·칸 없음=none, compute_signal 불변). page/server.py build_hypothesis_signal 응답에 diff 키(거른 rows 기준, missing엔 없음). 테스트 tests/test_desk_signal_diff.py·tests/test_desk_server_hypothesis_diff.py, 기존 test_desk_server_hypothesis.py·test_desk_server_hypothesis_repo.py의 키 제외 단언에 diff 추가(RED 커밋), 전체 630 OK",
+      "completed_at": "2026-11-13T23:35:39+0900"
     },
     {
       "step": 12,
