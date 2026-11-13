@@ -1723,7 +1723,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
   // 서버(GET /hypothesis-signal)가 센 숫자를 그대로 그린다. pct · n · m을 다시 계산하지 않고 목록도 자르지 않는다.
   // 응답 문자열은 textContent로만 넣는다(el()). 읽기 전용: 폼 · 버튼(펼침 토글 제외) · 쓰기 요청 없음.
 
-  var hypState = { data: null, okAt: null, error: false, loaded: false, open: false, cardsFailed: false };
+  var hypState = { data: null, repo: null, okAt: null, error: false, loaded: false, open: false, cardsFailed: false };
   var HYP_AREAS = [["FE", "FE"], ["BE", "BE"], ["infra", "infra"], ["domain", "도메인"]];
   var HYP_REASON = {
     "설정 없음": ["neutral", "원장 경로 설정 없음 · 설정의 hypothesis_ledger에 경로를 넣으세요 · 값을 못 냄"],
@@ -1823,7 +1823,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     var vals = mode === "ok" || mode === "empty" ? d : {};
     var areas = vals.areas || {};
     band.appendChild(el("div", { class: "hyp-summary" }, [
-      el("span", { class: "hyp-scope", text: "전체" }),
+      el("span", { class: "hyp-scope", text: (d ? hypState.repo : extraRepo.fullstack) === null ? "전체" : String(d ? hypState.repo : extraRepo.fullstack) }),
       hypStat("가설 먼저", vals.hyp_first, mode),
       el("span", { class: "hyp-sep", "aria-hidden": "true" }),
       hypStat("이유 없는 수락", vals.acc_no_reason, mode),
@@ -1892,6 +1892,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         // 응답이 늦게 와도 지금 고른 레포 것만 반영한다.
         if (extraRepo.fullstack !== repo) return;
         hypState.data = data;
+        hypState.repo = repo;
         hypState.okAt = new Date();
         hypState.error = false;
         hypState.loaded = true;
