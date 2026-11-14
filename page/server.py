@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, config, ledger, paths, rollup, routine, signal, sort, trends, validate  # noqa: E402
+from desk import atomic, board, config, ledger, paths, rollup, routine, signal, sort, trends, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
@@ -531,6 +531,39 @@ def build_trends(cfg: dict) -> dict:
             "broken": i_broken + r_broken + m_broken, "missing": []}
 
 
+def build_board(cfg: dict, query: dict) -> dict:
+    """칸반 화면 응답 — 카드·phases를 읽기만 한다. 계산은 desk/board.py."""
+    cards_by_repo, phases_by_repo, unreadable = {}, {}, set()
+    for root in cfg["repos"]:
+        name = Path(root).name
+        try:
+            cards_by_repo[name] = board.list_cards(name)
+        except (ValueError, OSError):
+            cards_by_repo[name] = ([], 1)
+            unreadable.add(name)
+        phases_by_repo[name] = dict(list_phase_indexes(root))
+    view = board.build_view(cards_by_repo, phases_by_repo, _today(), time.time(), query)
+    return {**view, "config": config_block(cfg), "repos": [n for n in cards_by_repo if n not in unreadable]}
+
+
+def build_board_card(cfg: dict, repo: str, card_id: str):
+    """카드 상세. 없는 레포·카드면 None, 이름·id 형식이 틀리면 ValueError."""
+    if not valid_repo_name(repo):
+        raise ValueError("bad repo")
+    board._check_id(card_id)
+    roots = {Path(r).name: r for r in cfg["repos"]}
+    if repo not in roots:
+        return None
+    try:
+        card = board.read_card_with_request(repo, card_id)
+    except (board.NotFound, ValueError):
+        return None
+    refs, refs_broken = board.read_refs(repo, card_id)
+    phase = dict(list_phase_indexes(roots[repo])).get(card.get("task")) if card.get("task") else None
+    detail = board.build_card_detail({**card, "id": card_id}, refs, phase, _today())
+    return {**detail, "refs_broken": refs_broken}
+
+
 def build_hypothesis_signal(cfg: dict, repo: str | None = None) -> dict:
     """가설 게이트 신호 띠 응답 — 원장을 열어 읽기만 한다. 계산은 desk/signal.py."""
     path = cfg.get("hypothesis_ledger")
@@ -558,6 +591,46 @@ def spawn_pick_candidate(body: dict) -> dict:
 
 
 # ---- 요청 핸들러 ----
+
+
+_BOARD_POST_PATHS = frozenset({
+    "/board/add", "/board/delete", "/board/archive", "/board/revive", "/board/start",
+    "/board/cancel", "/board/ref/add", "/board/ref/update", "/board/ref/delete",
+})
+
+
+def _board_links(raw) -> list:
+    if raw is None:
+        return []
+    if not isinstance(raw, list) or not all(isinstance(x, dict) for x in raw):
+        raise ValueError("bad links")
+    return [(x.get("name"), x.get("url")) for x in raw]
+
+
+def _board_post_action(path: str, repo: str, body: dict, now: float) -> dict:
+    """엔드포인트별 board 함수 호출. 실패는 board의 예외로 올린다."""
+    if path == "/board/add":
+        card = board.add_card(repo, body.get("title"), body.get("note"), now,
+                              links=_board_links(body.get("links")))
+        return {"id": card["id"]}
+    card_id = body.get("id")
+    if path == "/board/delete":
+        board.delete_card(repo, card_id)
+    elif path == "/board/archive":
+        board.archive_card(repo, card_id, now)
+    elif path == "/board/revive":
+        board.revive_card(repo, card_id)
+    elif path == "/board/start":
+        board.request_start(repo, card_id, now)
+    elif path == "/board/cancel":
+        board.cancel_request(repo, card_id)
+    elif path == "/board/ref/add":
+        return {"id": board.add_ref(repo, card_id, body.get("name"), body.get("url"))["id"]}
+    elif path == "/board/ref/update":
+        board.update_ref(repo, card_id, body.get("ref_id"), body.get("name"), body.get("url"))
+    else:
+        board.delete_ref(repo, card_id, body.get("ref_id"))
+    return {"ok": True}
 
 
 class _DeskRequestHandler(BaseHTTPRequestHandler):
@@ -648,6 +721,36 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(403, {"error": "bad host"})
                 return
             self._send_json(200, build_trends(config.load_config()))
+            return
+
+        if parsed.path == "/board":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            qs = {k: v[0] for k, v in parse_qs(parsed.query).items()}
+            try:
+                payload = build_board(config.load_config(), qs)
+            except board.BadQuery as exc:
+                self._send_json(400, {"error": str(exc)})
+                return
+            self._send_json(200, payload)
+            return
+
+        if parsed.path == "/board/card":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            qs = parse_qs(parsed.query)
+            try:
+                detail = build_board_card(config.load_config(), qs.get("repo", [None])[0],
+                                          qs.get("id", [None])[0])
+            except ValueError:
+                self._send_json(400, {"error": "bad request"})
+                return
+            if detail is None:
+                self._send_json(404, {"error": "not found"})
+                return
+            self._send_json(200, detail)
             return
 
         if parsed.path == "/hypothesis-signal":
@@ -764,6 +867,10 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
 
         if parsed.path == "/share/shared":
             self._handle_share_shared()
+            return
+
+        if parsed.path in _BOARD_POST_PATHS:
+            self._handle_board_post(parsed.path)
             return
 
         if parsed.path == "/shutdown":
@@ -950,6 +1057,43 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
         pick_path = paths.inbox_dir(repo) / f"{id_}.pick.json"
         atomic.write_json_atomic(pick_path, candidate)
         self._send_json(200, {"ok": True})
+
+    def _handle_board_post(self, path: str):
+        """POST /board/* — 카드·요청·링크 파일만 쓴다. 오류 응답에는 짧은 코드만 싣는다."""
+        if not self._check_post_guard():
+            return
+        try:
+            body = self._read_json_body()
+        except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+            self._send_json(400, {"error": "bad json"})
+            return
+        if not isinstance(body, dict):
+            self._send_json(400, {"error": "bad body"})
+            return
+        repo = body.get("repo")
+        if not valid_repo_name(repo):
+            self._send_json(400, {"error": "bad repo"})
+            return
+        known = {Path(r).name for r in config.load_config()["repos"]}
+        if repo not in known:
+            self._send_json(400 if path == "/board/add" else 404, {"error": "unknown repo"})
+            return
+        try:
+            result = _board_post_action(path, repo, body, time.time())
+        except board.DuplicateTitle:
+            self._send_json(409, {"error": "duplicate"})
+        except board.RefsBroken:
+            self._send_json(409, {"error": "refs broken"})
+        except (board.WrongColumn, board.AlreadyRequested, board.NoRequest, board.TooManyLinks):
+            self._send_json(409, {"error": "conflict"})
+        except board.NotFound:
+            self._send_json(404, {"error": "not found"})
+        except ValueError:
+            self._send_json(400, {"error": "invalid"})
+        except OSError:
+            self._send_json(500, {"error": "write failed"})
+        else:
+            self._send_json(200, result)
 
     def _handle_shutdown(self):
         if self.headers.get("X-Desk-Token") != self._token():

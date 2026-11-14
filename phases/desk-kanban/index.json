@@ -1,0 +1,205 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-kanban",
+  "docs": "docs/desk-kanban-2026-11-14",
+  "after": [],
+  "steps": [
+    {
+      "step": 1,
+      "name": "board-core",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:12:51+0900",
+      "summary": "desk/board.py(순수 함수: COLUMNS·LINK 상수·check_title/link/links·can_move·elapsed_days·candidate_mark·connection_state·progress)와 tests/test_desk_board.py 추가. 시각·today는 인자로 받음.",
+      "completed_at": "2026-11-14T18:18:16+0900"
+    },
+    {
+      "step": 2,
+      "name": "board-files",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:18:26+0900",
+      "summary": "paths.board_dir + desk/board.py 파일 함수(add/read/list/delete/archive/revive/request_start/cancel_request/add·update·delete_ref/read_refs/move_card/mark_pr/set_task), 예외 DuplicateTitle·WrongColumn·AlreadyRequested·NoRequest·TooManyLinks·NotFound, id=<epoch초>-<hex4>. list_cards 항목에 requested_at·request_broken·refs_broken 포함, (cards, 깨진 카드 수) 반환. 테스트 tests/test_desk_board_files.py",
+      "completed_at": "2026-11-14T18:26:54+0900"
+    },
+    {
+      "step": 3,
+      "name": "board-view-response",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:27:06+0900",
+      "summary": "desk/board.py에 BadQuery · build_view(cards_by_repo={레포:(cards,깨진수)}, phases_by_repo={레포:{task:index}|None}, today, now, query dict) · build_card_detail(card, refs, phase_index, today) 추가. 열별 cards·count·total, 카드 키(badge·pr_waiting·elapsed_days·progress·candidate·connection 등), 응답 최상위 columns·broken·archived. 테스트 tests/test_desk_board_view.py",
+      "completed_at": "2026-11-14T18:42:53+0900"
+    },
+    {
+      "step": 4,
+      "name": "board-get-endpoints",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:43:03+0900",
+      "summary": "page/server.py에 build_board(cfg,query)·build_board_card(cfg,repo,id) + GET /board(BadQuery→400, config·repos 추가)·GET /board/card(형식 오류 400, 없는 레포·카드 404) 추가. tests/test_desk_server_board_get.py 24개.",
+      "completed_at": "2026-11-14T18:51:07+0900"
+    },
+    {
+      "step": 5,
+      "name": "board-post-endpoints",
+      "status": "completed",
+      "summary": "page/server.py에 POST /board/{add,delete,archive,revive,start,cancel,ref/add,ref/update,ref/delete} 추가(_handle_board_post, 기존 _check_post_guard 재사용, 오류는 {error: 짧은 코드}: 400 검증·모르는 레포(add) / 404 없는 카드·링크·모르는 레포(id 동작) / 409 duplicate·conflict). tests/test_desk_server_board_post.py 36개, 전체 837개 통과.",
+      "tdd": true,
+      "started_at": "2026-11-14T18:51:18+0900",
+      "completed_at": "2026-11-14T19:07:46+0900"
+    },
+    {
+      "step": 6,
+      "name": "board-desk-cli",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T19:31:39+0900",
+      "summary": "scripts/desk.py에 board requests(--repo)·move·pr·link 서브커맨드 추가(board.list_cards/move_card/mark_pr/set_task 호출, 거절은 stderr 한 줄+종료코드 1, 서브프로세스·HTTP 없음). tests/test_desk_board_cli.py 31개, 전체 868개 통과.",
+      "completed_at": "2026-11-14T19:39:38+0900"
+    },
+    {
+      "step": 7,
+      "name": "board-ui-board",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T19:39:50+0900",
+      "summary": "page/index.html만 수정: 사이드 메뉴 「칸반」(data-tab=board, 배지 없음)·panels.board·loadVisibleExtra→fetchBoard(15초)·buildBoard/renderBoard(열 3개·카드·열별 정렬 토글·레포 검색 셀렉트·기간 From~To·제목 검색 0.3초·보관 보기·필터 요약 줄·로딩/빈/오류/config/broken). 화면이 읽는 키(id·repo·title·note·column·badge·pr_waiting·elapsed_days·progress{done,total}·candidate·connection·created_at·done_at·archived·archived_at, 최상위 columns{cards,count,total}·broken·config·repos)는 desk/board.py _view_card·build_view와 page/server.py build_board 키와 대조해 일치. 카드 클릭·새 카드 버튼·모달·토스트는 없음(step 8·9). 868개 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T19:47:52+0900"
+    },
+    {
+      "step": 8,
+      "name": "board-ui-panel",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T19:48:03+0900",
+      "summary": "page/index.html만 수정: 카드 클릭/Enter로 우측 세부 패널(GET /board/card 열 때·바뀐 때만, ✕·Esc 안쪽부터·포커스 복귀), 날짜·단계 summary·링크 줄(이름만 하이퍼링크, URL은 title 툴팁, 수정·링크 삭제·추가, 5개 상한, 칸별 오류, 편집 중엔 안 다시 그리고 「카드가 바뀌었어요」), 버튼(작업 시작·요청 취소·삭제·보관·되살리기), 읽기 실패/저장 실패 분리. deleteRef(card, ref) 한 곳(step 9가 5초 지연으로 교체). 응답 키 refs{id,name,url}·steps{step,name,status,summary}·phase_summary·created_at/requested_at/doing_at/pr_at/done_at/archived_at·elapsed_days·column·task를 desk/board.py build_card_detail과 대조해 일치. 868개 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T19:58:39+0900"
+    },
+    {
+      "step": 9,
+      "name": "board-ui-modals-toasts",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T19:58:50+0900",
+      "summary": "page/index.html만 수정: 「+ 새 카드」 모달(레포·제목·메모·링크 최대 5개, 하단 버튼 고정, 409는 모달 안 「같은 제목의 예정 카드가 이미 있어요」, 입력 보존, Esc/포커스 복귀)·토스트 스택([모두 지우기])·카드 삭제(5초 뒤 POST /board/delete, 되돌리면 안 보냄)·보관(즉시 POST, 되돌리기=revive)·deleteRef 5초 지연. 868개 통과, HTML 파서·node --check 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T20:05:29+0900"
+    },
+    {
+      "step": 10,
+      "name": "board-ui-other-screens-repo-select",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T20:05:40+0900",
+      "summary": "page/index.html만 수정: 순환 칩 repoFilterChip을 레포 검색 셀렉트 repoSelect(value,repos,onPick)+repoFilterSelect(key,..)로 교체, 트랙 화면 순환 칩도 repoSelect로 교체. 바뀐 화면 4곳: 리뷰·AI워크플로우·풀스택(가설 신호 포함)·트랙(grep으로 사용처 전수 확인, repoFilterChip 0건). 868개 통과, HTML 파서·node --check 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T20:11:27+0900"
+    },
+    {
+      "step": 11,
+      "name": "board-card-detail-request-merge",
+      "status": "completed",
+      "summary": "desk/board.py에 공개 함수 read_card_with_request(read_card + 요청 파일 at을 requested_at으로 합침, 깨지면 None)를 더하고 page/server.py build_board_card가 쓴다. 상세 requested_at·elapsed_days가 목록과 같다(진행 카드만 값). 테스트 9개는 tests/test_desk_server_board_get.py 새 클래스. 877개 통과.",
+      "tdd": true,
+      "started_at": "2026-11-14T22:39:07+0900",
+      "completed_at": "2026-11-14T22:46:52+0900"
+    },
+    {
+      "step": 12,
+      "name": "board-integration-check",
+      "status": "completed",
+      "tdd": false,
+      "kind": "measure",
+      "started_at": "2026-11-14T22:46:58+0900",
+      "summary": "가짜 DESK_HOME·repo-a/repo-b·example.com 데이터로 서버(DESK_PORT=47699)를 띄워 claude-in-chrome(새 탭)으로 측정, 코드 변경 0. `GET /board`+화면 DOM 대조` 열 3개 건수 3/5/2 = 응답 count/total 일치, 요청됨 배지·경과 일수(5/3/8/12일)·진행도 1/2·2/2·후보 표식·설계 중·연결 끊김·PR 대기(진행 맨 위) 응답과 일치. `요청됨 카드 세부 패널` 「요청」 시각 11월 14일과 [요청 취소] 표시 통과, [작업 시작]은 숨지 않고 비활성(title 이미 요청했어요)으로 나옴=PRD 「시작 버튼 중복」 결정과 일치하나 step 문구 '안 나오는지'와는 표현이 다름(Finn 판단 필요). `[요청 취소] 클릭` 배지 사라짐·요청 파일 삭제·요청 시각 '없음'·[작업 시작] 활성 통과. `레포 셀렉트 4곳(리뷰·AI워크플로우·풀스택·트랙)에서 repo-a/repo-b/전체 선택` 모두 고른 레포 행만 보임 통과(풀스택 hypothesis-signal은 원장 설정이 없어 repo 쿼리 경로는 확인필요 — 미실행: hypothesis_ledger 가짜 파일 미구성). `기간 From~To 화면 조작+curl` from=11-10&to=11-13 → 1/3·1/5·0/2, from만 2/3·2/5·1/2, to만 1/3·0/5·1/2 화면=응답 일치, from>to는 화면 안내 문구+요청 안 보냄·서버 400 통과. `제목 검색 'ALPHA P'` 0.3초 디바운스·대소문자 무시·메모 단어 'memo' 0건·필터 요약 줄 '걸린 3 / 전체 10' 통과. `정렬 토글` 예정 오래된순→최신순 반전·진행 PR 대기 맨 위 유지 통과. `세부 패널` step summary·링크 이름만 하이퍼링크(target=_blank, rel=noopener noreferrer, URL은 title 툴팁, 본문 텍스트에 example.com 없음) 통과. `링크 추가·수정·javascript: 거절 문구·5개째 뒤 '링크는 5개까지' 안내·링크 삭제 5초 되돌리기(되돌리면 refs.json 그대로)` 통과. `카드 삭제 5초 되돌리기(되돌리면 파일 유지)·삭제 확정(파일 삭제)·보관→보관 보기→되살리기` 통과. `같은 제목 모달` '같은 제목의 예정 카드가 이미 있어요' 통과. `curl /nav-counts` {judge,review,routine,trends,errors} board 키 없음 통과. `레포 셀렉트 직후 지연 원인(코드 읽기)` page/index.html boardOpts click 핸들러가 boardUi.repo 설정 뒤 fetchBoard()를 즉시 호출(디바운스·15초 폴링 대기 없음, 디바운스 boardSchedule은 제목 검색 전용), 실측 클릭→필터 반영 23ms → 15초 폴링 탓 아님, 첫 측정의 1.5초 미반영은 화면 쪽 지연이 아니라 측정 타이밍 또는 응답 대기로 추정(원인 확정 못 함, 고치지 않음). `python3 -m unittest discover -s tests` Ran 877 tests OK. 서버 종료·임시 폴더 삭제 완료.",
+      "completed_at": "2026-11-14T22:57:23+0900"
+    },
+    {
+      "step": 13,
+      "name": "board-server-hardening",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T23:44:09+0900",
+      "summary": "desk/board.py에 RefsBroken 추가(깨진 링크 파일이면 add/update/delete_ref가 쓰지 않고 예외, 파일 없음은 정상), page/server.py가 POST /board/ref/*에서 409 {error: refs broken}으로 매핑하고 build_board가 list_cards의 ValueError·OSError를 레포 단위로 삼켜 ([], 1)로 취급(my..repo 있어도 GET /board 200). 기존 덮어쓰기 단언은 RED 커밋에서 교체, ARCHITECTURE 링크 설명에 한 줄 추가. 880개 통과.",
+      "completed_at": "2026-11-14T23:54:29+0900"
+    },
+    {
+      "step": 14,
+      "name": "board-ui-review-fixes",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T23:54:37+0900",
+      "summary": "page/index.html만 수정: (1) .kb-change[hidden]{display:none} 추가(inline-note+hidden 조합은 칸반 안엔 이것뿐, 749행) (2) saveRef에 p.refBusy 가드(3518행) — 같은 Enter 연타 모양: 칸반 새 카드 모달은 Enter 저장 핸들러 없음, 다른 Enter 저장 없음(목록 없음) (3) 새 카드 모달 syncRequired: 레포·제목(공백만이면 빈 것)이 비면 [추가] 비활성+「비어 있는 칸: 레포 · 제목」(3236~3246행), 서버 검증 그대로 (4) 기간 팝오버에 [오늘][지난 7일][이번 달][지우기] 프리셋(3940~3960행, 브라우저 로컬 날짜, 누르면 입력에 넣고 periodChanged로 바로 적용). 날짜 입력은 type=date 유지, 시안 인라인 달력은 안 만듦(AI 해석) (5) 보관 보기 제목 「보관한 카드 N」(d.archTitle, 3745~3752행)과 진행에서 보관한 카드의 「진행에서 보관」 메타(3007행). 응답에 최상위 보관 건수 키는 없고 보관 보기에서 columns.*.count가 보관 카드 수라 N은 서버가 준 열별 count의 합(블록 사유 아님 — 화면이 카드를 세지 않음, 합산 해석은 Finn 확인 필요) (6) 링크 추가·수정 409는 「링크 파일이 깨져서 저장하지 못했어요…」(BOARD_REFS_BROKEN, 3511·3534행, 입력 유지), 삭제 409는 같은 문구 토스트(3494행). 완료 열은 「더 보기」 없이 전부 보이고 열 스크롤인 기존 구현 유지. innerHTML 추가 0, node --check 통과, 880개 통과. 확인필요 — 미실행: 실제 화면 확인은 step 15에서",
+      "completed_at": "2026-11-15T00:02:27+0900"
+    },
+    {
+      "step": 15,
+      "name": "board-integration-recheck",
+      "status": "completed",
+      "tdd": false,
+      "kind": "measure",
+      "started_at": "2026-11-15T00:02:31+0900",
+      "summary": "측정 전용, 코드 변경 0(git status는 index.json만). 가짜 DESK_HOME/DESK_CONFIG/repo-a·repo-b·my..repo·example.com, `DESK_PORT=47715 python3 page/server.py` + claude-in-chrome 새 탭(종료 후 닫음, 서버 종료·임시 폴더 삭제). 1) `카드 열기 후 .kb-change 검사` hidden=true·display none·높이 0(빈 노란 줄 없음) / `desk.py board pr` 뒤 15초 폴링은 패널 값만 갱신, 줄 안 나옴 / `+ 링크 추가`로 편집 중 `desk.py board move … done` 뒤 15초에 「카드가 바뀌었어요」 display flex 높이 34px로 나옴 통과. 2) `링크 저장 칸 Enter 2회(key Return Return)+fetch POST 계수` POST /board/ref/add 1회, refs.json 항목 1개 통과(키 2회는 연속 입력이라 같은 틱 동시 발사는 아님). 3) `새 카드 모달 syncRequired 3상태` 제목 빔·공백만 → [추가] 비활성+「비어 있는 칸: 제목」, 제목 입력 → 힌트 숨김·활성 통과. 어긋남: 레포 셀렉트에 빈 옵션이 없고 첫 레포(repo-a)가 미리 골라져서 「레포 · 제목」·「레포」만 나오는 상태는 레포 설정이 0개일 때만 가능, 화면에서 재현 못 함(확인필요 — 미실행: 레포 0개 설정). 4) `기간 팝오버 프리셋 4개 + curl 127.0.0.1:47715/board?from&to` 오늘 입력 11-15~11-15 쿼리 동일 1/5·0/1·1/10, 지난 7일 11-09~11-15 3/5·0/1·1/10, 이번 달 11-01~11-15(이번 달 1일~오늘, 월말 아님) 4/5·0/1·1/10, 지우기 입력·쿼리 없음 5/1/10 — 화면 열 머리 「걸린/전체」 = curl 응답 전부 일치. 5) `보관 보기 클릭 + curl /board?archived=1` 화면 「보관한 카드 2」 = 응답 열별 count 합 0+1+1=2, 진행에서 보관한 카드에 「진행에서 보관」 메타, 패널 [되살리기] 뒤 archived_at null·보관 목록 1건·진행 2/2로 복귀 통과. 6) `refs.json의 url 삭제 후 UI 링크 추가 + POST ref/add·update·delete` 화면 「링크 파일이 깨져서 저장하지 못했어요…」 입력 유지, 세 POST 모두 409 refs broken, `shasum` 전후 동일(b1c259dd…) 통과. 한계: 깨진 파일은 링크 목록이 빈 채로 보여 화면에서 수정·삭제 버튼에 닿을 수 없어 둘은 POST 직접 호출로만 확인(삭제 토스트 문구 확인필요 — 미실행). 깨진 refs 카드가 「읽지 못한 카드」 수에도 더해져 1→2개로 늘어남(응답 broken에 refs_broken 포함, 의도 여부 Finn 확인 필요). 7) `config repos에 my..repo 추가 후 GET /board + 화면` 200, 다른 레포 카드 보임, 「읽지 못한 카드가 1개 있어요…」 노란 줄 통과. 8) `완료 열 DOM 카드 수 + 조상 overflow 조사` 완료 9장(이후 10장) 전부 렌더, 「더 보기」 버튼 0개. 어긋남: .kb-col에 max-height·overflow가 없어(CSS 754~762행) 열 안 스크롤이 아니라 열이 1030px로 늘어나고 페이지가 스크롤됨 — PRD 리뷰1회차 결정 「열 안에서 스크롤」과 다름, 고치지 않음(Finn 판단 필요). 9) `python3 -m unittest discover -s tests` Ran 880 tests OK. 10) 확인필요 — 미실행: 풀스택 hypothesis 레포 셀렉트(step 12에서 다룸), 시안 Kanban4States·5Filters 픽셀 대조(화면 구조는 스크린샷으로만 눈 확인).",
+      "completed_at": "2026-11-15T00:13:22+0900"
+    },
+    {
+      "step": 16,
+      "name": "board-server-review2-fixes",
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-15T01:31:02+0900",
+      "summary": "page/server.py만 수정: build_board가 읽지 못한 레포(list_cards 예외)를 repos에서 빼고(새 키 없음), build_board_card가 read_refs 깨짐 정보로 상세 응답에 refs_broken(bool)을 붙임. 상세 키 집합 단언은 RED 커밋에서 갱신, ARCHITECTURE 상세 설명에 한 줄. 883개 통과.",
+      "completed_at": "2026-11-15T01:38:35+0900"
+    },
+    {
+      "step": 17,
+      "name": "board-ui-review2-fixes",
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-15T01:38:40+0900",
+      "summary": "page/index.html만 수정: boardPost가 콜백에 응답 error 값을 넘김(본문 없으면 빈 값). 링크 추가·수정·삭제 409는 error===\"refs broken\"일 때만 BOARD_REFS_BROKEN, 그 외는 「링크는 5개까지 붙일 수 있어요」·「이 링크를 바꾸지 못했어요」·「링크를 지우지 못했어요 · 이름」. 상세 refs_broken이 true면 링크 영역에 깨짐 안내만 보이고 추가 버튼·폼 숨김. 필터가 걸린 보관 보기 제목은 「보관한 카드 걸린 수 / 전체 수」(total 합). 883개 통과, node --check 통과. 확인필요 — 미실행: 화면은 리뷰 3회차에서",
+      "completed_at": "2026-11-15T01:43:50+0900"
+    },
+    {
+      "step": 18,
+      "name": "board-ui-reconcile-fixes",
+      "status": "completed",
+      "tdd": false,
+      "summary": "page/index.html만 수정: .btn:disabled/.btn.accent:disabled opacity 0.4(.btn.accent 뒤, 작업 시작·추가 둘 다 걸림). 보관 보기가 켜지면 제목 「칸반 · 보관」·부제 「보관한 카드를 보고 되살려요」·버튼 「← 보드로」(aria-pressed 유지), 열 3칸 대신 서버가 준 columns의 cards를 이어 한 목록(boardArchiveList, 화면이 새로 세지 않음), 0장이면 「보관한 카드가 없어요」(필터 중엔 기존 「이 조건에 맞는 카드가 없어요」). 보드로 돌아가면 기존 3열·정렬·필터 그대로. innerHTML 0, node --check 통과, 883개 통과. 확인필요 — 미실행: 화면은 재대조에서",
+      "started_at": "2026-11-15T02:12:18+0900",
+      "completed_at": "2026-11-15T02:17:59+0900"
+    }
+  ],
+  "reviews": [
+    {
+      "at": "2026-11-14T23:06:22+09:00",
+      "head": "615669e35c55f117b80508c636a664848b28d360",
+      "issues": [
+        "링크·카드 쓰기 읽고-고치고-쓰기 경합(saveRef busy 가드 없음)",
+        "깨진 링크 파일에 add_ref하면 파일 전체 덮어씀",
+        "레포 이름 검증 두 곳 불일치(my..repo → GET /board 500)",
+        "패널 변경 안내 줄 hidden이 display:flex에 덮임",
+        "완료 열 「더 보기」 없음(브리프만 있고 PRD 없음)",
+        "새 카드 모달 추가 버튼 빈 제목에서 활성",
+        "기간 선택 달력·프리셋 없음",
+        "보관 보기·「디자인 중」 문구 시안과 다름(세부 미확정)"
+      ]
+    },
+    {
+      "at": "2026-11-15T00:53:03+09:00",
+      "head": "bf82fa4cadefc5ed66606c060bcda1d59012cb95",
+      "issues": [
+        "링크 추가 409(TooManyLinks)를 전부 '링크 파일 깨짐' 문구로 보여 줌(page/index.html:3535)",
+        "읽지 못한 레포를 '깨진 카드 1개'로 안내하고 repos에 남김(page/server.py:541)"
+      ]
+    },
+    {
+      "at": "2026-11-15T01:48:24+09:00",
+      "head": "f27e677993c635c4fba1bc592afc8ddaa602f9d8",
+      "issues": [
+        "링크 쓰기 409 뒤 패널을 다시 받지 않아 화면 링크 수와 어긋남(🟢)",
+        "refs_broken 조기 종료 시 p.editing 잔존(🟢)",
+        "ref/update의 conflict 분기는 도달 불가(🟢)"
+      ]
+    }
+  ]
+}

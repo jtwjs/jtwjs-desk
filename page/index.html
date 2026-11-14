@@ -468,6 +468,7 @@
   .btn.accent { background: var(--brand-fill); color: var(--on-brand); }
   .btn.accent:hover:not(:disabled) { border-color: var(--accent); }
   .btn.sm { height: 28px; padding: 0 12px; font-size: 13px; }
+  .btn:disabled, .btn.accent:disabled { opacity: 0.4; }
   .btn.confirm-pending { border-color: var(--attention); }
 
   .screen { display: flex; flex-direction: column; gap: 20px; }
@@ -717,6 +718,147 @@
   .tr-chip[aria-pressed="true"] { background: var(--surface-raised); color: var(--text-strong); }
   .tr-counts { font-size: 12px; color: var(--text-muted); margin-left: 4px; }
 
+  /* ---- 칸반 ---- 입력칸 테두리만 #6B7390(전역 토큰은 안 바꾼다) */
+  #board-content { --kb-input-border: #6B7390; --kb-link: #AEB6FF; }
+  .kb-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: relative; }
+  .kb-bar .kb-spacer { flex: 1; }
+  .kb-pop-wrap { position: relative; }
+  .rsel { --kb-input-border: var(--surface-raised); }
+  .kb-bar .chip { border-color: var(--kb-input-border); }
+  .kb-pop {
+    position: absolute; top: 36px; left: 0; z-index: 20; min-width: 260px;
+    display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    background: var(--surface-panel); border: 1px solid var(--kb-input-border); border-radius: var(--radius-card);
+  }
+  .kb-pop[hidden] { display: none; }
+  .kb-input, .kb-search {
+    box-sizing: border-box; height: 32px; padding: 0 10px; font: inherit; font-size: 13px;
+    color: var(--text-strong); background: var(--surface-content);
+    border: 1px solid var(--kb-input-border); border-radius: var(--radius-control);
+  }
+  .kb-search { width: 240px; }
+  .kb-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-muted); }
+  .kb-opts { display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow-y: auto; }
+  .kb-opt {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 32px; padding: 0 8px;
+    border: 0; border-radius: var(--radius-control); background: transparent; font: inherit; font-size: 13px;
+    color: var(--text-body); text-align: left; cursor: pointer;
+  }
+  .kb-opt:hover, .kb-opt[aria-selected="true"] { background: var(--surface-raised); color: var(--text-strong); }
+  .kb-hint { margin: 0; font-size: 12px; color: var(--text-muted); }
+  .kb-hint.danger { color: var(--danger); }
+  .kb-change[hidden] { display: none; }
+  .kb-summary {
+    display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-body);
+  }
+  .kb-summary .kb-sum-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kb-cols { display: flex; gap: 12px; align-items: flex-start; overflow-x: auto; }
+  .kb-col {
+    flex: 1 1 0; min-width: 260px; display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    max-height: calc(100vh - 240px); overflow-y: auto;
+    background: var(--surface-panel); border: 1px solid var(--surface-raised); border-radius: var(--radius-card);
+  }
+  .kb-col-head { display: flex; align-items: center; justify-content: space-between; min-height: 32px; position: sticky; top: -12px; z-index: 1; background: var(--surface-panel); }
+  .kb-col-title { display: flex; align-items: baseline; gap: 8px; }
+  .kb-col-name { font-size: 13px; font-weight: 600; color: var(--text-strong); }
+  .kb-col-count { font-size: 12px; color: var(--text-muted); }
+  .kb-sort {
+    display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 8px; border: 0;
+    border-radius: var(--radius-control); background: transparent; font: inherit; font-size: 12px;
+    color: var(--text-muted); cursor: pointer;
+  }
+  .kb-sort:hover { color: var(--text-strong); background: var(--surface-raised); }
+  .kb-card {
+    display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    background: var(--surface-content); border: 1px solid var(--surface-raised); border-radius: var(--radius-card);
+  }
+  .kb-card.pr { border-left: 4px solid var(--attention); }
+  .kb-card.cand { border-left: 4px solid color-mix(in srgb, var(--attention) 55%, transparent); }
+  .kb-card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .kb-repo {
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
+    border: 1px solid var(--surface-raised); border-radius: var(--radius-control); padding: 1px 6px;
+  }
+  .kb-flag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--neutral); }
+  .kb-flag .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: currentColor; box-sizing: border-box; }
+  .kb-flag.accent { color: var(--accent); }
+  .kb-flag.attention { color: var(--attention); }
+  .kb-flag.danger { color: var(--danger); }
+  .kb-flag.hollow .dot { background: transparent; border: 1px solid currentColor; }
+  .kb-title {
+    font-size: 13px; line-height: 1.4; font-weight: 500; color: var(--text-strong);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .kb-meta { font-size: 12px; color: var(--text-muted); }
+  .kb-prog { display: flex; align-items: center; gap: 8px; }
+  .kb-prog-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-raised); }
+  .kb-prog-fill { height: 4px; border-radius: 2px; background: var(--accent); }
+  .kb-card.pr .kb-prog-fill { background: var(--attention); }
+  .kb-card.cand .kb-prog-fill { background: color-mix(in srgb, var(--attention) 55%, transparent); }
+  .kb-empty { margin: 0; padding: 12px 4px; font-size: 13px; color: var(--text-muted); }
+  .kb-empty-all { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-muted); }
+
+  .kb-card { cursor: pointer; }
+  .kb-card:hover { border-color: var(--text-muted); }
+  .kb-card:focus-visible, .kb-panel :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .kb-panel {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; width: 420px; max-width: 100vw;
+    display: flex; flex-direction: column; background: var(--surface-panel);
+    border-left: 1px solid var(--surface-raised); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.35);
+  }
+  .kb-panel[hidden] { display: none; }
+  .kb-panel .kb-spacer { flex: 1; }
+  .kb-panel-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--surface-raised); }
+  .kb-panel-close {
+    width: 32px; height: 32px; border: 0; border-radius: var(--radius-control); background: transparent;
+    color: var(--text-muted); font: inherit; font-size: 14px; cursor: pointer;
+  }
+  .kb-panel-close:hover { color: var(--text-strong); background: var(--surface-raised); }
+  .kb-panel-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+  .kb-panel-title { margin: 0; font-size: 16px; line-height: 1.4; font-weight: 600; color: var(--text-strong); overflow-wrap: anywhere; }
+  .kb-panel-note { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-body); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .kb-dates { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 0; font-size: 13px; }
+  .kb-dates dt { color: var(--text-muted); }
+  .kb-dates dd { margin: 0; color: var(--text-body); }
+  .kb-sec-title { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .kb-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .kb-step { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; background: var(--surface-raised); border-radius: var(--radius-control); }
+  .kb-step-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text-body); }
+  .kb-step-status { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .kb-step.done .kb-step-status { color: var(--success); }
+  .kb-step.bad .kb-step-status { color: var(--danger); }
+  .kb-links { display: flex; flex-direction: column; gap: 8px; }
+  .kb-ref-row { display: flex; align-items: center; gap: 8px; min-height: 32px; }
+  .kb-ref-link { color: var(--kb-link); font-size: 13px; text-decoration: none; overflow-wrap: anywhere; }
+  .kb-ref-link:hover { text-decoration: underline; }
+  .kb-ref-plain { color: var(--text-body); font-size: 13px; overflow-wrap: anywhere; }
+  .kb-ref-form { display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--surface-raised); border-radius: var(--radius-control); }
+  .kb-row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .kb-panel-foot { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--surface-raised); }
+
+  .kb-overlay { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.55); }
+  .kb-overlay[hidden] { display: none; }
+  .kb-modal {
+    box-sizing: border-box; width: 520px; max-width: 100%; max-height: 100%; display: flex; flex-direction: column;
+    background: var(--surface-panel); border: 1px solid var(--surface-raised); border-radius: var(--radius-card);
+  }
+  .kb-modal-head { padding: 16px 16px 8px; font-size: 16px; font-weight: 600; color: var(--text-strong); margin: 0; }
+  .kb-modal-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 8px 16px 16px; }
+  .kb-modal-foot { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--surface-raised); }
+  .kb-modal-foot .kb-row-actions { justify-content: flex-end; }
+  .kb-modal select.kb-input, .kb-modal .kb-input, .kb-modal textarea.kb-input { width: 100%; }
+  .kb-modal textarea.kb-input { height: 80px; padding: 8px 10px; resize: vertical; }
+  .kb-input.bad { border-color: var(--danger); }
+  .kb-modal :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .kb-link-row { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--surface-raised); border-radius: var(--radius-control); }
+  .kb-toasts { position: fixed; left: 16px; bottom: 16px; z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .kb-toast {
+    display: flex; align-items: center; gap: 12px; padding: 8px 12px; font-size: 13px; color: var(--text-strong);
+    background: var(--surface-raised); border: 1px solid var(--kb-input-border, #6B7390); border-radius: var(--radius-control);
+  }
+  .kb-toast.bad { border-color: var(--danger); }
+  .kb-toasts :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
@@ -751,6 +893,7 @@
         <button type="button" class="menu-item sub" data-tab="trends" data-sub="bookmarks"><span class="label">북마크</span></button>
       </div>
     </div>
+    <button type="button" class="menu-item" data-tab="board" aria-label="칸반"><svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg><span class="label">칸반</span><span class="tip" role="tooltip">칸반</span></button>
   </div>
 </nav>
 <main>
@@ -777,6 +920,9 @@
   </section>
   <section id="tab-trends" class="tab-panel" hidden>
     <div id="trends-content"><p class="empty-msg">불러오는 중…</p></div>
+  </section>
+  <section id="tab-board" class="tab-panel" hidden>
+    <div id="board-content" class="screen"></div>
   </section>
 </main>
 <div id="banner" hidden></div>
@@ -817,7 +963,8 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     weekly: document.getElementById("tab-weekly"),
     health: document.getElementById("tab-health"),
     routine: document.getElementById("tab-routine"),
-    trends: document.getElementById("tab-trends")
+    trends: document.getElementById("tab-trends"),
+    board: document.getElementById("tab-board")
   };
   var activeTab = "track";
   var activeSub = "workflow";
@@ -982,15 +1129,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     if (trackState.repo !== null && repos.indexOf(trackState.repo) === -1) trackState.repo = null;
 
     var chipRow = el("div", { class: "chip-row" });
-    var repoChip = chip("레포", trackState.repo === null ? "전체" : trackState.repo);
-    repoChip.setAttribute("aria-label", "레포 필터: 누르면 다음 레포로 바뀐다");
-    repoChip.addEventListener("click", function () {
-      var order = [null].concat(repos);
-      var next = order[(order.indexOf(trackState.repo) + 1) % order.length];
-      trackState.repo = next;
+    chipRow.appendChild(repoSelect(trackState.repo, repos, function (r) {
+      trackState.repo = r;
       renderTrack();
-    });
-    chipRow.appendChild(repoChip);
+    }));
     container.appendChild(chipRow);
 
     var rows = [];
@@ -1512,18 +1654,83 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     return el("h2", { class: "section-title", text: text });
   }
 
-  // 레포 필터 칩: 누르면 다음 레포로 순환(트랙 화면과 같은 방식)
-  var extraRepo = { review: null, workflow: null, fullstack: null };
-  function repoFilterChip(key, repos, rerender) {
-    if (extraRepo[key] !== null && repos.indexOf(extraRepo[key]) === -1) extraRepo[key] = null;
-    var c = chip("레포", extraRepo[key] === null ? "전체" : extraRepo[key]);
-    c.setAttribute("aria-label", "레포 필터: 누르면 다음 레포로 바뀐다");
-    c.addEventListener("click", function () {
-      var order = [null].concat(repos);
-      extraRepo[key] = order[(order.indexOf(extraRepo[key]) + 1) % order.length];
-      rerender();
+  // 레포 검색 셀렉트(칸반과 같은 모양): value는 null이면 전체, onPick(repo|null)은 고른 뒤 부른다.
+  // 선택은 메모리에만 있다(새로고침하면 초기화).
+  function repoSelect(value, repos, onPick) {
+    var valueNode = el("span", { class: "chip-value", text: value === null ? "전체" : value });
+    var trigger = el("button", { class: "chip", type: "button", "aria-haspopup": "true", "aria-expanded": "false" }, [
+      el("span", { class: "chip-label", text: "레포" }),
+      el("span", { class: "chip-sep", "aria-hidden": "true" }),
+      valueNode,
+      el("span", { class: "chip-label", text: "⌄", "aria-hidden": "true" })
+    ]);
+    var search = el("input", { class: "kb-input", type: "text", placeholder: "레포 검색…", "aria-label": "레포 검색" });
+    var opts = el("div", { class: "kb-opts", role: "listbox", "aria-label": "레포 목록" });
+    var pop = el("div", { class: "kb-pop" }, [
+      search, opts,
+      el("p", { class: "kb-hint", text: "↑↓ 이동 · Enter 선택 · Esc 닫기" })
+    ]);
+    pop.hidden = true;
+    var wrap = el("div", { class: "kb-pop-wrap rsel" }, [trigger, pop]);
+
+    function close() { pop.hidden = true; trigger.setAttribute("aria-expanded", "false"); }
+    function renderOpts() {
+      clear(opts);
+      var needle = search.value.trim().toLowerCase();
+      var list = repos.filter(function (r) { return !needle || r.toLowerCase().indexOf(needle) !== -1; });
+      if (!needle) list = [null].concat(list);
+      if (list.length === 0) {
+        opts.appendChild(el("p", { class: "kb-hint", text: "일치하는 레포가 없어요" }));
+        return;
+      }
+      list.forEach(function (r) {
+        var b = el("button", {
+          class: "kb-opt", type: "button", role: "option",
+          "aria-selected": r === value ? "true" : "false"
+        }, [
+          el("span", { text: r === null ? "전체" : r }),
+          r === value ? el("span", { text: "✓", "aria-hidden": "true" }) : null
+        ]);
+        b.addEventListener("click", function () { close(); onPick(r); });
+        opts.appendChild(b);
+      });
+    }
+    trigger.addEventListener("click", function () {
+      var open = pop.hidden;
+      closeRepoSelects();
+      pop.hidden = !open;
+      trigger.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) { search.value = ""; renderOpts(); search.focus(); }
     });
-    return el("div", { class: "chip-row" }, [c]);
+    search.addEventListener("input", renderOpts);
+    pop.addEventListener("keydown", function (e) {
+      var list = Array.prototype.slice.call(opts.querySelectorAll(".kb-opt"));
+      var i = list.indexOf(document.activeElement);
+      if (e.key === "Escape") { close(); trigger.focus(); }
+      else if (e.key === "ArrowDown" && list.length) { e.preventDefault(); list[Math.min(i + 1, list.length - 1)].focus(); }
+      else if (e.key === "ArrowUp" && list.length) { e.preventDefault(); if (i <= 0) search.focus(); else list[i - 1].focus(); }
+      else if (e.key === "Enter" && document.activeElement === search && list.length) { e.preventDefault(); list[0].click(); }
+    });
+    return wrap;
+  }
+  function closeRepoSelects() {
+    Array.prototype.forEach.call(document.querySelectorAll(".rsel"), function (w) {
+      w.querySelector(".kb-pop").hidden = true;
+      w.querySelector("button.chip").setAttribute("aria-expanded", "false");
+    });
+  }
+  // 셀렉트 밖을 누르면 닫는다
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest || !e.target.closest(".rsel")) closeRepoSelects();
+  });
+
+  var extraRepo = { review: null, workflow: null, fullstack: null };
+  function repoFilterSelect(key, repos, rerender) {
+    if (extraRepo[key] !== null && repos.indexOf(extraRepo[key]) === -1) extraRepo[key] = null;
+    return el("div", { class: "chip-row" }, [repoSelect(extraRepo[key], repos, function (r) {
+      extraRepo[key] = r;
+      rerender();
+    })]);
   }
 
   function uniq(list) {
@@ -1532,7 +1739,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     return out;
   }
 
-  var lastExtra = { review: null, comp: null, routine: null, trends: null };
+  var lastExtra = { review: null, comp: null, routine: null, trends: null, board: null };
   var reviewErrors = {};
 
   function renderReview(data) {
@@ -1545,7 +1752,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       return;
     }
     if (items.length > 0) {
-      box.appendChild(repoFilterChip("review", uniq(items.map(function (i) { return i.repo; })), function () { renderReview(data); }));
+      box.appendChild(repoFilterSelect("review", uniq(items.map(function (i) { return i.repo; })), function () { renderReview(data); }));
       var rows = [];
       items.forEach(function (it) {
         if (extraRepo.review !== null && it.repo !== extraRepo.review) return;
@@ -1601,7 +1808,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       return;
     }
     if (rows.length > 0) {
-      box.appendChild(repoFilterChip("workflow", uniq(rows.map(function (r) { return r.repo; })), rerender));
+      box.appendChild(repoFilterSelect("workflow", uniq(rows.map(function (r) { return r.repo; })), rerender));
       var trs = [];
       rows.forEach(function (r) {
         if (extraRepo.workflow !== null && r.repo !== extraRepo.workflow) return;
@@ -1937,7 +2144,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     if (!fsChipCtx) return;
     var sigRepos = hypState.data && Array.isArray(hypState.data.repos) ? hypState.data.repos : [];
     var repos = uniq(fsChipCtx.cards.map(function (c) { return c.repo; }).concat(sigRepos));
-    if (repos.length > 0) slot.appendChild(repoFilterChip("fullstack", repos, fsChipCtx.rerender));
+    if (repos.length > 0) slot.appendChild(repoFilterSelect("fullstack", repos, fsChipCtx.rerender));
   }
 
   function afterHypUpdate(visible) {
@@ -2324,6 +2531,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     if (activeTab === "track" || activeTab === "judge") return;
     if (activeTab === "routine") { fetchRoutine(false); return; }
     if (activeTab === "trends") { fetchTrends(); return; }
+    if (activeTab === "board") { fetchBoard(); return; }
     fetchExtra(activeTab);
   }
 
@@ -2681,6 +2889,1194 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       });
   }
 
+  // ---- 칸반 ----
+  // 서버(GET /board)가 열 묶기 · 건수 · 정렬 · 배지 · 경과 일수 · 표식 · 연결 상태를 다 계산해 준다.
+  // 화면은 받은 값을 그리기만 한다(재계산 · slice 없음). 응답 문자열은 textContent(el())로만 넣는다.
+  // 선택(필터 · 정렬 · 검색)은 메모리만 쓴다 — 새로고침하면 초기화.
+
+  var BOARD_COLS = [
+    { key: "planned", name: "예정", empty: "예정 카드가 없어요" },
+    { key: "doing", name: "진행", empty: "진행 중인 카드가 없어요" },
+    { key: "done", name: "완료", empty: "아직 merge된 카드가 없어요" }
+  ];
+  var boardUi = {
+    data: null, okAt: null, failed: false,
+    repo: "", from: "", to: "", q: "", archived: false, rangeErr: "",
+    sort: { planned: "old", doing: "old", done: "new" },
+    seq: 0, timer: null, dom: null
+  };
+
+  function boardFilterOn() {
+    return !!(boardUi.repo || boardUi.from || boardUi.to || boardUi.q.trim());
+  }
+
+  function boardUrl() {
+    var p = [];
+    function add(k, v) { p.push(k + "=" + encodeURIComponent(v)); }
+    if (boardUi.repo) add("repo", boardUi.repo);
+    if (boardUi.from) add("from", boardUi.from);
+    if (boardUi.to) add("to", boardUi.to);
+    if (boardUi.q.trim()) add("q", boardUi.q);
+    add("sort_planned", boardUi.sort.planned);
+    add("sort_doing", boardUi.sort.doing);
+    add("sort_done", boardUi.sort.done);
+    if (boardUi.archived) add("archived", "1");
+    return "/board?" + p.join("&");
+  }
+
+  function fmtDay(ts) {
+    if (typeof ts !== "number" || !isFinite(ts)) return "";
+    var d = new Date(ts * 1000);
+    return ("0" + (d.getMonth() + 1)).slice(-2) + "." + ("0" + d.getDate()).slice(-2);
+  }
+
+  function dayLabel(iso) {
+    return iso ? iso.slice(5).replace("-", ".") : "";
+  }
+
+  function periodText() {
+    if (boardUi.from && boardUi.to) return dayLabel(boardUi.from) + " – " + dayLabel(boardUi.to);
+    if (boardUi.from) return dayLabel(boardUi.from) + "부터";
+    if (boardUi.to) return dayLabel(boardUi.to) + "까지";
+    return "전체";
+  }
+
+  function fetchBoard() {
+    if (boardUi.rangeErr) return; // 시작일이 종료일보다 늦으면 보내지 않는다
+    var seq = ++boardUi.seq;
+    fetch(boardUrl())
+      .then(function (res) {
+        if (!res.ok) throw new Error("board " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        if (activeTab !== "board" || seq !== boardUi.seq) return; // 늦게 온 옛 응답은 버린다
+        boardUi.okAt = new Date();
+        boardUi.failed = false;
+        renderBoard(data);
+      })
+      .catch(function () {
+        if (seq !== boardUi.seq) return;
+        // 화면은 지우지 않고 마지막 값을 둔 채 안내만 띄운다. 다음 polling에서 다시 시도한다.
+        boardUi.failed = true;
+        renderBoardNotes();
+      });
+  }
+
+  function boardSchedule() {
+    if (boardUi.timer) clearTimeout(boardUi.timer);
+    boardUi.timer = setTimeout(fetchBoard, 300);
+  }
+
+  function boardFlag(text, tone, hollow) {
+    return el("span", { class: "kb-flag" + (tone ? " " + tone : "") + (hollow ? " hollow" : "") }, [
+      el("span", { class: "dot", "aria-hidden": "true" }),
+      el("span", { text: text })
+    ]);
+  }
+
+  function boardCard(c) {
+    var cls = "kb-card" + (c.pr_waiting ? " pr" : (c.candidate ? " cand" : ""));
+    var top = [el("span", { class: "kb-repo", text: c.repo })];
+    if (c.badge === "requested") top.push(boardFlag("⏳ 요청됨", "neutral"));
+    if (c.pr_waiting) top.push(boardFlag("PR 대기", "attention"));
+    else if (c.candidate) top.push(boardFlag("PR 대기 후보", "attention", true));
+    if (c.connection === "designing") top.push(boardFlag("설계 중", "accent"));
+    if (c.connection === "disconnected") top.push(boardFlag("연결 끊김", "danger"));
+
+    var kids = [
+      el("div", { class: "kb-card-top" }, top),
+      el("div", { class: "kb-title", text: c.title })
+    ];
+    var pg = c.progress;
+    if (pg && typeof pg.total === "number" && pg.total > 0) {
+      var fill = el("div", { class: "kb-prog-fill" });
+      fill.style.width = (pg.done / pg.total * 100) + "%";
+      kids.push(el("div", { class: "kb-prog" }, [
+        el("div", { class: "kb-prog-bar" }, [fill]),
+        el("span", { class: "kb-meta", text: "단계 " + pg.done + "/" + pg.total })
+      ]));
+    }
+    var meta = [];
+    if (c.column === "planned" && c.created_at != null) meta.push("만든 날 " + fmtDay(c.created_at));
+    if (c.column === "doing") {
+      if (typeof c.elapsed_days === "number") meta.push((c.pr_waiting ? "PR 대기 " : "진행 ") + c.elapsed_days + "일");
+      if (c.connection === "disconnected") meta.push("작업 기록을 찾지 못했어요");
+      if (c.candidate) meta.push("단계 전부 끝남");
+    }
+    if (c.column === "done" && c.done_at != null) meta.push("merge " + fmtDay(c.done_at));
+    if (c.archived && c.archived_at != null) meta.push("보관 " + fmtDay(c.archived_at));
+    if (c.archived && c.column === "doing") meta.push("진행에서 보관");
+    if (c.note) meta.push("메모 있음");
+    if (meta.length) kids.push(el("div", { class: "kb-meta", text: meta.join(" · ") }));
+    var node = el("div", { class: cls, tabindex: "0", role: "button", "data-kb-repo": c.repo, "data-kb-id": c.id }, kids);
+    node.addEventListener("click", function () { openBoardPanel(c.repo, c.id, node); });
+    node.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openBoardPanel(c.repo, c.id, node); }
+    });
+    return node;
+  }
+
+  function boardColumn(def, col) {
+    var filtered = boardUi.data && boardFilterOn();
+    var countText = !col ? "" : (filtered ? col.count + " / " + col.total : String(col.count));
+    var sortLabel = boardUi.sort[def.key] === "old" ? "오래된순" : "최신순";
+    var sortBtn = el("button", {
+      class: "kb-sort", type: "button", text: sortLabel + " ⇅",
+      "aria-label": def.name + " 정렬: 지금 " + sortLabel + ", 누르면 " + (boardUi.sort[def.key] === "old" ? "최신순" : "오래된순")
+    });
+    sortBtn.addEventListener("click", function () {
+      boardUi.sort[def.key] = boardUi.sort[def.key] === "old" ? "new" : "old";
+      fetchBoard();
+    });
+    var kids = [el("div", { class: "kb-col-head" }, [
+      el("span", { class: "kb-col-title" }, [
+        el("span", { class: "kb-col-name", text: def.name }),
+        el("span", { class: "kb-col-count", text: countText })
+      ]),
+      sortBtn
+    ])];
+    if (!col) {
+      kids.push(waitLine("불러오는 중…"));
+    } else if (col.cards.length === 0) {
+      kids.push(el("p", { class: "kb-empty", text: filtered ? "이 조건에 맞는 카드가 없어요" : def.empty }));
+    } else {
+      col.cards.forEach(function (c) { if (!boardHidden[c.repo + "/" + c.id]) kids.push(boardCard(c)); }); // 삭제 대기 중인 카드만 잠시 숨긴다(되돌리기 5초)
+    }
+    return el("section", { class: "kb-col", "aria-label": def.name }, kids);
+  }
+
+  // ---- 칸반 토스트 · 새 카드 모달 ----
+  // 토스트: 삭제 · 보관 · 링크 삭제를 5초 동안 되돌릴 수 있다. 서버에 임시 상태는 없다 —
+  // 삭제는 5초 뒤에 POST를 보내고(되돌리면 안 보냄), 새로고침하거나 탭을 닫으면 대기 중 삭제는 보내지 않는다.
+  var BOARD_UNDO_MS = 5000;
+  var boardHidden = {}; // 삭제 대기 중인 카드 · 링크 키 (화면에서만 숨김)
+  var boardToasts = [];
+  var boardToastBox = null;
+
+  function boardToastRender() {
+    if (!boardToastBox) {
+      boardToastBox = el("div", { class: "kb-toasts", role: "status", "aria-live": "polite" });
+      document.body.appendChild(boardToastBox);
+    }
+    clear(boardToastBox);
+    boardToasts.forEach(function (t) { boardToastBox.appendChild(t.node); });
+    if (boardToasts.length >= 2) {
+      var all = el("button", { class: "btn sm", type: "button", text: "모두 지우기" });
+      // 알림만 지운다 — 대기 중인 삭제는 5초 뒤 그대로 나간다
+      all.addEventListener("click", function () { boardToasts.slice().forEach(function (t) { boardToastDrop(t); }); });
+      boardToastBox.appendChild(all);
+    }
+  }
+
+  function boardToastDrop(t) {
+    var i = boardToasts.indexOf(t);
+    if (i >= 0) boardToasts.splice(i, 1);
+    boardToastRender();
+  }
+
+  // undo 있으면 [되돌리기] 버튼, onExpire는 5초가 지난 뒤(되돌리지 않았을 때) 한 번 부른다
+  function boardToast(text, onUndo, onExpire, bad) {
+    var t = { node: null, timer: null };
+    var kids = [el("span", { text: text })];
+    if (onUndo) {
+      var u = el("button", { class: "btn sm", type: "button", text: "되돌리기" });
+      u.addEventListener("click", function () {
+        clearTimeout(t.timer);
+        boardToastDrop(t);
+        onUndo();
+      });
+      kids.push(u);
+    }
+    t.node = el("div", { class: "kb-toast" + (bad ? " bad" : "") }, kids);
+    boardToasts.push(t);
+    boardToastRender();
+    t.timer = setTimeout(function () {
+      boardToastDrop(t);
+      if (onExpire) onExpire();
+    }, BOARD_UNDO_MS);
+  }
+
+  // 카드 삭제: 카드를 숨기고 5초 토스트, 5초 뒤에 POST /board/delete
+  function boardDeleteCard(repo, id, title) {
+    var key = repo + "/" + id;
+    boardHidden[key] = true;
+    renderBoardCols();
+    boardToast("카드를 지웠어요 · " + title, function () {
+      delete boardHidden[key];
+      renderBoardCols();
+    }, function () {
+      boardPost("/board/delete", { repo: repo, id: id }, function (status) {
+        delete boardHidden[key];
+        if (status !== 200) boardToast("삭제하지 못했어요 · " + title + (status === 409 ? " (카드 상태가 이미 바뀌었어요)" : ""), null, null, true);
+        fetchBoard();
+      });
+    });
+  }
+
+  // 보관: 바로 POST, 토스트의 되돌리기가 POST /board/revive
+  function boardArchiveCard(repo, id, title) {
+    boardPost("/board/archive", { repo: repo, id: id }, function (status) {
+      if (status === 200) {
+        var cur = boardPanel;
+        if (cur && cur.repo === repo && cur.id === id) closeBoardPanel();
+        fetchBoard();
+        boardToast("보관했어요 · " + title, function () {
+          boardPost("/board/revive", { repo: repo, id: id }, function (st) {
+            if (st !== 200) boardToast("되살리지 못했어요 · " + title, null, null, true);
+            fetchBoard();
+          });
+        }, null);
+        return;
+      }
+      var p = boardPanel;
+      if (p && p.repo === repo && p.id === id) {
+        p.busy = false;
+        p.saveError = status === 409 ? "카드 상태가 이미 바뀌었어요. 목록을 다시 받아 왔어요."
+          : (status === 404 ? "카드를 찾지 못했어요." : "보관하지 못했어요. 다시 눌러 주세요.");
+        renderBoardPanel();
+      }
+      if (status === 409 || status === 404) fetchBoard();
+    });
+  }
+
+  var boardModal = null; // { opener, errors, busy, node }
+  var boardDraft = null; // 모달을 닫아도(Esc) 입력은 남긴다. 추가에 성공하면 비운다
+
+  function boardDraftNew() {
+    var repos = (boardUi.data && boardUi.data.repos) || [];
+    return { repo: boardUi.repo || repos[0] || "", title: "", note: "", links: [] };
+  }
+
+  function openBoardModal(opener) {
+    if (boardModal) return;
+    if (!boardDraft) boardDraft = boardDraftNew();
+    var overlay = el("div", { class: "kb-overlay" });
+    boardModal = { opener: opener, errors: {}, busy: false, node: overlay };
+    document.body.appendChild(overlay);
+    renderBoardModal("title");
+  }
+
+  function closeBoardModal() {
+    var m = boardModal;
+    if (!m) return;
+    boardModal = null;
+    if (m.node.parentNode) m.node.parentNode.removeChild(m.node);
+    if (m.opener && m.opener.isConnected) m.opener.focus();
+  }
+
+  function boardModalErr(text) {
+    return text ? el("p", { class: "kb-hint danger", role: "alert", text: text }) : null;
+  }
+
+  function renderBoardModal(focusSel) {
+    var m = boardModal;
+    if (!m) return;
+    var dr = boardDraft;
+    var errs = m.errors;
+    var repos = (boardUi.data && boardUi.data.repos) || [];
+    clear(m.node);
+
+    var repoSel = el("select", { class: "kb-input", "aria-label": "레포" });
+    if (repos.length === 0) repoSel.appendChild(el("option", { value: "", text: "레포가 없어요" }));
+    repos.forEach(function (r) {
+      var o = el("option", { value: r, text: r });
+      if (r === dr.repo) o.selected = true;
+      repoSel.appendChild(o);
+    });
+    repoSel.addEventListener("change", function () { dr.repo = repoSel.value; });
+
+    var titleIn = el("input", { class: "kb-input" + (errs.title || errs.dup ? " bad" : ""), type: "text", "aria-label": "제목", "data-kb-focus": "title" });
+    titleIn.value = dr.title;
+    titleIn.addEventListener("input", function () { dr.title = titleIn.value; }); // 입력 중에는 중복 경고를 하지 않는다
+
+    var noteIn = el("textarea", { class: "kb-input", "aria-label": "메모", placeholder: "사람 이름이나 대화 내용은 적지 않아요" });
+    noteIn.value = dr.note;
+    noteIn.addEventListener("input", function () { dr.note = noteIn.value; });
+
+    var body = [
+      el("label", { class: "kb-field" }, [el("span", { text: "레포" }), repoSel]),
+      boardModalErr(errs.repo),
+      el("label", { class: "kb-field" }, [el("span", { text: "제목" }), titleIn]),
+      boardModalErr(errs.title),
+      boardModalErr(errs.dup),
+      el("label", { class: "kb-field" }, [el("span", { text: "메모" }), noteIn]),
+      el("p", { class: "kb-hint", text: "사람 이름이나 대화 내용은 적지 않아요" }),
+      el("div", { class: "kb-sec-title", text: "레퍼런스 링크 (" + dr.links.length + "/" + BOARD_REF_MAX + ")" })
+    ];
+    dr.links.forEach(function (lk, i) {
+      var le = (errs.links && errs.links[i]) || {};
+      var nIn = el("input", { class: "kb-input" + (le.name ? " bad" : ""), type: "text", "aria-label": "링크 " + (i + 1) + " 이름", placeholder: "이름 (40자까지)", maxlength: "200", "data-kb-focus": "ln" + i });
+      var uIn = el("input", { class: "kb-input" + (le.url ? " bad" : ""), type: "text", "aria-label": "링크 " + (i + 1) + " 주소", placeholder: "https://example.com/…", maxlength: "5000" });
+      nIn.value = lk.name;
+      uIn.value = lk.url;
+      nIn.addEventListener("input", function () { lk.name = nIn.value; });
+      uIn.addEventListener("input", function () { lk.url = uIn.value; });
+      var rm = button("링크 빼기", function () {
+        dr.links.splice(i, 1);
+        m.errors.links = null;
+        renderBoardModal("addlink");
+      }, null, true);
+      rm.setAttribute("aria-label", "링크 " + (i + 1) + " 빼기");
+      body.push(el("div", { class: "kb-link-row" }, [nIn, boardModalErr(le.name), uIn, boardModalErr(le.url), el("div", { class: "kb-row-actions" }, [rm])]));
+    });
+    if (dr.links.length >= BOARD_REF_MAX) {
+      body.push(el("p", { class: "kb-hint", text: "링크는 5개까지 붙일 수 있어요" }));
+    } else {
+      var addLink = button("+ 링크 추가", function () {
+        dr.links.push({ name: "", url: "" });
+        renderBoardModal("ln" + (dr.links.length - 1));
+      }, null, true);
+      addLink.setAttribute("data-kb-focus", "addlink");
+      body.push(addLink);
+    }
+
+    var cancel = button("취소", closeBoardModal);
+    var submit = button(m.busy ? "추가하는 중…" : "추가", submitBoardModal, "accent");
+    var emptyHint = el("p", { class: "kb-hint", role: "status" });
+    // 레포·제목(공백만이면 빈 것)이 비면 [추가]를 막고 빈 칸 이름을 보인다. 서버 검증은 그대로다
+    function syncRequired() {
+      var missing = [];
+      if (!dr.repo) missing.push("레포");
+      if (!dr.title.trim()) missing.push("제목");
+      submit.disabled = m.busy || repos.length === 0 || missing.length > 0;
+      emptyHint.textContent = missing.length ? "비어 있는 칸: " + missing.join(" · ") : "";
+      emptyHint.hidden = missing.length === 0;
+    }
+    syncRequired();
+    repoSel.addEventListener("change", syncRequired);
+    titleIn.addEventListener("input", syncRequired);
+    var foot = [];
+    if (errs.form) foot.push(inlineNote(errs.form, "danger"));
+    foot.push(emptyHint);
+    foot.push(el("div", { class: "kb-row-actions" }, [cancel, submit]));
+
+    var dialog = el("div", { class: "kb-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "kb-modal-title" }, [
+      el("h2", { class: "kb-modal-head", id: "kb-modal-title", text: "새 카드" }),
+      el("div", { class: "kb-modal-body" }, body),
+      el("div", { class: "kb-modal-foot" }, foot)
+    ]);
+    dialog.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeBoardModal(); return; }
+      if (e.key === "Tab") { // 포커스를 모달 안에 가둔다
+        var f = Array.prototype.slice.call(dialog.querySelectorAll("button:not(:disabled), input, select, textarea"));
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+    m.node.appendChild(dialog);
+    if (focusSel) {
+      var target = dialog.querySelector('[data-kb-focus="' + focusSel + '"]');
+      if (target) target.focus();
+    }
+  }
+
+  function submitBoardModal() {
+    var m = boardModal;
+    if (!m || m.busy) return;
+    var dr = boardDraft;
+    var errs = {};
+    if (!dr.repo) errs.repo = "레포를 골라 주세요";
+    if (!dr.title.trim()) errs.title = "제목을 적어 주세요";
+    var links = [];
+    var linkErrs = [];
+    var bad = false;
+    dr.links.forEach(function (lk, i) {
+      if (!lk.name.trim() && !lk.url.trim()) { linkErrs[i] = {}; return; } // 빈 줄은 보내지 않는다
+      var le = checkRefInput(lk.name, lk.url);
+      linkErrs[i] = le;
+      if (le.name || le.url) bad = true;
+      links.push({ name: lk.name.trim(), url: lk.url.trim() });
+    });
+    if (bad) errs.links = linkErrs;
+    if (errs.repo || errs.title || errs.links) {
+      m.errors = errs;
+      renderBoardModal(errs.title ? "title" : null);
+      return;
+    }
+    m.errors = {};
+    m.busy = true;
+    renderBoardModal(null);
+    boardPost("/board/add", { repo: dr.repo, title: dr.title.trim(), note: dr.note, links: links }, function (status) {
+      if (boardModal !== m) return;
+      m.busy = false;
+      if (status === 200) {
+        boardDraft = null;
+        closeBoardModal();
+        fetchBoard();
+        return;
+      }
+      // 입력은 그대로 둔다
+      if (status === 409) m.errors = { dup: "같은 제목의 예정 카드가 이미 있어요" };
+      else if (status === 400) m.errors = { form: "입력을 확인해 주세요. 제목은 비면 안 되고, 링크는 이름과 http(s):// 주소가 맞아야 해요" };
+      else m.errors = { form: "서버에 닿지 못했어요. 입력은 그대로예요. 다시 눌러 주세요" };
+      renderBoardModal(status === 409 ? "title" : null);
+    });
+  }
+
+  // ---- 칸반 세부 패널 ----
+  // 카드를 누르면 GET /board/card를 한 번 부른다. 목록 폴링에서는 목록만 받고, 열린 카드의 목록 항목이 바뀐 때만 세부를 다시 받는다.
+  // 링크 URL은 패널에 글자로 노출하지 않는다(href · hover 툴팁뿐). 입력칸의 값은 편집 중에만 보인다.
+
+  var BOARD_REF_MAX = 5;
+  var boardPanel = null; // { repo, id, opener, detail, loadError, saveError, editing, drafts, errors, snap, changed, busy }
+
+  function fmtLong(ts) {
+    if (typeof ts !== "number" || !isFinite(ts)) return "";
+    var d = new Date(ts * 1000);
+    return (d.getMonth() + 1) + "월 " + d.getDate() + "일";
+  }
+
+  function safeHref(url) {
+    return typeof url === "string" && /^https?:\/\//i.test(url) ? url : "";
+  }
+
+  function boardPost(path, body, cb) {
+    fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Desk-Token": DESK_TOKEN },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        if (res.status === 403) {
+          showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
+        }
+        return res.json().then(function (j) { return j && typeof j.error === "string" ? j.error : ""; }, function () { return ""; })
+          .then(function (err) { cb(res.status, err); });
+      })
+      .catch(function () { cb(0, ""); });
+  }
+
+  function boardCardSnap(data, repo, id) {
+    var cols = data && data.columns;
+    if (!cols) return null;
+    for (var i = 0; i < BOARD_COLS.length; i++) {
+      var col = cols[BOARD_COLS[i].key];
+      var list = (col && col.cards) || [];
+      for (var j = 0; j < list.length; j++) {
+        if (list[j].repo === repo && list[j].id === id) return JSON.stringify(list[j]);
+      }
+    }
+    return null;
+  }
+
+  function findBoardCardNode(repo, id) {
+    var nodes = document.querySelectorAll("#board-content .kb-card");
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].getAttribute("data-kb-repo") === repo && nodes[i].getAttribute("data-kb-id") === id) return nodes[i];
+    }
+    return null;
+  }
+
+  function openBoardPanel(repo, id, opener) {
+    var same = boardPanel && boardPanel.repo === repo && boardPanel.id === id;
+    if (same) { closeBoardPanel(); return; } // 같은 카드를 다시 누르면 닫는다
+    boardPanel = {
+      repo: repo, id: id, opener: opener, detail: null, loadError: false, saveError: "",
+      editing: null, drafts: {}, errors: {}, snap: boardCardSnap(boardUi.data, repo, id), changed: false, busy: false
+    };
+    boardUi.dom.panel.hidden = false;
+    renderBoardPanel();
+    loadBoardDetail(true);
+  }
+
+  function closeBoardPanel() {
+    var p = boardPanel;
+    boardPanel = null;
+    boardUi.dom.panel.hidden = true;
+    clear(boardUi.dom.panel);
+    if (p) {
+      var node = findBoardCardNode(p.repo, p.id) || p.opener;
+      if (node && node.isConnected) node.focus();
+    }
+  }
+
+  function loadBoardDetail(focusClose) {
+    var p = boardPanel;
+    if (!p) return;
+    fetch("/board/card?repo=" + encodeURIComponent(p.repo) + "&id=" + encodeURIComponent(p.id))
+      .then(function (res) {
+        if (!res.ok) throw new Error("card " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        if (boardPanel !== p) return;
+        p.detail = data;
+        p.loadError = false;
+        p.changed = false;
+        p.snap = boardCardSnap(boardUi.data, p.repo, p.id) || p.snap;
+        renderBoardPanel();
+        if (focusClose) focusPanelClose();
+      })
+      .catch(function () {
+        if (boardPanel !== p) return;
+        p.loadError = true;
+        renderBoardPanel();
+        if (focusClose) focusPanelClose();
+      });
+  }
+
+  function focusPanelClose() {
+    var b = boardUi.dom.panel.querySelector(".kb-panel-close");
+    if (b) b.focus();
+  }
+
+  // 목록을 새로 받았을 때: 열린 카드의 항목이 바뀌었으면 세부를 다시 받는다. 링크 편집 중이면 다시 그리지 않고 안내만 띄운다.
+  function boardPanelSync(data) {
+    var p = boardPanel;
+    if (!p || p.busy) return;
+    var now = boardCardSnap(data, p.repo, p.id);
+    if (now === null || now === p.snap) return;
+    if (p.editing) {
+      p.changed = true;
+      renderBoardPanelChange();
+      return;
+    }
+    p.snap = now;
+    loadBoardDetail(false);
+  }
+
+  function renderBoardPanelChange() {
+    var p = boardPanel;
+    var box = boardUi.dom.panel.querySelector(".kb-change");
+    if (!p || !box) return;
+    box.hidden = !p.changed;
+    box.textContent = p.changed ? "카드가 바뀌었어요" : "";
+  }
+
+  function endBoardEdit() {
+    var p = boardPanel;
+    p.editing = null;
+    p.errors = {};
+    if (p.changed) { loadBoardDetail(false); return; }
+    renderBoardLinks();
+  }
+
+  // 저장 뒤에는 세부와 목록을 같이 다시 받는다
+  function boardAfterAction(closeAfter) {
+    if (closeAfter) closeBoardPanel();
+    else loadBoardDetail(false);
+    fetchBoard();
+  }
+
+  function boardAction(path, body, closeAfter, fallbackMsg) {
+    var p = boardPanel;
+    if (!p || p.busy) return;
+    p.busy = true;
+    boardPost(path, body, function (status) {
+      if (boardPanel !== p) return;
+      p.busy = false;
+      if (status === 200) { p.saveError = ""; boardAfterAction(closeAfter); return; }
+      p.saveError = status === 409
+        ? "카드 상태가 이미 바뀌었어요. 목록을 다시 받아 왔어요."
+        : (status === 404 ? "카드를 찾지 못했어요." : fallbackMsg);
+      renderBoardPanel();
+      if (status === 409 || status === 404) fetchBoard();
+    });
+  }
+
+  // 링크 삭제 한 곳 — 줄을 숨기고 5초 토스트를 보인 뒤, 5초가 지나야 POST를 보낸다(되돌리면 보내지 않는다)
+  function deleteRef(card, ref) {
+    var key = card.repo + "/" + card.id + "/" + ref.id;
+    if (boardHidden[key]) return;
+    boardHidden[key] = true;
+    if (boardPanel) renderBoardLinks();
+    boardToast("링크를 지웠어요 · " + ref.name, function () {
+      delete boardHidden[key];
+      if (boardPanel) renderBoardLinks();
+    }, function () {
+      boardPost("/board/ref/delete", { repo: card.repo, id: card.id, ref_id: ref.id }, function (status, err) {
+        delete boardHidden[key];
+        var p = boardPanel;
+        if (status === 200) {
+          if (p && p.repo === card.repo && p.id === card.id) loadBoardDetail(false);
+          return;
+        }
+        boardToast(status === 409 && err === "refs broken" ? BOARD_REFS_BROKEN : "링크를 지우지 못했어요 · " + ref.name, null, null, true);
+        if (p && p.repo === card.repo && p.id === card.id) {
+          renderBoardLinks();
+          if (status === 409) loadBoardDetail(false); // 서버 상태로 다시 받는다
+        }
+      });
+    });
+  }
+
+  function checkRefInput(name, url) {
+    var errs = {};
+    var n = name.trim();
+    if (!n) errs.name = "이름을 적어 주세요";
+    else if (n.length > 40) errs.name = "이름은 40자까지 쓸 수 있어요";
+    if (!url.trim()) errs.url = "주소를 적어 주세요";
+    else if (!safeHref(url.trim())) errs.url = "주소는 http:// 또는 https://로 시작해야 해요";
+    else if (url.trim().length > 2000) errs.url = "주소는 2000자까지 쓸 수 있어요";
+    return errs;
+  }
+
+  var BOARD_REFS_BROKEN = "링크 파일이 깨져서 저장하지 못했어요. 홈 폴더 board/ 아래 refs 파일을 고치거나 지워 주세요.";
+
+  function saveRef(key) {
+    var p = boardPanel;
+    var dr = p.drafts[key] || { name: "", url: "" };
+    var errs = checkRefInput(dr.name, dr.url);
+    if (errs.name || errs.url) { p.errors = errs; renderBoardLinks(); return; }
+    if (p.refBusy) return; // 응답 전 Enter 연타로 POST가 두 번 나가지 않게 한다
+    p.refBusy = true;
+    var body = { repo: p.repo, id: p.id, name: dr.name.trim(), url: dr.url.trim() };
+    var path = "/board/ref/add";
+    if (key !== "add") { path = "/board/ref/update"; body.ref_id = key; }
+    boardPost(path, body, function (status, err) {
+      if (boardPanel !== p) return;
+      p.refBusy = false;
+      if (status === 200) {
+        delete p.drafts[key];
+        p.errors = {};
+        p.editing = null;
+        p.saveError = "";
+        loadBoardDetail(false);
+        return;
+      }
+      if (status === 409) {
+        // 서버는 update에서 refs broken만 409로 낸다. 방어용
+        p.errors = { form: err === "refs broken" ? BOARD_REFS_BROKEN : (key === "add" ? "링크는 5개까지 붙일 수 있어요" : "이 링크를 바꾸지 못했어요") };
+      }
+      else if (status === 400) p.errors = { form: "입력을 확인해 주세요. 이름은 1~40자, 주소는 http(s)://로 시작해야 해요" };
+      else if (status === 404) p.errors = { form: "카드나 링크를 찾지 못했어요" };
+      else p.errors = { form: "저장하지 못했어요. 다시 눌러 주세요" };
+      renderBoardLinks();
+      if (status === 409) loadBoardDetail(false); // 오류는 다시 받아도 지워지지 않는다
+    });
+  }
+
+  function refForm(key) {
+    var p = boardPanel;
+    var dr = p.drafts[key] || (p.drafts[key] = { name: "", url: "" });
+    var nameIn = el("input", { class: "kb-input", type: "text", "aria-label": "링크 이름", placeholder: "이름 (40자까지)", maxlength: "200" });
+    var urlIn = el("input", { class: "kb-input", type: "text", "aria-label": "링크 주소", placeholder: "https://example.com/…", maxlength: "5000" });
+    nameIn.value = dr.name;
+    urlIn.value = dr.url;
+    nameIn.addEventListener("input", function () { dr.name = nameIn.value; });
+    urlIn.addEventListener("input", function () { dr.url = urlIn.value; });
+    function onKey(e) {
+      if (e.key === "Enter") { e.preventDefault(); saveRef(key); }
+    }
+    nameIn.addEventListener("keydown", onKey);
+    urlIn.addEventListener("keydown", onKey);
+    var save = button("저장", function () { saveRef(key); }, "accent", true);
+    var cancel = button("취소", function () { endBoardEdit(); }, null, true);
+    var kids = [
+      el("p", { class: "kb-hint", text: "사람 이름·원문은 적지 않아요" }),
+      el("label", { class: "kb-field" }, [el("span", { text: "이름" }), nameIn]),
+      p.errors.name ? el("p", { class: "kb-hint danger", text: p.errors.name }) : null,
+      el("label", { class: "kb-field" }, [el("span", { text: "주소" }), urlIn]),
+      p.errors.url ? el("p", { class: "kb-hint danger", text: p.errors.url }) : null,
+      p.errors.form ? el("p", { class: "kb-hint danger", text: p.errors.form }) : null,
+      el("div", { class: "kb-row-actions" }, [save, cancel])
+    ];
+    var form = el("div", { class: "kb-ref-form" }, kids);
+    form.setAttribute("data-kb-form", key);
+    return form;
+  }
+
+  function startBoardEdit(key) {
+    var p = boardPanel;
+    p.editing = key;
+    p.errors = {};
+    if (key !== "add" && !p.drafts[key]) {
+      var refs = (p.detail && p.detail.refs) || [];
+      for (var i = 0; i < refs.length; i++) {
+        if (refs[i].id === key) p.drafts[key] = { name: refs[i].name, url: refs[i].url };
+      }
+    }
+    renderBoardLinks();
+    var first = boardUi.dom.panel.querySelector('[data-kb-form="' + key + '"] input');
+    if (first) first.focus();
+  }
+
+  function renderBoardLinks() {
+    var p = boardPanel;
+    var box = boardUi.dom.panel.querySelector(".kb-links");
+    if (!p || !box || !p.detail) return;
+    clear(box);
+    var refs = p.detail.refs || [];
+    box.appendChild(el("div", { class: "kb-sec-title", text: "레퍼런스 링크" }));
+    if (p.detail.refs_broken === true) {
+      p.editing = null; // 링크 편집 상태만 해제(편집 키는 링크용뿐)
+      box.appendChild(el("p", { class: "kb-hint", text: "링크 파일이 깨져 있어요. 홈 폴더 board/ 아래 refs 파일을 고치거나 지워 주세요" }));
+      return;
+    }
+    if (refs.length === 0 && p.editing !== "add") box.appendChild(el("p", { class: "kb-hint", text: "붙인 링크가 없어요" }));
+    refs.forEach(function (r) {
+      if (boardHidden[p.repo + "/" + p.id + "/" + r.id]) return; // 삭제 대기 중인 링크
+      if (p.editing === r.id) { box.appendChild(refForm(r.id)); return; }
+      var href = safeHref(r.url);
+      var nameNode;
+      if (href) {
+        nameNode = el("a", { class: "kb-ref-link", href: href, target: "_blank", rel: "noopener noreferrer", title: r.url });
+        nameNode.appendChild(el("span", { text: r.name }));
+        nameNode.appendChild(el("span", { class: "kb-ref-arrow", text: " ↗", "aria-hidden": "true" }));
+      } else {
+        nameNode = el("span", { class: "kb-ref-plain", text: r.name });
+      }
+      var edit = button("수정", function () { startBoardEdit(r.id); }, null, true);
+      edit.setAttribute("aria-label", r.name + " 수정");
+      var del = button("링크 삭제", function () { deleteRef({ repo: p.repo, id: p.id }, r); }, null, true);
+      del.setAttribute("aria-label", r.name + " 링크 삭제");
+      box.appendChild(el("div", { class: "kb-ref-row" }, [nameNode, el("span", { class: "kb-spacer" }), edit, del]));
+    });
+    if (p.editing === "add") box.appendChild(refForm("add"));
+    else if (refs.length >= BOARD_REF_MAX) box.appendChild(el("p", { class: "kb-hint", text: "링크는 5개까지 붙일 수 있어요" }));
+    else box.appendChild(button("+ 링크 추가", function () { startBoardEdit("add"); }, null, true));
+  }
+
+  function stepStatusLabel(s) {
+    if (s === "completed") return "완료";
+    if (s === "pending") return "대기";
+    if (s === "error") return "오류";
+    if (s === "blocked") return "막힘";
+    return typeof s === "string" ? s : "";
+  }
+
+  function renderBoardPanel() {
+    var p = boardPanel;
+    var panel = boardUi.dom.panel;
+    clear(panel);
+    if (!p) return;
+    var d = p.detail;
+    var closeBtn = el("button", { class: "kb-panel-close", type: "button", text: "✕", "aria-label": "닫기" });
+    closeBtn.addEventListener("click", closeBoardPanel);
+    var head = [el("span", { class: "kb-repo", text: p.repo })];
+    if (d && d.column === "planned" && d.requested_at != null) head.push(boardFlag("⏳ 요청됨", "neutral"));
+    if (d && d.pr_at != null && d.column === "doing") head.push(boardFlag("PR 대기", "attention"));
+    if (d && d.archived_at != null) head.push(boardFlag("보관됨", "neutral"));
+    head.push(el("span", { class: "kb-spacer" }));
+    head.push(closeBtn);
+    panel.appendChild(el("div", { class: "kb-panel-head" }, head));
+
+    if (p.loadError) {
+      var retry = button("다시 받기", function () { p.loadError = false; renderBoardPanel(); loadBoardDetail(true); }, null, true);
+      panel.appendChild(el("div", { class: "kb-panel-body" }, [
+        inlineNote("카드를 읽지 못했어요. 카드 파일이 지워졌거나 서버가 응답하지 않았어요.", "danger"),
+        el("div", { class: "kb-row-actions" }, [retry])
+      ]));
+      return;
+    }
+    if (!d) {
+      panel.appendChild(el("div", { class: "kb-panel-body" }, [waitLine("불러오는 중…")]));
+      return;
+    }
+
+    var body = [];
+    var change = el("p", { class: "inline-note attention kb-change", hidden: "", role: "status" });
+    change.hidden = !p.changed;
+    if (p.changed) change.textContent = "카드가 바뀌었어요";
+    body.push(change);
+    body.push(el("h2", { class: "kb-panel-title", text: d.title }));
+    if (d.note) body.push(el("p", { class: "kb-panel-note", text: d.note }));
+
+    var dates = [];
+    function dateRow(label, value) {
+      dates.push(el("dt", { text: label }));
+      dates.push(el("dd", { text: value }));
+    }
+    dateRow("만든 날", fmtLong(d.created_at));
+    dateRow("요청", d.requested_at != null ? fmtLong(d.requested_at) : "없음");
+    if (d.doing_at != null) dateRow("진행 시작", fmtLong(d.doing_at));
+    if (d.column === "doing") {
+      if (typeof d.elapsed_days === "number") dateRow("경과", d.elapsed_days + "일");
+      dateRow("PR 대기 표시", d.pr_at != null ? fmtLong(d.pr_at) : "없음");
+    } else if (d.pr_at != null) {
+      dateRow("PR 대기 표시", fmtLong(d.pr_at));
+    }
+    if (d.done_at != null) dateRow("merge", fmtLong(d.done_at));
+    if (d.archived_at != null) dateRow("보관", fmtLong(d.archived_at));
+    body.push(el("dl", { class: "kb-dates" }, dates));
+
+    var steps = d.steps || [];
+    if (d.task && steps.length > 0) {
+      body.push(el("div", { class: "kb-sec-title", text: "단계" }));
+      if (d.phase_summary) body.push(el("p", { class: "kb-panel-note", text: d.phase_summary }));
+      var list = el("ul", { class: "kb-steps" });
+      steps.forEach(function (s) {
+        var tone = s.status === "completed" ? "done" : (s.status === "error" || s.status === "blocked" ? "bad" : "");
+        var li = el("li", { class: "kb-step" + (tone ? " " + tone : "") }, [
+          el("div", { class: "kb-step-top" }, [
+            el("span", { class: "kb-step-name", text: s.name || ("단계 " + s.step) }),
+            el("span", { class: "kb-step-status", text: stepStatusLabel(s.status) })
+          ]),
+          s.summary ? el("div", { class: "kb-meta", text: s.summary }) : null
+        ]);
+        list.appendChild(li);
+      });
+      body.push(list);
+    } else if (d.task) {
+      body.push(el("p", { class: "kb-hint", text: "연결된 작업 기록을 찾지 못했어요." }));
+    } else {
+      body.push(el("p", { class: "kb-hint", text: "연결된 작업이 없어요. 작업을 시작하면 단계가 여기에 보여요." }));
+    }
+
+    body.push(el("div", { class: "kb-links" }));
+    panel.appendChild(el("div", { class: "kb-panel-body" }, body));
+
+    var acts = [];
+    var requested = d.column === "planned" && d.requested_at != null;
+    if (d.archived_at != null) {
+      acts.push(button("되살리기", function () {
+        boardAction("/board/revive", { repo: p.repo, id: p.id }, true, "되살리지 못했어요. 다시 눌러 주세요.");
+      }));
+    } else if (d.column === "planned") {
+      var startBtn = button("▶ 작업 시작", function () {
+        boardAction("/board/start", { repo: p.repo, id: p.id }, false, "작업 시작을 보내지 못했어요. 다시 눌러 주세요.");
+      }, "accent");
+      if (requested) { startBtn.disabled = true; startBtn.setAttribute("title", "이미 요청했어요"); }
+      acts.push(startBtn);
+      if (requested) {
+        acts.push(button("요청 취소", function () {
+          boardAction("/board/cancel", { repo: p.repo, id: p.id }, false, "요청을 취소하지 못했어요. 다시 눌러 주세요.");
+        }));
+      }
+      acts.push(button("삭제", function () {
+        var t = d.title, r = p.repo, i = p.id;
+        closeBoardPanel();
+        boardDeleteCard(r, i, t);
+      }));
+    } else {
+      acts.push(button("보관", function () {
+        if (p.busy) return;
+        p.busy = true;
+        boardArchiveCard(p.repo, p.id, d.title);
+      }));
+    }
+    var foot = [];
+    if (p.saveError) foot.push(inlineNote(p.saveError, "danger"));
+    foot.push(el("div", { class: "kb-row-actions" }, acts));
+    panel.appendChild(el("div", { class: "kb-panel-foot" }, foot));
+    renderBoardLinks();
+  }
+
+  function renderBoardCols() {
+    var d = boardUi.dom;
+    clear(d.cols);
+    var cols = boardUi.data && boardUi.data.columns;
+    // 보관 보기 제목: N은 응답이 준 열별 count의 합이다(화면이 카드를 세지 않는다)
+    d.archTitle.hidden = !(boardUi.archived && cols);
+    if (!d.archTitle.hidden) {
+      var n = 0, all = 0;
+      BOARD_COLS.forEach(function (def) { n += cols[def.key].count; all += cols[def.key].total; });
+      d.archTitle.textContent = "보관한 카드 " + (boardFilterOn() ? n + " / " + all : n);
+    }
+    if (boardUi.archived) {
+      d.cols.appendChild(boardArchiveList(cols));
+      return;
+    }
+    BOARD_COLS.forEach(function (def) {
+      d.cols.appendChild(boardColumn(def, cols ? cols[def.key] : null));
+    });
+  }
+
+  // 보관 보기: 열 구분 없이 한 목록. 서버가 열별로 준 cards를 이어 붙일 뿐 화면이 새로 세지 않는다
+  function boardArchiveList(cols) {
+    var kids = [];
+    if (!cols) {
+      kids.push(waitLine("불러오는 중…"));
+    } else {
+      var any = false;
+      BOARD_COLS.forEach(function (def) {
+        cols[def.key].cards.forEach(function (c) {
+          if (boardHidden[c.repo + "/" + c.id]) return;
+          any = true;
+          kids.push(boardCard(c));
+        });
+      });
+      if (!any) kids.push(el("p", { class: "kb-empty", text: boardFilterOn() ? "이 조건에 맞는 카드가 없어요" : "보관한 카드가 없어요" }));
+    }
+    return el("section", { class: "kb-col", "aria-label": "보관한 카드" }, kids);
+  }
+
+  function renderBoardNotes() {
+    var d = boardUi.dom;
+    var data = boardUi.data;
+    clear(d.notes);
+    if (boardUi.failed) {
+      var when = boardUi.okAt
+        ? fmtClock(boardUi.okAt) + "에 받은 값을 보여 드려요. "
+        : "";
+      var retry = el("button", { class: "btn sm", type: "button", text: "지금 다시 시도" });
+      retry.addEventListener("click", fetchBoard);
+      d.notes.appendChild(el("div", { class: "kb-bar" }, [
+        inlineNote("불러오지 못했어요. " + when + "15초 뒤 다시 시도해요.", "danger"),
+        retry
+      ]));
+    }
+    if (!data) return;
+    cfgNotes(data.config).forEach(function (n) { d.notes.appendChild(n); });
+    if (typeof data.broken === "number" && data.broken > 0) {
+      d.notes.appendChild(inlineNote("읽지 못한 카드가 " + data.broken + "개 있어요. 홈 폴더 board/ 아래 카드 파일이 깨졌을 수 있어요. 파일을 고치거나 지워 주세요.", "attention"));
+    }
+  }
+
+  function fmtClock(d) {
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+  }
+
+  function renderBoardSummary() {
+    var d = boardUi.dom;
+    clear(d.summary);
+    d.summary.hidden = !boardFilterOn();
+    if (d.summary.hidden) return;
+    var parts = [];
+    if (boardUi.repo) parts.push("레포 " + boardUi.repo);
+    if (boardUi.from || boardUi.to) parts.push("기간 " + periodText());
+    if (boardUi.q.trim()) parts.push("검색 “" + boardUi.q.trim() + "”");
+    var text = "필터 적용 중: " + parts.join(" · ");
+    if (boardUi.from || boardUi.to) text += " · 열마다 기준일이 달라요";
+    var hit = 0, all = 0;
+    var cols = boardUi.data && boardUi.data.columns;
+    if (cols) BOARD_COLS.forEach(function (def) { hit += cols[def.key].count; all += cols[def.key].total; });
+    var clearBtn = el("button", { class: "btn sm", type: "button", text: "모두 지우기" });
+    clearBtn.addEventListener("click", function () {
+      boardUi.repo = ""; boardUi.from = ""; boardUi.to = ""; boardUi.q = ""; boardUi.rangeErr = "";
+      boardSyncBar();
+      fetchBoard();
+    });
+    d.summary.appendChild(el("span", { class: "kb-sum-text", title: text, text: text }));
+    if (cols) d.summary.appendChild(el("span", { class: "kb-meta", text: "걸린 " + hit + " / 전체 " + all }));
+    d.summary.appendChild(clearBtn);
+  }
+
+  function renderBoardRepoOpts() {
+    var d = boardUi.dom;
+    clear(d.repoOpts);
+    var repos = (boardUi.data && boardUi.data.repos) || [];
+    var needle = d.repoSearch.value.trim().toLowerCase();
+    var list = [""].concat(repos.filter(function (r) { return !needle || r.toLowerCase().indexOf(needle) !== -1; }));
+    if (needle) list = list.slice(1);
+    if (list.length === 0) {
+      d.repoOpts.appendChild(el("p", { class: "kb-hint", text: "일치하는 레포가 없어요" }));
+      return;
+    }
+    list.forEach(function (r) {
+      var b = el("button", {
+        class: "kb-opt", type: "button", role: "option",
+        "aria-selected": r === boardUi.repo ? "true" : "false"
+      }, [
+        el("span", { text: r === "" ? "전체" : r }),
+        r === boardUi.repo ? el("span", { text: "✓", "aria-hidden": "true" }) : null
+      ]);
+      b.addEventListener("click", function () {
+        boardUi.repo = r;
+        boardClosePops();
+        boardSyncBar();
+        fetchBoard();
+        d.repoTrigger.focus();
+      });
+      d.repoOpts.appendChild(b);
+    });
+  }
+
+  function boardSyncBar() {
+    var d = boardUi.dom;
+    d.repoValue.textContent = boardUi.repo === "" ? "전체" : boardUi.repo;
+    d.periodValue.textContent = periodText();
+    d.fromInput.value = boardUi.from;
+    d.toInput.value = boardUi.to;
+    d.searchInput.value = boardUi.q;
+    d.rangeHint.textContent = boardUi.rangeErr;
+    d.rangeHint.hidden = !boardUi.rangeErr;
+    d.archiveBtn.setAttribute("aria-pressed", boardUi.archived ? "true" : "false");
+    d.archiveBtn.textContent = boardUi.archived ? "← 보드로" : "보관 보기";
+    d.headTitle.textContent = boardUi.archived ? "칸반 · 보관" : "칸반";
+    d.headDesc.textContent = boardUi.archived ? "보관한 카드를 보고 되살려요" : BOARD_HEAD_DESC;
+    renderBoardRepoOpts();
+    renderBoardSummary();
+  }
+
+  function boardClosePops() {
+    var d = boardUi.dom;
+    d.repoPop.hidden = true;
+    d.periodPop.hidden = true;
+    d.repoTrigger.setAttribute("aria-expanded", "false");
+    d.periodTrigger.setAttribute("aria-expanded", "false");
+  }
+
+  function boardTrigger(label, valueNode) {
+    var b = el("button", { class: "chip", type: "button", "aria-haspopup": "true", "aria-expanded": "false" }, [
+      el("span", { class: "chip-label", text: label }),
+      el("span", { class: "chip-sep", "aria-hidden": "true" }),
+      valueNode,
+      el("span", { class: "chip-label", text: "⌄", "aria-hidden": "true" })
+    ]);
+    return b;
+  }
+
+  var BOARD_HEAD_DESC = "예정부터 merge까지 카드를 한 화면에서 봅니다";
+
+  function buildBoard() {
+    var box = document.getElementById("board-content");
+    clear(box);
+    var head = pageHead("칸반", BOARD_HEAD_DESC);
+    box.appendChild(head);
+
+    var d = {};
+    boardUi.dom = d;
+    d.headTitle = head.querySelector("h1");
+    d.headDesc = head.querySelector("p");
+    d.repoValue = el("span", { class: "chip-value", text: "전체" });
+    d.periodValue = el("span", { class: "chip-value", text: "전체" });
+    d.repoTrigger = boardTrigger("레포", d.repoValue);
+    d.periodTrigger = boardTrigger("기간", d.periodValue);
+
+    // 레포 검색 셀렉트
+    d.repoSearch = el("input", { class: "kb-input", type: "text", placeholder: "레포 검색…", "aria-label": "레포 검색" });
+    d.repoOpts = el("div", { class: "kb-opts", role: "listbox", "aria-label": "레포 목록" });
+    d.repoPop = el("div", { class: "kb-pop", hidden: "" }, [
+      d.repoSearch, d.repoOpts,
+      el("p", { class: "kb-hint", text: "↑↓ 이동 · Enter 선택 · Esc 닫기" })
+    ]);
+    d.repoPop.hidden = true;
+    d.repoTrigger.addEventListener("click", function () {
+      var open = d.repoPop.hidden;
+      boardClosePops();
+      d.repoPop.hidden = !open;
+      d.repoTrigger.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) { d.repoSearch.value = ""; renderBoardRepoOpts(); d.repoSearch.focus(); }
+    });
+    d.repoSearch.addEventListener("input", renderBoardRepoOpts);
+    d.repoPop.addEventListener("keydown", function (e) {
+      var opts = Array.prototype.slice.call(d.repoOpts.querySelectorAll(".kb-opt"));
+      var i = opts.indexOf(document.activeElement);
+      if (e.key === "Escape") { boardClosePops(); d.repoTrigger.focus(); }
+      else if (e.key === "ArrowDown" && opts.length) { e.preventDefault(); opts[Math.min(i + 1, opts.length - 1)].focus(); }
+      else if (e.key === "ArrowUp" && opts.length) { e.preventDefault(); if (i <= 0) d.repoSearch.focus(); else opts[i - 1].focus(); }
+      else if (e.key === "Enter" && document.activeElement === d.repoSearch && opts.length) { e.preventDefault(); opts[0].click(); }
+    });
+
+    // 기간 From ~ To
+    d.fromInput = el("input", { class: "kb-input", type: "date", "aria-label": "시작일 (From)" });
+    d.toInput = el("input", { class: "kb-input", type: "date", "aria-label": "종료일 (To)" });
+    d.rangeHint = el("p", { class: "kb-hint danger", role: "alert", hidden: "" });
+    d.rangeHint.hidden = true;
+    var periodClear = el("button", { class: "btn sm", type: "button", text: "지우기" });
+    var presets = el("div", { class: "kb-row-actions" });
+    d.periodPop = el("div", { class: "kb-pop", hidden: "" }, [
+      el("label", { class: "kb-field" }, [el("span", { text: "시작일 (From)" }), d.fromInput]),
+      el("label", { class: "kb-field" }, [el("span", { text: "종료일 (To)" }), d.toInput]),
+      d.rangeHint,
+      el("p", { class: "kb-hint", text: "기준일: 예정은 만든 날 · 진행은 시작일 · 완료는 merge일" }),
+      presets
+    ]);
+    d.periodPop.hidden = true;
+    d.periodTrigger.addEventListener("click", function () {
+      var open = d.periodPop.hidden;
+      boardClosePops();
+      d.periodPop.hidden = !open;
+      d.periodTrigger.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    function periodChanged() {
+      boardUi.from = d.fromInput.value;
+      boardUi.to = d.toInput.value;
+      boardUi.rangeErr = boardUi.from && boardUi.to && boardUi.from > boardUi.to
+        ? "시작일이 종료일보다 늦어요. 날짜를 바꿔 주세요." : "";
+      boardSyncBar();
+      fetchBoard();
+    }
+    d.fromInput.addEventListener("change", periodChanged);
+    d.toInput.addEventListener("change", periodChanged);
+    // 프리셋 날짜는 브라우저 로컬 날짜로 계산한다(화면이 규칙을 다시 계산하는 유일한 예외)
+    function localDay(dt) {
+      function z(n) { return (n < 10 ? "0" : "") + n; }
+      return dt.getFullYear() + "-" + z(dt.getMonth() + 1) + "-" + z(dt.getDate());
+    }
+    function applyPreset(from, to) {
+      d.fromInput.value = from; d.toInput.value = to;
+      periodChanged();
+    }
+    [
+      ["오늘", function (t) { return [t, t]; }],
+      ["지난 7일", function (t) { return [new Date(t.getFullYear(), t.getMonth(), t.getDate() - 6), t]; }],
+      ["이번 달", function (t) { return [new Date(t.getFullYear(), t.getMonth(), 1), t]; }]
+    ].forEach(function (pr) {
+      var b = el("button", { class: "btn sm", type: "button", text: pr[0] });
+      b.addEventListener("click", function () {
+        var r = pr[1](new Date());
+        applyPreset(localDay(r[0]), localDay(r[1]));
+      });
+      presets.appendChild(b);
+    });
+    presets.appendChild(periodClear);
+    periodClear.addEventListener("click", function () { applyPreset("", ""); });
+    d.periodPop.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { boardClosePops(); d.periodTrigger.focus(); }
+    });
+
+    // 제목 검색(0.3초 디바운스, 보관 보기에서도 동작)
+    d.searchInput = el("input", { class: "kb-search", type: "search", placeholder: "카드 제목으로 찾기", "aria-label": "카드 제목 검색" });
+    d.searchInput.addEventListener("input", function () {
+      boardUi.q = d.searchInput.value;
+      renderBoardSummary();
+      boardSchedule();
+    });
+
+    d.archiveBtn = el("button", { class: "btn", type: "button", text: "보관 보기", "aria-pressed": "false" });
+    d.archiveBtn.addEventListener("click", function () {
+      boardUi.archived = !boardUi.archived;
+      boardSyncBar();
+      fetchBoard();
+    });
+
+    d.newBtn = el("button", { class: "btn accent", type: "button", text: "+ 새 카드" });
+    d.newBtn.addEventListener("click", function () { openBoardModal(d.newBtn); });
+
+    d.bar = el("div", { class: "kb-bar" }, [
+      el("div", { class: "kb-pop-wrap" }, [d.repoTrigger, d.repoPop]),
+      el("div", { class: "kb-pop-wrap" }, [d.periodTrigger, d.periodPop]),
+      d.searchInput,
+      el("span", { class: "kb-spacer" }),
+      d.archiveBtn,
+      d.newBtn
+    ]);
+    box.appendChild(d.bar);
+
+    d.notes = el("div", { class: "screen" });
+    d.notes.style.gap = "8px";
+    d.summary = el("div", { class: "kb-summary", hidden: "" });
+    d.summary.hidden = true;
+    d.cols = el("div", { class: "kb-cols" });
+    d.archTitle = el("div", { class: "kb-sec-title", hidden: "" });
+    d.archTitle.hidden = true;
+    box.appendChild(d.notes);
+    box.appendChild(d.summary);
+    box.appendChild(d.archTitle);
+    box.appendChild(d.cols);
+
+    // 팝오버 밖을 누르면 닫는다
+    document.addEventListener("click", function (e) {
+      if (!d.bar.contains(e.target)) boardClosePops();
+    });
+    d.panel = el("aside", { class: "kb-panel", role: "dialog", "aria-label": "카드 세부", hidden: "" });
+    d.panel.hidden = true;
+    box.appendChild(d.panel);
+    // Esc: 열린 것 중 가장 안쪽 하나만 닫는다(링크 입력 폼 → 패널). 입력한 글자는 drafts에 남는다
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape" || !boardPanel || activeTab !== "board" || boardModal) return;
+      if (!d.repoPop.hidden || !d.periodPop.hidden) return; // 팝오버가 먼저 닫힌다
+      if (boardPanel.editing) { endBoardEdit(); return; }
+      closeBoardPanel();
+    });
+    renderBoardCols();
+  }
+
+  function renderBoard(data) {
+    boardUi.data = data;
+    lastExtra.board = data;
+    renderBoardNotes();
+    renderBoardRepoOpts();
+    renderBoardSummary();
+    renderBoardCols();
+    boardPanelSync(data);
+  }
+
   // ---- 메뉴 배지 (ADR-014(임시)) — 메뉴는 항상 보이므로 탭 폴링과 별개로 부른다 ----
 
   var navCounts = { judge: 0, review: 0 };
@@ -2757,6 +4153,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
 
   renderTrack();
   renderJudge();
+  buildBoard();
   fetchSessions();
   fetchJudgments();
   fetchNavCounts();
