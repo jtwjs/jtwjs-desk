@@ -79,8 +79,11 @@
     {
       "step": 9,
       "name": "board-ui-modals-toasts",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T19:58:50+0900",
+      "summary": "page/index.html만 수정: 「+ 새 카드」 모달(레포·제목·메모·링크 최대 5개, 하단 버튼 고정, 409는 모달 안 「같은 제목의 예정 카드가 이미 있어요」, 입력 보존, Esc/포커스 복귀)·토스트 스택([모두 지우기])·카드 삭제(5초 뒤 POST /board/delete, 되돌리면 안 보냄)·보관(즉시 POST, 되돌리기=revive)·deleteRef 5초 지연. 868개 통과, HTML 파서·node --check 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T20:05:29+0900"
     },
     {
       "step": 10,
