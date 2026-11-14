@@ -3494,7 +3494,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
           return;
         }
         boardToast(status === 409 && err === "refs broken" ? BOARD_REFS_BROKEN : "링크를 지우지 못했어요 · " + ref.name, null, null, true);
-        if (p && p.repo === card.repo && p.id === card.id) renderBoardLinks();
+        if (p && p.repo === card.repo && p.id === card.id) {
+          renderBoardLinks();
+          if (status === 409) loadBoardDetail(false); // 서버 상태로 다시 받는다
+        }
       });
     });
   }
@@ -3534,12 +3537,14 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         return;
       }
       if (status === 409) {
+        // 서버는 update에서 refs broken만 409로 낸다. 방어용
         p.errors = { form: err === "refs broken" ? BOARD_REFS_BROKEN : (key === "add" ? "링크는 5개까지 붙일 수 있어요" : "이 링크를 바꾸지 못했어요") };
       }
       else if (status === 400) p.errors = { form: "입력을 확인해 주세요. 이름은 1~40자, 주소는 http(s)://로 시작해야 해요" };
       else if (status === 404) p.errors = { form: "카드나 링크를 찾지 못했어요" };
       else p.errors = { form: "저장하지 못했어요. 다시 눌러 주세요" };
       renderBoardLinks();
+      if (status === 409) loadBoardDetail(false); // 오류는 다시 받아도 지워지지 않는다
     });
   }
 
@@ -3596,6 +3601,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     var refs = p.detail.refs || [];
     box.appendChild(el("div", { class: "kb-sec-title", text: "레퍼런스 링크" }));
     if (p.detail.refs_broken === true) {
+      p.editing = null; // 링크 편집 상태만 해제(편집 키는 링크용뿐)
       box.appendChild(el("p", { class: "kb-hint", text: "링크 파일이 깨져 있어요. 홈 폴더 board/ 아래 refs 파일을 고치거나 지워 주세요" }));
       return;
     }
