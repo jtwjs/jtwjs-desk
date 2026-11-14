@@ -87,4 +87,4 @@ flowchart LR
 
 - [ ] `GET /board`가 레포마다 `phases`를 읽는 비용: 레포 수·카드 수 `미측정`. 첫 구현은 레포당 `list_phase_indexes` 한 번
 - [x] `sort` 쿼리 모양: 열마다 파라미터 3개(PLAN, AI 추천 수용, ADR 「sort 쿼리 모양」)
-- [ ] 카드 id 형식(시각 기반 등)은 구현 때 정한다
+- [x] 카드 id 형식: `{초 단위 시각}-{무작위 4자리 16진}`(`desk/board.py` `new_card_id`)
