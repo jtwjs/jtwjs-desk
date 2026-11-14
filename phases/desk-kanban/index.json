@@ -25,8 +25,11 @@
     {
       "step": 3,
       "name": "board-view-response",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:27:06+0900",
+      "summary": "desk/board.py에 BadQuery · build_view(cards_by_repo={레포:(cards,깨진수)}, phases_by_repo={레포:{task:index}|None}, today, now, query dict) · build_card_detail(card, refs, phase_index, today) 추가. 열별 cards·count·total, 카드 키(badge·pr_waiting·elapsed_days·progress·candidate·connection 등), 응답 최상위 columns·broken·archived. 테스트 tests/test_desk_board_view.py",
+      "completed_at": "2026-11-14T18:42:53+0900"
     },
     {
       "step": 4,
