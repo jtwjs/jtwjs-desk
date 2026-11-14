@@ -96,6 +96,12 @@
     },
     {
       "step": 11,
+      "name": "board-card-detail-request-merge",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 12,
       "name": "board-integration-check",
       "status": "pending",
       "tdd": false,

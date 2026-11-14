@@ -1,34 +1,37 @@
-# Step 11: board-integration-check
+# Step 11: board-card-detail-request-merge
 
 ## 읽어야 할 파일
 
-- `CLAUDE.md`, `docs/desk-kanban-2026-11-14/PRD.md` 「수용 조건」 표(특히 「화면 연결」 · 「메뉴 배지 없음」) · `docs/desk-kanban-2026-11-14/ARCHITECTURE.md`
-- `.claude/rules/non-obvious-patterns.md` — 「서버 · 화면」 · 「화면 · 서버 집계」 · 「PR · 스크린샷」
-- `page/server.py`의 서버 기동 방식(`DESK_HOME` · `DESK_CONFIG` 환경 변수, 포트 인자는 파일에서 확인) · `tests/test_desk_redesign_integration.py`
+- `CLAUDE.md`, `docs/desk-kanban-2026-11-14/{PRD,ARCHITECTURE,ADR}.md` — ARCHITECTURE 「엔드포인트」의 `GET /board/card` 응답 계약이 기준이다
+- `.claude/rules/testing.md` §0 · §1 · §2, `.claude/rules/non-obvious-patterns.md` 전체(특히 「sdd · 응답 키 추가」 · 「서버 · 화면」)
+- `desk/board.py` — `read_card` · `list_cards` · `_read_request` · `build_card_detail`
+- `page/server.py` — `build_board_card`
+- `tests/test_desk_server_board_get.py`의 `통합_GET_board_card` · `tests/test_desk_board_view.py`의 상세 응답 테스트
+
+## 배경 (step 11 첫 측정에서 나온 어긋남)
+
+`GET /board`(목록)는 `list_cards`가 요청 파일의 `at`을 합쳐 `requested_at`을 주는데, `GET /board/card`(상세)는 `read_card`를 그대로 써서 `requested_at`이 항상 null이고 `elapsed_days`도 null이다. 화면의 세부 패널은 이 값으로 「요청」 줄 · [요청 취소] · [작업 시작] 표시를 정하므로, 요청됨 카드 패널에서 「요청」이 없음으로 나오고 [요청 취소]에 닿을 수 없다. `POST /board/cancel` 자체는 정상이다.
 
 ## 작업
 
-`kind: "measure"` — **코드를 바꾸지 않고** 가짜 데이터로 서버를 띄워 확인하고 결과만 `summary`에 남긴다. 파일을 고치지 않으므로 변경 0이 정상이다(대신 `summary`에 실행한 명령(백틱)과 결과를 적는다).
+러너가 이 step을 테스트 먼저 → 구현으로 한 호출에서 돌린다(`tdd: true`). 테스트만 담은 커밋이 먼저 있어야 하고, 그 커밋 뒤 테스트 파일을 고치면 러너가 되돌린다. 만들거나 고치는 파일은 **`page/server.py`의 `build_board_card`, (필요하면) `desk/board.py`, 테스트 파일**뿐이다.
 
-1. 스크래치패드(작업 디렉터리 밖 임시 폴더)에 가짜 `DESK_HOME` · `DESK_CONFIG` · 지어낸 레포 2개(`repo-a` · `repo-b`, 각각 `phases/demo/index.json` 포함: 일부 step만 completed인 것 / 전부 completed인 것)를 만들고 카드 파일을 `scripts/desk.py board ...`와 `POST /board/add`(토큰은 서버가 내는 값, 페이지 소스에서 읽음)로 채운다. 데이터는 전부 지어낸 값(제목 · 링크 `https://example.com/...`). 사람 이름 · vault 경로 금지
-2. 서버를 띄우고 브라우저(`claude-in-chrome` 도구 또는 `curl`)로 다음을 **응답 값과 화면 값을 나란히 대조**한다: 열 3개와 건수(`count` / `total`) · 요청됨 배지 · 경과 일수 · 진행도 막대 · 후보 표식 · 설계 중 · 연결 끊김 · PR 대기 표시(「진행」 맨 위) · 보관 보기와 되살리기 · 제목 검색과 필터 요약 줄 · 열별 정렬 토글 · 세부 패널(step summary · 링크 텍스트, URL 비노출, 새 탭 · `noopener noreferrer`) · 링크 추가 · 수정 · 5번째 뒤 안내 · 링크 삭제 5초 되돌리기(되돌리면 서버에 안 감) · 카드 삭제 5초 되돌리기 · 같은 제목 409 모달 문구 · 요청 취소
-3. 다른 화면(리뷰 · 3역량 등)의 레포 셀렉트가 고른 레포만 보이게 하는지 한 곳 이상 확인한다
-4. `GET /nav-counts` 응답 키가 이 phase 이전과 같은지 확인한다(`{"judge","review","routine","trends",...}` 기존 집합 그대로, `board` 키 없음)
-5. `python3 -m unittest discover -s tests` 전체 통과를 summary에 적는다
-6. 확인하지 못한 것은 통과로 적지 않고 `확인필요 — 미실행: 이유`로 적는다
-
-summary 형식: `` `실행한 명령` 결과 `` 를 항목마다 한 줄. 기록한 뒤 서버를 끄고 임시 폴더를 지운다. 실제 `DESK_HOME`(Finn의 홈)은 건드리지 않는다.
+- 상세 응답이 요청 파일의 시각을 `requested_at`으로 주고, 요청 시각이 있는 예정·진행 카드의 `elapsed_days`가 목록(`GET /board`)과 같은 값이 된다. 요청 파일이 없으면 둘 다 null. 요청 파일이 깨졌으면 목록과 같은 방식으로 다룬다(`list_cards`의 `request_broken` 처리를 확인하고 그대로 따른다)
+- 요청 시각을 합치는 일은 `board` 모듈 안에서 한 곳으로 한다. 서버가 `board._read_request`(비공개)를 직접 부르지 않는다. 기존 `read_card`는 이동·삭제 등 쓰기 경로도 쓰므로 반환 모양을 바꾸지 않는다(새 공개 함수를 더하거나 `build_board_card` 쪽에서 합치는 공개 함수를 쓴다)
+- 응답에 새 키를 더하지 않는다(`requested_at` · `elapsed_days`는 이미 `build_card_detail`의 키다). 그래서 응답 키 집합을 비교하는 기존 테스트가 깨지지 않는다 — 시작 전 `grep -rn "board/card" tests/`로 상세 응답을 비교하는 기존 테스트를 확인하고, 수정이 필요하면 **RED 커밋에 넣는다**(GREEN에서 고치면 러너가 되돌린다)
+- `/nav-counts` · 화면(`page/index.html`)은 고치지 않는다. 화면은 이미 이 값을 읽는다
 
 ## Acceptance Criteria
 
-- 변경 파일 0(코드 · 테스트 · 문서 모두). `git status --short`가 비어 있다
-- `summary`에 실행한 명령(백틱)과 결과가 있다
-- `python3 -m unittest discover -s tests` 통과(`typecheck` · `lint` · `build`는 이 레포에 없다)
+- `.claude/harness.json`의 `verify.test`(`python3 -m unittest discover -s tests`) 통과. `typecheck` · `lint` · `build`는 이 레포에 없다(비어 있다)
+- 새 테스트 단언: 요청 파일이 있는 예정 카드의 상세 응답 `requested_at`이 요청 시각과 같다 · 같은 카드의 `elapsed_days`가 목록 응답과 같다 · 요청이 없는 카드는 둘 다 null · 요청 파일이 깨진 카드는 목록과 같은 결과다 · 진행 카드(요청 뒤 시작)의 `elapsed_days`가 목록과 같다 · 응답에 파일 경로가 안 실린다
+- 엣지 5축: 빈 값(요청 없음) · 비정상 입력(깨진 요청 파일) · 실패 경로(없는 카드 404 그대로) · 상태 전이(예정→진행 뒤 값) · 동시성(읽기만 하고 요청 파일을 바꾸지 않음을 단언)
 
 ## 검증 절차
 
-1. 위 작업 2~5의 항목마다 명령과 결과를 summary에 적었는지 센다.
-2. 결과를 `phases/desk-kanban/index.json`의 이 step에 기록: 성공 → `completed` + `summary` / 실패 → `error` + `error_message`(어느 항목이 응답과 화면이 달랐는지) / 차단 → `blocked`.
+1. AC 명령을 실제 실행한다.
+2. `ARCHITECTURE.md` 「계층 배치」·「경계」와 대조한다.
+3. 결과를 `phases/desk-kanban/index.json`의 이 step에 기록: 성공 → `completed` + `summary`(1~2줄) / 실패 → `error` + `error_message` / 차단 → `blocked` + `blocked_reason`.
 
 ### 🔴 CRITICAL (CLAUDE.md 그대로)
 
@@ -41,4 +44,4 @@ summary 형식: `` `실행한 명령` 결과 `` 를 항목마다 한 줄. 기록
 
 - hook 우회(`--no-verify`) · 자동 생성물 직접 수정 · 요청 범위 밖 수정 · **테스트 파일 수정**(구현 단계에서) 금지
 - 쌓기만 하는 기록(`docs/`의 지난 설계 · ADR 본문 · `phases/*/`)은 고치지 않는다. 이 step이 맡지 않은 파일은 고치지 않는다
-- 이 step은 어떤 파일도 고치지 않는다. 어긋남을 찾으면 고치지 말고 `error`로 보고한다(고치는 일은 수정 step으로 따로 만든다)
+- `page/index.html` · `/nav-counts`는 고치지 않는다
