@@ -144,8 +144,11 @@
     {
       "step": 16,
       "name": "board-server-review2-fixes",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-15T01:31:02+0900",
+      "summary": "page/server.py만 수정: build_board가 읽지 못한 레포(list_cards 예외)를 repos에서 빼고(새 키 없음), build_board_card가 read_refs 깨짐 정보로 상세 응답에 refs_broken(bool)을 붙임. 상세 키 집합 단언은 RED 커밋에서 갱신, ARCHITECTURE 상세 설명에 한 줄. 883개 통과.",
+      "completed_at": "2026-11-15T01:38:35+0900"
     },
     {
       "step": 17,
