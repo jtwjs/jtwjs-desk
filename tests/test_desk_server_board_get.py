@@ -251,3 +251,83 @@ class 통합_GET_board_card(_BoardCase):
         before = _snapshot(self.board_root)
         self._get(f"/board/card?repo={self.repo}&id={doing['id']}")
         self.assertEqual(_snapshot(self.board_root), before)
+
+
+class 통합_GET_board_card_요청_시각(_BoardCase):
+    """step 11 — 상세 응답이 목록(GET /board)과 같은 requested_at · elapsed_days를 준다."""
+
+    def _list_card(self, card_id):
+        _, body = self._get("/board")
+        for col in body["columns"].values():
+            for c in col["cards"]:
+                if c["id"] == card_id:
+                    return c
+        self.fail("목록에 카드 없음")
+
+    def _detail(self, card_id):
+        status, body = self._get(f"/board/card?repo={self.repo}&id={card_id}")
+        self.assertEqual(status, 200)
+        return body
+
+    def test_요청_파일이_있는_예정_카드는_requested_at이_요청_시각이고_elapsed_days는_null이다(self):
+        planned, _, _ = self._seed()
+        d = self._detail(planned["id"])
+        self.assertAlmostEqual(d["requested_at"], self.now - 3 * DAY, places=3)
+        self.assertIsNone(d["elapsed_days"])
+        self.assertEqual(d["requested_at"], self._list_card(planned["id"])["requested_at"])
+        self.assertIsNone(self._list_card(planned["id"])["elapsed_days"])
+
+    def test_진행_카드의_elapsed_days는_목록과_같은_숫자다(self):
+        _, doing, _ = self._seed()
+        d = self._detail(doing["id"])
+        self.assertEqual(d["elapsed_days"], 4)
+        self.assertEqual(d["elapsed_days"], self._list_card(doing["id"])["elapsed_days"])
+        self.assertEqual(d["requested_at"], self._list_card(doing["id"])["requested_at"])
+
+    def test_요청_파일이_없는_카드는_requested_at이_null이다(self):
+        card = board.add_card(self.repo, "요청 없는 카드", "", self.now - DAY)
+        d = self._detail(card["id"])
+        self.assertIsNone(d["requested_at"])
+        self.assertIsNone(d["elapsed_days"])
+
+    def test_완료_카드는_elapsed_days가_null이다(self):
+        _, _, done = self._seed()
+        self.assertIsNone(self._detail(done["id"])["elapsed_days"])
+
+    def test_요청_파일이_깨진_카드는_목록과_같은_결과다(self):
+        planned, doing, _ = self._seed()
+        for card in (planned, doing):
+            (self.board_root / self.repo / f"{card['id']}.request.json").write_text(
+                "{깨짐", encoding="utf-8")
+            d = self._detail(card["id"])
+            lst = self._list_card(card["id"])
+            self.assertIsNone(d["requested_at"])
+            self.assertEqual(d["requested_at"], lst["requested_at"])
+            self.assertEqual(d["elapsed_days"], lst["elapsed_days"])
+
+    def test_예정에서_진행으로_옮긴_뒤_값이_목록과_같다(self):
+        planned, _, _ = self._seed()
+        self.assertIsNone(self._detail(planned["id"])["elapsed_days"])
+        board.move_card(self.repo, planned["id"], "doing", self.now - 3 * DAY)
+        d = self._detail(planned["id"])
+        self.assertEqual(d["elapsed_days"], 3)
+        self.assertEqual(d["elapsed_days"], self._list_card(planned["id"])["elapsed_days"])
+
+    def test_없는_카드는_그대로_404다(self):
+        self._seed()
+        status, _ = self._get(f"/board/card?repo={self.repo}&id=1-abcd")
+        self.assertEqual(status, 404)
+
+    def test_읽기만_하고_요청_파일을_바꾸지_않으며_경로가_안_실린다(self):
+        planned, doing, _ = self._seed()
+        before = _snapshot(self.board_root)
+        for card in (planned, doing):
+            body = self._detail(card["id"])
+            self.assertNotIn(self._tmp.name, json.dumps(body, ensure_ascii=False))
+        self.assertEqual(_snapshot(self.board_root), before)
+
+    def test_응답_키_집합은_늘지_않는다(self):
+        planned, _, _ = self._seed()
+        self.assertEqual(set(self._detail(planned["id"])), {
+            "id", "title", "note", "column", "task", "created_at", "requested_at", "doing_at",
+            "pr_at", "done_at", "archived_at", "elapsed_days", "refs", "steps", "phase_summary"})
