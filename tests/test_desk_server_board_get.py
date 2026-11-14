@@ -183,6 +183,17 @@ class 통합_GET_board(_BoardCase):
         self.assertEqual(body["repos"], [])
         self.assertEqual(body["columns"]["planned"]["cards"], [])
 
+    def test_이름이_거절되는_레포가_있어도_200이고_다른_레포는_정상이다(self):
+        planned, _, _ = self._seed()
+        weird = Path(self._tmp.name) / "my..repo"
+        weird.mkdir()
+        self._write_cfg([weird, self.repo_root])
+        status, body = self._get("/board")
+        self.assertEqual(status, 200)
+        self.assertEqual(body["broken"], 1)
+        self.assertIn("예정 카드 Alpha", self._titles(body, "planned"))
+        self.assertEqual(len(body["columns"]["doing"]["cards"]), 1)
+
     def test_nav_counts_키_집합은_그대로다(self):
         _, counts = self._get("/nav-counts")
         self.assertEqual(set(counts), {"judge", "review", "routine", "trends", "errors"})

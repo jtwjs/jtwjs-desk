@@ -340,6 +340,18 @@ class 레퍼런스_링크(_PostCase):
         self.assertEqual(status, 200)
         self.assertEqual(self._card(cid)["refs"][0]["name"], "새 이름")
 
+    def test_깨진_링크_파일이면_세_경로가_409고_파일은_한_바이트도_안_바뀐다(self):
+        cid = self._add("깨진 링크")
+        path = self.board_root / self.repo / f"{cid}.refs.json"
+        path.write_text("{깨짐", encoding="utf-8")
+        before = self._files()
+        for sub, kw in (("add", {"name": "n", "url": "https://example.com"}),
+                        ("update", {"ref_id": "r0000", "name": "n", "url": "https://example.com"}),
+                        ("delete", {"ref_id": "r0000"})):
+            status, body = self._ref(sub, cid, **kw)
+            self.assertEqual((status, body), (409, {"error": "refs broken"}), sub)
+        self.assertEqual(self._files(), before)
+
 
 class 메뉴_배지_없음(_PostCase):
     def test_nav_counts_키_집합이_그대로다(self):

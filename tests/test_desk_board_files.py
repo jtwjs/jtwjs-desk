@@ -474,8 +474,20 @@ class 링크를_고칠_때(_Case):
         board.delete_ref(REPO, self.cid, ref["id"])
         self.assertEqual(self.card_path(self.cid).read_bytes(), before)
 
-    def test_깨진_링크_파일에_추가하면_빈_목록에서_시작한다(self):
-        (paths.board_dir(REPO) / f"{self.cid}.refs.json").write_text("{깨짐", encoding="utf-8")
+    def test_깨진_링크_파일에_추가_수정_삭제하면_RefsBroken이고_파일이_안_바뀐다(self):
+        path = paths.board_dir(REPO) / f"{self.cid}.refs.json"
+        path.write_text("{깨짐", encoding="utf-8")
+        before = path.read_bytes()
+        with self.assertRaises(board.RefsBroken):
+            board.add_ref(REPO, self.cid, "a", "https://example.com/a")
+        with self.assertRaises(board.RefsBroken):
+            board.update_ref(REPO, self.cid, "r0000", "a", "https://example.com/a")
+        with self.assertRaises(board.RefsBroken):
+            board.delete_ref(REPO, self.cid, "r0000")
+        self.assertEqual(path.read_bytes(), before)
+
+    def test_링크_파일이_없으면_깨진_게_아니라서_새로_만든다(self):
+        self.assertFalse((paths.board_dir(REPO) / f"{self.cid}.refs.json").exists())
         board.add_ref(REPO, self.cid, "a", "https://example.com/a")
         self.assertEqual(self.names(), ["a"])
 
