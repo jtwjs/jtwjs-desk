@@ -61,8 +61,11 @@
     {
       "step": 7,
       "name": "board-ui-board",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T19:39:50+0900",
+      "summary": "page/index.html만 수정: 사이드 메뉴 「칸반」(data-tab=board, 배지 없음)·panels.board·loadVisibleExtra→fetchBoard(15초)·buildBoard/renderBoard(열 3개·카드·열별 정렬 토글·레포 검색 셀렉트·기간 From~To·제목 검색 0.3초·보관 보기·필터 요약 줄·로딩/빈/오류/config/broken). 화면이 읽는 키(id·repo·title·note·column·badge·pr_waiting·elapsed_days·progress{done,total}·candidate·connection·created_at·done_at·archived·archived_at, 최상위 columns{cards,count,total}·broken·config·repos)는 desk/board.py _view_card·build_view와 page/server.py build_board 키와 대조해 일치. 카드 클릭·새 카드 버튼·모달·토스트는 없음(step 8·9). 868개 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T19:47:52+0900"
     },
     {
       "step": 8,
