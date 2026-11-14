@@ -16,8 +16,11 @@
     {
       "step": 2,
       "name": "board-files",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:18:26+0900",
+      "summary": "paths.board_dir + desk/board.py 파일 함수(add/read/list/delete/archive/revive/request_start/cancel_request/add·update·delete_ref/read_refs/move_card/mark_pr/set_task), 예외 DuplicateTitle·WrongColumn·AlreadyRequested·NoRequest·TooManyLinks·NotFound, id=<epoch초>-<hex4>. list_cards 항목에 requested_at·request_broken·refs_broken 포함, (cards, 깨진 카드 수) 반환. 테스트 tests/test_desk_board_files.py",
+      "completed_at": "2026-11-14T18:26:54+0900"
     },
     {
       "step": 3,
