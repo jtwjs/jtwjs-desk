@@ -16,11 +16,25 @@ Claude Code 세션을 여러 개 동시에 돌리면 어느 세션이 막혔는�
 | 트랙 | 세션별 상태(작업 중 · 승인 대기 · 막힘) | 없음 |
 | 판정 | 지휘가 올린 선택지. 고르면 지휘가 읽어 반영 | 선택 |
 | 복습함 | 복습 대기 카드 | 완료 표시 |
-| 3역량 | AI 워크플로우 · 적극성 · 풀스택 기록 | 없음 |
+| 칸반 | 할 일 카드(예정 · 진행 · 완료)와 작업 시작 요청 | 카드 추가 · 삭제 · 보관 · 시작 요청 |
+| 3역량 | AI 워크플로우 · 적극성 · 풀스택 기록. 풀스택에 가설 게이트 신호 띠 | 없음 |
 | 주간 롤업 | 이번 주 세션 · 커밋 · 학습 카드 | 없음 |
 | 레포 건강도 | 레포별 점수와 등급 | 없음 |
 | 회고 | wiki가 올린 질문에 답을 남기는 우편함 | 답 쓰기 |
 | 기술 동향 | 오늘의 글, 안 읽은 글, 북마크, 읽은 이력 잔디 | 읽음 · 북마크 |
+
+### 칸반
+
+레포별 할 일 카드를 3열로 본다. 카드는 desk 홈 폴더의 파일이라 커밋되지 않는다.
+
+<img width="720" alt="칸반 보드" src="https://github.com/user-attachments/assets/1ef809ee-1f9f-4de8-bcfd-b9714bc6956c" />
+
+- **작업 시작**은 desk가 요청 파일만 쓴다. 파일을 읽어 세션을 띄우는 일은 지휘 세션 몫이고, desk는 프로세스를 실행하지 않는다.
+- 열을 옮기는 것도 지휘 세션이다(`scripts/desk.py board`). PR이 머지되면 완료다.
+- 삭제는 5초 토스트로 되돌릴 수 있다. 보관한 카드는 보관 보기에서 되살린다.
+- 카드 패널에서 진행도와 레퍼런스 링크(이름 + URL, 5개까지)를 본다.
+
+<img width="360" alt="진행 중 카드 패널" src="https://github.com/user-attachments/assets/aa837ab3-5161-47af-85f9-4a80509ce4c7" />
 
 ## 동작
 
@@ -28,6 +42,7 @@ Claude Code 세션을 여러 개 동시에 돌리면 어느 세션이 막혔는�
 Claude Code 훅 ──▶ ~/.jtwjs-desk/ (상태 파일)  ◀── page/server.py ──▶ 브라우저
 지휘 ── scripts/desk.py ask / picks ──▶ 판정 파일 ◀───────┘
 wiki ──▶ 동향 · 회고 질문 파일 ──(읽기)──▶ desk ──(덧붙이기)──▶ 읽음 · 북마크 · 회고 답 파일
+칸반 카드 ◀──(쓰기)── desk ──(요청 파일)──▶ 지휘 세션 ── scripts/desk.py board ──▶ 카드 이동
 ```
 
 - 다른 레포의 기록은 읽기만 한다. wiki가 쓰는 파일은 desk가 고치지 않고, desk가 쓰는 파일은 wiki가 고치지 않는다.
@@ -52,7 +67,16 @@ python3 scripts/desk.py applied <repo> <id>         # 반영 완료 표시
 python3 scripts/desk.py prune --days 7              # 오래된 것 정리
 ```
 
-절차는 [`skills/decision-inbox`](skills/decision-inbox/SKILL.md).
+칸반 요청은 이렇게 다룬다.
+
+```bash
+python3 scripts/desk.py board requests --repo <repo>   # 작업 시작 요청 읽기
+python3 scripts/desk.py board link <repo> <id> <task>  # 카드에 phases 작업 이름 연결
+python3 scripts/desk.py board move <repo> <id> <column>  # 열 이동
+python3 scripts/desk.py board pr <repo> <id>           # PR 대기 표시
+```
+
+판정 절차는 [`skills/decision-inbox`](skills/decision-inbox/SKILL.md).
 
 ## 설정
 
@@ -71,15 +95,16 @@ python3 scripts/desk.py prune --days 7              # 오래된 것 정리
 | `routine_questions` · `routine_answers` | 회고 질문(읽기) · 답(덧붙이기) |
 | `trends_items` | 기술 동향 글(읽기). 한 줄에 `{id, date, title, url, summary}` |
 | `trends_reads` · `trends_marks` | 읽음 · 북마크(덧붙이기) |
+| `hypothesis_ledger` · `hypothesis_streak_threshold` | 풀스택 가설 게이트 신호 띠(원장 읽기, 이유 없이 수락한 연속 횟수가 이 값에 닿으면 가설 재요구 표시) |
 
 ## 개발
 
 ```bash
-python3 -m unittest discover -s tests    # 519개
+python3 -m unittest discover -s tests    # 883개
 ```
 
 ```
-desk/      순수 로직 (설정 · 원장 읽기 · 롤업 · 동향 · 검증)
+desk/      순수 로직 (설정 · 원장 읽기 · 롤업 · 동향 · 칸반 · 검증)
 hooks/     훅 진입점 (상태 파일만 씀)
 page/      서버 + 단일 HTML
 scripts/   지휘용 CLI
@@ -92,4 +117,4 @@ docs/      기능별 PRD · ARCHITECTURE · ADR
 
 ## 상태
 
-개인용 도구, private 레포. 화면 재설계(다크 · 좌측 메뉴)는 구현됐고, 설계는 [`.claude/design/`](.claude/design/)에 있다.
+개인용 도구, private 레포. 화면 재설계(다크 · 좌측 메뉴)와 칸반은 구현됐고, 설계는 [`.claude/design/`](.claude/design/)에 있다.
