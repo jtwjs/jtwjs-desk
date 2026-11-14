@@ -16,7 +16,7 @@
 
 러너가 이 step을 테스트 먼저 → 구현으로 한 호출에서 돌린다(`tdd: true`). 테스트만 담은 커밋이 먼저 있어야 하고, 그 커밋 뒤 테스트 파일을 고치면 러너가 되돌린다. 만들거나 고치는 파일은 **`page/server.py`의 `build_board_card`, (필요하면) `desk/board.py`, 테스트 파일**뿐이다.
 
-- 상세 응답이 요청 파일의 시각을 `requested_at`으로 주고, 요청 시각이 있는 예정·진행 카드의 `elapsed_days`가 목록(`GET /board`)과 같은 값이 된다. 요청 파일이 없으면 둘 다 null. 요청 파일이 깨졌으면 목록과 같은 방식으로 다룬다(`list_cards`의 `request_broken` 처리를 확인하고 그대로 따른다)
+- 상세 응답이 요청 파일의 시각을 `requested_at`으로 주고, `elapsed_days`는 목록(`GET /board`)과 같은 규칙으로 나온다 — PRD대로 「진행」 카드에만 값이 있고 예정·완료 카드는 null이다(예정 카드에 값을 내리지 않는다). 요청 파일이 없으면 `requested_at`은 null. 요청 파일이 깨졌으면 목록과 같은 방식으로 다룬다(`list_cards`의 `request_broken` 처리를 확인하고 그대로 따른다)
 - 요청 시각을 합치는 일은 `board` 모듈 안에서 한 곳으로 한다. 서버가 `board._read_request`(비공개)를 직접 부르지 않는다. 기존 `read_card`는 이동·삭제 등 쓰기 경로도 쓰므로 반환 모양을 바꾸지 않는다(새 공개 함수를 더하거나 `build_board_card` 쪽에서 합치는 공개 함수를 쓴다)
 - 응답에 새 키를 더하지 않는다(`requested_at` · `elapsed_days`는 이미 `build_card_detail`의 키다). 그래서 응답 키 집합을 비교하는 기존 테스트가 깨지지 않는다 — 시작 전 `grep -rn "board/card" tests/`로 상세 응답을 비교하는 기존 테스트를 확인하고, 수정이 필요하면 **RED 커밋에 넣는다**(GREEN에서 고치면 러너가 되돌린다)
 - `/nav-counts` · 화면(`page/index.html`)은 고치지 않는다. 화면은 이미 이 값을 읽는다
@@ -24,7 +24,7 @@
 ## Acceptance Criteria
 
 - `.claude/harness.json`의 `verify.test`(`python3 -m unittest discover -s tests`) 통과. `typecheck` · `lint` · `build`는 이 레포에 없다(비어 있다)
-- 새 테스트 단언: 요청 파일이 있는 예정 카드의 상세 응답 `requested_at`이 요청 시각과 같다 · 같은 카드의 `elapsed_days`가 목록 응답과 같다 · 요청이 없는 카드는 둘 다 null · 요청 파일이 깨진 카드는 목록과 같은 결과다 · 진행 카드(요청 뒤 시작)의 `elapsed_days`가 목록과 같다 · 응답에 파일 경로가 안 실린다
+- 새 테스트 단언: 요청 파일이 있는 예정 카드의 상세 응답 `requested_at`이 요청 시각과 같고 `elapsed_days`는 null이다(목록과 같음) · 진행 카드의 `elapsed_days`가 목록 응답과 같은 숫자다 · 요청이 없는 카드는 `requested_at`이 null · 요청 파일이 깨진 카드는 목록과 같은 결과다 · 응답에 파일 경로가 안 실린다
 - 엣지 5축: 빈 값(요청 없음) · 비정상 입력(깨진 요청 파일) · 실패 경로(없는 카드 404 그대로) · 상태 전이(예정→진행 뒤 값) · 동시성(읽기만 하고 요청 파일을 바꾸지 않음을 단언)
 
 ## 검증 절차
