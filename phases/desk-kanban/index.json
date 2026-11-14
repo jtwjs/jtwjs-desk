@@ -52,8 +52,11 @@
     {
       "step": 6,
       "name": "board-desk-cli",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T19:31:39+0900",
+      "summary": "scripts/desk.py에 board requests(--repo)·move·pr·link 서브커맨드 추가(board.list_cards/move_card/mark_pr/set_task 호출, 거절은 stderr 한 줄+종료코드 1, 서브프로세스·HTTP 없음). tests/test_desk_board_cli.py 31개, 전체 868개 통과.",
+      "completed_at": "2026-11-14T19:39:38+0900"
     },
     {
       "step": 7,
