@@ -194,6 +194,16 @@ class 통합_GET_board(_BoardCase):
         self.assertIn("예정 카드 Alpha", self._titles(body, "planned"))
         self.assertEqual(len(body["columns"]["doing"]["cards"]), 1)
 
+    def test_읽지_못한_레포는_repos에서_빠진다(self):
+        self._seed()
+        weird = Path(self._tmp.name) / "my..repo"
+        weird.mkdir()
+        self._write_cfg([weird, self.repo_root])
+        status, body = self._get("/board")
+        self.assertEqual(status, 200)
+        self.assertNotIn("my..repo", body["repos"])
+        self.assertIn(self.repo, body["repos"])
+
     def test_nav_counts_키_집합은_그대로다(self):
         _, counts = self._get("/nav-counts")
         self.assertEqual(set(counts), {"judge", "review", "routine", "trends", "errors"})
@@ -341,4 +351,25 @@ class 통합_GET_board_card_요청_시각(_BoardCase):
         planned, _, _ = self._seed()
         self.assertEqual(set(self._detail(planned["id"])), {
             "id", "title", "note", "column", "task", "created_at", "requested_at", "doing_at",
-            "pr_at", "done_at", "archived_at", "elapsed_days", "refs", "steps", "phase_summary"})
+            "pr_at", "done_at", "archived_at", "elapsed_days", "refs", "steps", "phase_summary",
+            "refs_broken"})
+
+
+class 통합_상세_refs_broken(_BoardCase):
+    def _detail(self, card_id):
+        status, body = self._get(f"/board/card?repo={self.repo}&id={card_id}")
+        self.assertEqual(status, 200)
+        return body
+
+    def test_링크_파일이_깨졌으면_true이고_refs는_비어_있다(self):
+        planned, _, _ = self._seed()
+        path = self.board_root / self.repo / f"{planned['id']}.refs.json"
+        path.write_text("{깨진", encoding="utf-8")
+        d = self._detail(planned["id"])
+        self.assertIs(d["refs_broken"], True)
+        self.assertEqual(d["refs"], [])
+
+    def test_멀쩡하거나_파일이_없으면_false다(self):
+        planned, doing, _ = self._seed()
+        for card in (planned, doing):
+            self.assertIs(self._detail(card["id"])["refs_broken"], False)
