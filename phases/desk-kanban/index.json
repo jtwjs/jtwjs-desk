@@ -70,8 +70,11 @@
     {
       "step": 8,
       "name": "board-ui-panel",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T19:48:03+0900",
+      "summary": "page/index.html만 수정: 카드 클릭/Enter로 우측 세부 패널(GET /board/card 열 때·바뀐 때만, ✕·Esc 안쪽부터·포커스 복귀), 날짜·단계 summary·링크 줄(이름만 하이퍼링크, URL은 title 툴팁, 수정·링크 삭제·추가, 5개 상한, 칸별 오류, 편집 중엔 안 다시 그리고 「카드가 바뀌었어요」), 버튼(작업 시작·요청 취소·삭제·보관·되살리기), 읽기 실패/저장 실패 분리. deleteRef(card, ref) 한 곳(step 9가 5초 지연으로 교체). 응답 키 refs{id,name,url}·steps{step,name,status,summary}·phase_summary·created_at/requested_at/doing_at/pr_at/done_at/archived_at·elapsed_days·column·task를 desk/board.py build_card_detail과 대조해 일치. 868개 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T19:58:39+0900"
     },
     {
       "step": 9,
