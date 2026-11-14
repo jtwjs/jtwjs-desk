@@ -88,8 +88,11 @@
     {
       "step": 10,
       "name": "board-ui-other-screens-repo-select",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T20:05:40+0900",
+      "summary": "page/index.html만 수정: 순환 칩 repoFilterChip을 레포 검색 셀렉트 repoSelect(value,repos,onPick)+repoFilterSelect(key,..)로 교체, 트랙 화면 순환 칩도 repoSelect로 교체. 바뀐 화면 4곳: 리뷰·AI워크플로우·풀스택(가설 신호 포함)·트랙(grep으로 사용처 전수 확인, repoFilterChip 0건). 868개 통과, HTML 파서·node --check 통과. 확인필요 — 미실행: 실제 화면 확인은 step 11에서",
+      "completed_at": "2026-11-14T20:11:27+0900"
     },
     {
       "step": 11,
