@@ -226,6 +226,14 @@
       "h": 900,
       "title": "다른 화면 필터 as-is | to-be",
       "page": "work-kanban"
+    },
+    "Kanban7Changes.dc.html": {
+      "x": 8160,
+      "y": 0,
+      "w": 1280,
+      "h": 2260,
+      "title": "회차 1 수정 · 새 컴포넌트 · 패널 상태",
+      "page": "work-kanban"
     }
   },
   "order": [
@@ -253,7 +261,8 @@
     "Kanban3Doing.dc.html",
     "Kanban4States.dc.html",
     "Kanban5Filters.dc.html",
-    "Kanban6Others.dc.html"
+    "Kanban6Others.dc.html",
+    "Kanban7Changes.dc.html"
   ],
   "notes": {},
   "designSystems": []
