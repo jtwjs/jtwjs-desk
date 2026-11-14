@@ -18,7 +18,7 @@
 - 복습함, 회고, 기술 동향: 복습할 것과 안 읽은 것을 보여 줘 부채가 쌓이지 않게 한다.
 - AI를 내가 지휘한다. 선택지는 내가 직접 고르고(판정), 이유 없이 수락한 횟수가 기준에 닿으면 가설부터 쓰라는 신호(가설 게이트)를 띄워 판단을 되찾는다.
 
-<img width="720" alt="판정 화면" src="https://github.com/user-attachments/assets/977da575-b5bd-4c6a-acdc-b79b5fb5fb02" />
+<img width="720" alt="칸반 화면" src="https://github.com/user-attachments/assets/244cb187-2206-4c7b-a44a-c592963558d7" />
 
 ## 화면
 
