@@ -1,6 +1,6 @@
 {
   "name": "jtwjs-desk",
-  "description": "지휘 책상: 판정 대기함 + 트랙 페이지",
+  "description": "작업 대시보드: 트랙 · 판정 · 칸반 · 복습 · 주간 기록을 한 화면에",
   "version": "0.1.0",
   "author": {
     "name": "jtwjs"
