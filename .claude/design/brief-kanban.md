@@ -121,7 +121,7 @@
 
 ## 디자인 URL · 캔버스 버전
 
-https://claude.ai/artifact/3GUzTueuEPdLgX6E2n9thX · 탭 `작업: 칸반`(보드 9장: 보드·예정 패널·진행 패널·상태 모음·필터 컴포넌트·다른 화면 필터 as-is\|to-be·회차 1 수정·제목 검색·레퍼런스 링크·회차 2 수정 as-is\|to-be) · 캔버스 Version 38(2026-11-14). 새 카드 모달은 상태 모음 보드에 둠.
+https://claude.ai/artifact/3GUzTueuEPdLgX6E2n9thX · 탭 `현행`(칸반 보드 9장, 작업 탭은 design-reconcile 통과 뒤 삭제: 보드·예정 패널·진행 패널·상태 모음·필터 컴포넌트·다른 화면 필터 as-is\|to-be·회차 1 수정·제목 검색·레퍼런스 링크·회차 2 수정 as-is\|to-be) · 캔버스 Version 39(2026-11-15, 현행 반영·구현 쪽으로 보정; Version 38은 작업 탭 시절). 새 카드 모달은 상태 모음 보드에 둠.
 
 ## 결정 로그
 
