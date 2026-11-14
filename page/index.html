@@ -468,6 +468,7 @@
   .btn.accent { background: var(--brand-fill); color: var(--on-brand); }
   .btn.accent:hover:not(:disabled) { border-color: var(--accent); }
   .btn.sm { height: 28px; padding: 0 12px; font-size: 13px; }
+  .btn:disabled, .btn.accent:disabled { opacity: 0.4; }
   .btn.confirm-pending { border-color: var(--attention); }
 
   .screen { display: flex; flex-direction: column; gap: 20px; }
@@ -3765,9 +3766,32 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       BOARD_COLS.forEach(function (def) { n += cols[def.key].count; all += cols[def.key].total; });
       d.archTitle.textContent = "보관한 카드 " + (boardFilterOn() ? n + " / " + all : n);
     }
+    if (boardUi.archived) {
+      d.cols.appendChild(boardArchiveList(cols));
+      return;
+    }
     BOARD_COLS.forEach(function (def) {
       d.cols.appendChild(boardColumn(def, cols ? cols[def.key] : null));
     });
+  }
+
+  // 보관 보기: 열 구분 없이 한 목록. 서버가 열별로 준 cards를 이어 붙일 뿐 화면이 새로 세지 않는다
+  function boardArchiveList(cols) {
+    var kids = [];
+    if (!cols) {
+      kids.push(waitLine("불러오는 중…"));
+    } else {
+      var any = false;
+      BOARD_COLS.forEach(function (def) {
+        cols[def.key].cards.forEach(function (c) {
+          if (boardHidden[c.repo + "/" + c.id]) return;
+          any = true;
+          kids.push(boardCard(c));
+        });
+      });
+      if (!any) kids.push(el("p", { class: "kb-empty", text: boardFilterOn() ? "이 조건에 맞는 카드가 없어요" : "보관한 카드가 없어요" }));
+    }
+    return el("section", { class: "kb-col", "aria-label": "보관한 카드" }, kids);
   }
 
   function renderBoardNotes() {
@@ -3861,6 +3885,9 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     d.rangeHint.textContent = boardUi.rangeErr;
     d.rangeHint.hidden = !boardUi.rangeErr;
     d.archiveBtn.setAttribute("aria-pressed", boardUi.archived ? "true" : "false");
+    d.archiveBtn.textContent = boardUi.archived ? "← 보드로" : "보관 보기";
+    d.headTitle.textContent = boardUi.archived ? "칸반 · 보관" : "칸반";
+    d.headDesc.textContent = boardUi.archived ? "보관한 카드를 보고 되살려요" : BOARD_HEAD_DESC;
     renderBoardRepoOpts();
     renderBoardSummary();
   }
@@ -3883,13 +3910,18 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     return b;
   }
 
+  var BOARD_HEAD_DESC = "예정부터 merge까지 카드를 한 화면에서 봅니다";
+
   function buildBoard() {
     var box = document.getElementById("board-content");
     clear(box);
-    box.appendChild(pageHead("칸반", "예정부터 merge까지 카드를 한 화면에서 봅니다"));
+    var head = pageHead("칸반", BOARD_HEAD_DESC);
+    box.appendChild(head);
 
     var d = {};
     boardUi.dom = d;
+    d.headTitle = head.querySelector("h1");
+    d.headDesc = head.querySelector("p");
     d.repoValue = el("span", { class: "chip-value", text: "전체" });
     d.periodValue = el("span", { class: "chip-value", text: "전체" });
     d.repoTrigger = boardTrigger("레포", d.repoValue);
