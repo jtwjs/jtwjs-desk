@@ -162,8 +162,9 @@
     {
       "step": 18,
       "name": "board-ui-reconcile-fixes",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "summary": "page/index.html만 수정: .btn:disabled/.btn.accent:disabled opacity 0.4(.btn.accent 뒤, 작업 시작·추가 둘 다 걸림). 보관 보기가 켜지면 제목 「칸반 · 보관」·부제 「보관한 카드를 보고 되살려요」·버튼 「← 보드로」(aria-pressed 유지), 열 3칸 대신 서버가 준 columns의 cards를 이어 한 목록(boardArchiveList, 화면이 새로 세지 않음), 0장이면 「보관한 카드가 없어요」(필터 중엔 기존 「이 조건에 맞는 카드가 없어요」). 보드로 돌아가면 기존 3열·정렬·필터 그대로. innerHTML 0, node --check 통과, 883개 통과. 확인필요 — 미실행: 화면은 재대조에서"
     }
   ],
   "reviews": [
