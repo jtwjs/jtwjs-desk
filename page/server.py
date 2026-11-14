@@ -588,6 +588,46 @@ def spawn_pick_candidate(body: dict) -> dict:
 # ---- 요청 핸들러 ----
 
 
+_BOARD_POST_PATHS = frozenset({
+    "/board/add", "/board/delete", "/board/archive", "/board/revive", "/board/start",
+    "/board/cancel", "/board/ref/add", "/board/ref/update", "/board/ref/delete",
+})
+
+
+def _board_links(raw) -> list:
+    if raw is None:
+        return []
+    if not isinstance(raw, list) or not all(isinstance(x, dict) for x in raw):
+        raise ValueError("bad links")
+    return [(x.get("name"), x.get("url")) for x in raw]
+
+
+def _board_post_action(path: str, repo: str, body: dict, now: float) -> dict:
+    """엔드포인트별 board 함수 호출. 실패는 board의 예외로 올린다."""
+    if path == "/board/add":
+        card = board.add_card(repo, body.get("title"), body.get("note"), now,
+                              links=_board_links(body.get("links")))
+        return {"id": card["id"]}
+    card_id = body.get("id")
+    if path == "/board/delete":
+        board.delete_card(repo, card_id)
+    elif path == "/board/archive":
+        board.archive_card(repo, card_id, now)
+    elif path == "/board/revive":
+        board.revive_card(repo, card_id)
+    elif path == "/board/start":
+        board.request_start(repo, card_id, now)
+    elif path == "/board/cancel":
+        board.cancel_request(repo, card_id)
+    elif path == "/board/ref/add":
+        return {"id": board.add_ref(repo, card_id, body.get("name"), body.get("url"))["id"]}
+    elif path == "/board/ref/update":
+        board.update_ref(repo, card_id, body.get("ref_id"), body.get("name"), body.get("url"))
+    else:
+        board.delete_ref(repo, card_id, body.get("ref_id"))
+    return {"ok": True}
+
+
 class _DeskRequestHandler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
@@ -824,6 +864,10 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             self._handle_share_shared()
             return
 
+        if parsed.path in _BOARD_POST_PATHS:
+            self._handle_board_post(parsed.path)
+            return
+
         if parsed.path == "/shutdown":
             self._handle_shutdown()
             return
@@ -1008,6 +1052,41 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
         pick_path = paths.inbox_dir(repo) / f"{id_}.pick.json"
         atomic.write_json_atomic(pick_path, candidate)
         self._send_json(200, {"ok": True})
+
+    def _handle_board_post(self, path: str):
+        """POST /board/* — 카드·요청·링크 파일만 쓴다. 오류 응답에는 짧은 코드만 싣는다."""
+        if not self._check_post_guard():
+            return
+        try:
+            body = self._read_json_body()
+        except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+            self._send_json(400, {"error": "bad json"})
+            return
+        if not isinstance(body, dict):
+            self._send_json(400, {"error": "bad body"})
+            return
+        repo = body.get("repo")
+        if not valid_repo_name(repo):
+            self._send_json(400, {"error": "bad repo"})
+            return
+        known = {Path(r).name for r in config.load_config()["repos"]}
+        if repo not in known:
+            self._send_json(400 if path == "/board/add" else 404, {"error": "unknown repo"})
+            return
+        try:
+            result = _board_post_action(path, repo, body, time.time())
+        except board.DuplicateTitle:
+            self._send_json(409, {"error": "duplicate"})
+        except (board.WrongColumn, board.AlreadyRequested, board.NoRequest, board.TooManyLinks):
+            self._send_json(409, {"error": "conflict"})
+        except board.NotFound:
+            self._send_json(404, {"error": "not found"})
+        except ValueError:
+            self._send_json(400, {"error": "invalid"})
+        except OSError:
+            self._send_json(500, {"error": "write failed"})
+        else:
+            self._send_json(200, result)
 
     def _handle_shutdown(self):
         if self.headers.get("X-Desk-Token") != self._token():
