@@ -64,3 +64,8 @@ def review_dir(repo: str) -> Path:
 def share_dir(repo: str) -> Path:
     """공유 파일 · 공유 끝 마킹 디렉터리: `<DESK_HOME>/share/<repo>`."""
     return desk_home_dir() / "share" / repo
+
+
+def board_dir(repo: str) -> Path:
+    """칸반 카드 · 시작 요청 · 링크 파일 디렉터리: `<DESK_HOME>/board/<repo>`."""
+    return desk_home_dir() / "board" / repo
