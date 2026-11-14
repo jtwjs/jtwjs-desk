@@ -43,8 +43,11 @@
     {
       "step": 5,
       "name": "board-post-endpoints",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "summary": "page/server.py에 POST /board/{add,delete,archive,revive,start,cancel,ref/add,ref/update,ref/delete} 추가(_handle_board_post, 기존 _check_post_guard 재사용, 오류는 {error: 짧은 코드}: 400 검증·모르는 레포(add) / 404 없는 카드·링크·모르는 레포(id 동작) / 409 duplicate·conflict). tests/test_desk_server_board_post.py 36개, 전체 837개 통과.",
+      "tdd": true,
+      "started_at": "2026-11-14T18:51:18+0900",
+      "completed_at": "2026-11-14T19:07:46+0900"
     },
     {
       "step": 6,
