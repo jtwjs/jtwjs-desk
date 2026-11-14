@@ -362,3 +362,126 @@ def set_task(repo, card_id, task) -> None:
     card = read_card(repo, card_id)
     card["task"] = task.strip()
     _write_card(repo, card_id, card)
+
+
+# ---- 화면용 응답 조립(순수) ---------------------------------------------------
+
+_BASIS = {"planned": "created_at", "doing": "doing_at", "done": "done_at"}
+_SORT_DEFAULT = {"planned": "old", "doing": "old", "done": "new"}
+
+
+class BadQuery(Exception):
+    """GET /board 쿼리가 틀렸다(400)."""
+
+
+def _parse_day(value, name):
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        raise BadQuery(f"{name} 날짜 형식이 올바르지 않아요(YYYY-MM-DD)") from None
+
+
+def _day_of(ts):
+    return datetime.fromtimestamp(ts).date() if isinstance(ts, (int, float)) else None
+
+
+def _statuses(phases, repo, task):
+    """(step status 목록, phases 폴더가 있는지). phases를 못 읽은 레포는 ([], None)."""
+    by_task = phases.get(repo)
+    if not isinstance(by_task, dict):
+        return [], None
+    index = by_task.get(task) if task else None
+    if not isinstance(index, dict):
+        return [], False
+    steps = index.get("steps")
+    return [s.get("status") for s in steps if isinstance(s, dict)] if isinstance(steps, list) else [], True
+
+
+def build_view(cards_by_repo, phases_by_repo, today: date, now, query) -> dict:
+    """cards_by_repo: {레포: (list_cards 결과 카드 목록, 깨진 카드 수)}.
+    phases_by_repo: {레포: {task: index.json dict}} (못 읽은 레포는 None 또는 없음)."""
+    repo = query.get("repo") or None
+    if repo is not None and repo not in cards_by_repo:
+        raise BadQuery("모르는 레포예요")
+    start = _parse_day(query["from"], "from") if query.get("from") else None
+    end = _parse_day(query["to"], "to") if query.get("to") else None
+    if start and end and start > end:
+        raise BadQuery("from이 to보다 늦어요")
+    sorts = {}
+    for col in COLUMNS:
+        value = query.get(f"sort_{col}") or _SORT_DEFAULT[col]
+        if value not in ("new", "old"):
+            raise BadQuery(f"sort_{col}은 new 또는 old예요")
+        sorts[col] = value
+    needle = (query.get("q") or "").strip().lower()
+    archived = str(query.get("archived") or "") in ("1", "true")
+
+    columns = {col: {"cards": [], "count": 0, "total": 0} for col in COLUMNS}
+    broken = 0
+    for name, (cards, broken_cards) in cards_by_repo.items():
+        broken += broken_cards
+        for c in cards:
+            broken += bool(c.get("request_broken")) + bool(c.get("refs_broken"))
+            if bool(c.get("archived_at")) != archived:
+                continue
+            col = c["column"]
+            columns[col]["total"] += 1
+            if repo and name != repo:
+                continue
+            if needle and needle not in c["title"].lower():
+                continue
+            if start or end:
+                day = _day_of(c.get(_BASIS[col]))
+                if day is None or (start and day < start) or (end and day > end):
+                    continue
+            columns[col]["cards"].append(_view_card(name, c, phases_by_repo, today))
+    for col, data in columns.items():
+        basis = _BASIS[col]
+        data["cards"].sort(key=lambda x: x[basis] or 0, reverse=sorts[col] == "new")
+        if col == "doing":
+            data["cards"].sort(key=lambda x: not x["pr_waiting"])  # 안정 정렬: PR 대기만 위로
+        data["count"] = len(data["cards"])
+    return {"columns": columns, "broken": broken, "archived": archived}
+
+
+def _view_card(repo, c, phases_by_repo, today) -> dict:
+    column = c["column"]
+    statuses, exists = _statuses(phases_by_repo, repo, c.get("task"))
+    return {
+        "id": c["id"], "repo": repo, "title": c["title"], "note": c.get("note") or "",
+        "column": column,
+        "badge": "requested" if column == "planned" and c.get("requested_at") else None,
+        "pr_waiting": bool(c.get("pr_at")) and column == "doing",
+        "elapsed_days": (elapsed_days(c.get("requested_at"), c.get("pr_at"), today)
+                         if column == "doing" else None),
+        "progress": progress(statuses),
+        "candidate": candidate_mark(c, statuses),
+        "connection": (None if exists is None and c.get("task") and column == "doing"
+                       else connection_state(c, bool(exists))),
+        "created_at": c.get("created_at"), "requested_at": c.get("requested_at"),
+        "doing_at": c.get("doing_at"), "pr_at": c.get("pr_at"), "done_at": c.get("done_at"),
+        "archived_at": c.get("archived_at"), "task": c.get("task"),
+        "archived": bool(c.get("archived_at")),
+    }
+
+
+def build_card_detail(card, refs, phase_index, today: date) -> dict:
+    steps, summary = [], None
+    if card.get("task") and isinstance(phase_index, dict):
+        summary = phase_index.get("summary")
+        raw = phase_index.get("steps")
+        for s in raw if isinstance(raw, list) else []:
+            if isinstance(s, dict):
+                steps.append({"step": s.get("step"), "name": s.get("name"),
+                              "status": s.get("status"), "summary": s.get("summary")})
+    return {
+        "id": card.get("id"), "title": card["title"], "note": card.get("note") or "",
+        "column": card["column"], "task": card.get("task"),
+        "created_at": card.get("created_at"), "requested_at": card.get("requested_at"),
+        "doing_at": card.get("doing_at"), "pr_at": card.get("pr_at"),
+        "done_at": card.get("done_at"), "archived_at": card.get("archived_at"),
+        "elapsed_days": (elapsed_days(card.get("requested_at"), card.get("pr_at"), today)
+                         if card["column"] == "doing" else None),
+        "refs": [{"id": r["id"], "name": r["name"], "url": r["url"]} for r in refs],
+        "steps": steps, "phase_summary": summary,
+    }
