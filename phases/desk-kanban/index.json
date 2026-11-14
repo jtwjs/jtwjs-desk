@@ -182,6 +182,15 @@
         "링크 추가 409(TooManyLinks)를 전부 '링크 파일 깨짐' 문구로 보여 줌(page/index.html:3535)",
         "읽지 못한 레포를 '깨진 카드 1개'로 안내하고 repos에 남김(page/server.py:541)"
       ]
+    },
+    {
+      "at": "2026-11-15T01:48:24+09:00",
+      "head": "f27e677993c635c4fba1bc592afc8ddaa602f9d8",
+      "issues": [
+        "링크 쓰기 409 뒤 패널을 다시 받지 않아 화면 링크 수와 어긋남(🟢)",
+        "refs_broken 조기 종료 시 p.editing 잔존(🟢)",
+        "ref/update의 conflict 분기는 도달 불가(🟢)"
+      ]
     }
   ]
 }
