@@ -10,4 +10,4 @@
 
 결정 로그는 `brief-kanban.md` 「결정 로그」 회차 2 후속.
 
-verdict:
+verdict: 승인
