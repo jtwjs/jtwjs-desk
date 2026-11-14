@@ -34,8 +34,11 @@
     {
       "step": 4,
       "name": "board-get-endpoints",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:43:03+0900",
+      "summary": "page/server.py에 build_board(cfg,query)·build_board_card(cfg,repo,id) + GET /board(BadQuery→400, config·repos 추가)·GET /board/card(형식 오류 400, 없는 레포·카드 404) 추가. tests/test_desk_server_board_get.py 24개.",
+      "completed_at": "2026-11-14T18:51:07+0900"
     },
     {
       "step": 5,
