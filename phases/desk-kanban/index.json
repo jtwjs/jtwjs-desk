@@ -97,8 +97,11 @@
     {
       "step": 11,
       "name": "board-card-detail-request-merge",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "summary": "desk/board.py에 공개 함수 read_card_with_request(read_card + 요청 파일 at을 requested_at으로 합침, 깨지면 None)를 더하고 page/server.py build_board_card가 쓴다. 상세 requested_at·elapsed_days가 목록과 같다(진행 카드만 값). 테스트 9개는 tests/test_desk_server_board_get.py 새 클래스. 877개 통과.",
+      "tdd": true,
+      "started_at": "2026-11-14T22:39:07+0900",
+      "completed_at": "2026-11-14T22:46:52+0900"
     },
     {
       "step": 12,
