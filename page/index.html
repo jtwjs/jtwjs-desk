@@ -754,9 +754,10 @@
   .kb-cols { display: flex; gap: 12px; align-items: flex-start; overflow-x: auto; }
   .kb-col {
     flex: 1 1 0; min-width: 260px; display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    max-height: calc(100vh - 240px); overflow-y: auto;
     background: var(--surface-panel); border: 1px solid var(--surface-raised); border-radius: var(--radius-card);
   }
-  .kb-col-head { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
+  .kb-col-head { display: flex; align-items: center; justify-content: space-between; min-height: 32px; position: sticky; top: -12px; z-index: 1; background: var(--surface-panel); }
   .kb-col-title { display: flex; align-items: baseline; gap: 8px; }
   .kb-col-name { font-size: 13px; font-weight: 600; color: var(--text-strong); }
   .kb-col-count { font-size: 12px; color: var(--text-muted); }
