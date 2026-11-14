@@ -116,8 +116,11 @@
     {
       "step": 13,
       "name": "board-server-hardening",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T23:44:09+0900",
+      "summary": "desk/board.py에 RefsBroken 추가(깨진 링크 파일이면 add/update/delete_ref가 쓰지 않고 예외, 파일 없음은 정상), page/server.py가 POST /board/ref/*에서 409 {error: refs broken}으로 매핑하고 build_board가 list_cards의 ValueError·OSError를 레포 단위로 삼켜 ([], 1)로 취급(my..repo 있어도 GET /board 200). 기존 덮어쓰기 단언은 RED 커밋에서 교체, ARCHITECTURE 링크 설명에 한 줄 추가. 880개 통과.",
+      "completed_at": "2026-11-14T23:54:29+0900"
     },
     {
       "step": 14,
