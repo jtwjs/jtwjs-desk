@@ -533,16 +533,17 @@ def build_trends(cfg: dict) -> dict:
 
 def build_board(cfg: dict, query: dict) -> dict:
     """칸반 화면 응답 — 카드·phases를 읽기만 한다. 계산은 desk/board.py."""
-    cards_by_repo, phases_by_repo = {}, {}
+    cards_by_repo, phases_by_repo, unreadable = {}, {}, set()
     for root in cfg["repos"]:
         name = Path(root).name
         try:
             cards_by_repo[name] = board.list_cards(name)
         except (ValueError, OSError):
             cards_by_repo[name] = ([], 1)
+            unreadable.add(name)
         phases_by_repo[name] = dict(list_phase_indexes(root))
     view = board.build_view(cards_by_repo, phases_by_repo, _today(), time.time(), query)
-    return {**view, "config": config_block(cfg), "repos": list(cards_by_repo)}
+    return {**view, "config": config_block(cfg), "repos": [n for n in cards_by_repo if n not in unreadable]}
 
 
 def build_board_card(cfg: dict, repo: str, card_id: str):
@@ -557,9 +558,10 @@ def build_board_card(cfg: dict, repo: str, card_id: str):
         card = board.read_card_with_request(repo, card_id)
     except (board.NotFound, ValueError):
         return None
-    refs, _ = board.read_refs(repo, card_id)
+    refs, refs_broken = board.read_refs(repo, card_id)
     phase = dict(list_phase_indexes(roots[repo])).get(card.get("task")) if card.get("task") else None
-    return board.build_card_detail({**card, "id": card_id}, refs, phase, _today())
+    detail = board.build_card_detail({**card, "id": card_id}, refs, phase, _today())
+    return {**detail, "refs_broken": refs_broken}
 
 
 def build_hypothesis_signal(cfg: dict, repo: str | None = None) -> dict:
