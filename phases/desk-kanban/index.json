@@ -125,8 +125,11 @@
     {
       "step": 14,
       "name": "board-ui-review-fixes",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-14T23:54:37+0900",
+      "summary": "page/index.html만 수정: (1) .kb-change[hidden]{display:none} 추가(inline-note+hidden 조합은 칸반 안엔 이것뿐, 749행) (2) saveRef에 p.refBusy 가드(3518행) — 같은 Enter 연타 모양: 칸반 새 카드 모달은 Enter 저장 핸들러 없음, 다른 Enter 저장 없음(목록 없음) (3) 새 카드 모달 syncRequired: 레포·제목(공백만이면 빈 것)이 비면 [추가] 비활성+「비어 있는 칸: 레포 · 제목」(3236~3246행), 서버 검증 그대로 (4) 기간 팝오버에 [오늘][지난 7일][이번 달][지우기] 프리셋(3940~3960행, 브라우저 로컬 날짜, 누르면 입력에 넣고 periodChanged로 바로 적용). 날짜 입력은 type=date 유지, 시안 인라인 달력은 안 만듦(AI 해석) (5) 보관 보기 제목 「보관한 카드 N」(d.archTitle, 3745~3752행)과 진행에서 보관한 카드의 「진행에서 보관」 메타(3007행). 응답에 최상위 보관 건수 키는 없고 보관 보기에서 columns.*.count가 보관 카드 수라 N은 서버가 준 열별 count의 합(블록 사유 아님 — 화면이 카드를 세지 않음, 합산 해석은 Finn 확인 필요) (6) 링크 추가·수정 409는 「링크 파일이 깨져서 저장하지 못했어요…」(BOARD_REFS_BROKEN, 3511·3534행, 입력 유지), 삭제 409는 같은 문구 토스트(3494행). 완료 열은 「더 보기」 없이 전부 보이고 열 스크롤인 기존 구현 유지. innerHTML 추가 0, node --check 통과, 880개 통과. 확인필요 — 미실행: 실제 화면 확인은 step 15에서",
+      "completed_at": "2026-11-15T00:02:27+0900"
     },
     {
       "step": 15,
