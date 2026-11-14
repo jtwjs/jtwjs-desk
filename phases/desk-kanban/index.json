@@ -1,0 +1,75 @@
+{
+  "project": "jtwjs-desk",
+  "phase": "desk-kanban",
+  "docs": "docs/desk-kanban-2026-11-14",
+  "after": [],
+  "steps": [
+    {
+      "step": 1,
+      "name": "board-core",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 2,
+      "name": "board-files",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 3,
+      "name": "board-view-response",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 4,
+      "name": "board-get-endpoints",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 5,
+      "name": "board-post-endpoints",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 6,
+      "name": "board-desk-cli",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 7,
+      "name": "board-ui-board",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 8,
+      "name": "board-ui-panel",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 9,
+      "name": "board-ui-modals-toasts",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 10,
+      "name": "board-ui-other-screens-repo-select",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 11,
+      "name": "board-integration-check",
+      "status": "pending",
+      "tdd": false,
+      "kind": "measure"
+    }
+  ]
+}
