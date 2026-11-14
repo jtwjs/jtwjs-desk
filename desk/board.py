@@ -200,6 +200,13 @@ def read_card(repo, card_id) -> dict:
     return data
 
 
+def read_card_with_request(repo, card_id) -> dict:
+    """read_card에 요청 시각(requested_at)을 합친다 — list_cards 항목과 같은 값. 깨진 요청 파일은 None."""
+    card = read_card(repo, card_id)
+    requested_at, request_broken = _read_request(repo, card_id)
+    return {**card, "requested_at": requested_at, "request_broken": request_broken}
+
+
 def list_cards(repo) -> tuple:
     """(카드 목록, 깨진 카드 파일 수). 항목에 id · requested_at · request_broken · refs_broken을 붙인다."""
     d = _dir(repo)

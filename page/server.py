@@ -551,7 +551,7 @@ def build_board_card(cfg: dict, repo: str, card_id: str):
     if repo not in roots:
         return None
     try:
-        card = board.read_card(repo, card_id)
+        card = board.read_card_with_request(repo, card_id)
     except (board.NotFound, ValueError):
         return None
     refs, _ = board.read_refs(repo, card_id)
