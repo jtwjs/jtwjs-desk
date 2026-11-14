@@ -112,6 +112,25 @@
       "started_at": "2026-11-14T22:46:58+0900",
       "summary": "가짜 DESK_HOME·repo-a/repo-b·example.com 데이터로 서버(DESK_PORT=47699)를 띄워 claude-in-chrome(새 탭)으로 측정, 코드 변경 0. `GET /board`+화면 DOM 대조` 열 3개 건수 3/5/2 = 응답 count/total 일치, 요청됨 배지·경과 일수(5/3/8/12일)·진행도 1/2·2/2·후보 표식·설계 중·연결 끊김·PR 대기(진행 맨 위) 응답과 일치. `요청됨 카드 세부 패널` 「요청」 시각 11월 14일과 [요청 취소] 표시 통과, [작업 시작]은 숨지 않고 비활성(title 이미 요청했어요)으로 나옴=PRD 「시작 버튼 중복」 결정과 일치하나 step 문구 '안 나오는지'와는 표현이 다름(Finn 판단 필요). `[요청 취소] 클릭` 배지 사라짐·요청 파일 삭제·요청 시각 '없음'·[작업 시작] 활성 통과. `레포 셀렉트 4곳(리뷰·AI워크플로우·풀스택·트랙)에서 repo-a/repo-b/전체 선택` 모두 고른 레포 행만 보임 통과(풀스택 hypothesis-signal은 원장 설정이 없어 repo 쿼리 경로는 확인필요 — 미실행: hypothesis_ledger 가짜 파일 미구성). `기간 From~To 화면 조작+curl` from=11-10&to=11-13 → 1/3·1/5·0/2, from만 2/3·2/5·1/2, to만 1/3·0/5·1/2 화면=응답 일치, from>to는 화면 안내 문구+요청 안 보냄·서버 400 통과. `제목 검색 'ALPHA P'` 0.3초 디바운스·대소문자 무시·메모 단어 'memo' 0건·필터 요약 줄 '걸린 3 / 전체 10' 통과. `정렬 토글` 예정 오래된순→최신순 반전·진행 PR 대기 맨 위 유지 통과. `세부 패널` step summary·링크 이름만 하이퍼링크(target=_blank, rel=noopener noreferrer, URL은 title 툴팁, 본문 텍스트에 example.com 없음) 통과. `링크 추가·수정·javascript: 거절 문구·5개째 뒤 '링크는 5개까지' 안내·링크 삭제 5초 되돌리기(되돌리면 refs.json 그대로)` 통과. `카드 삭제 5초 되돌리기(되돌리면 파일 유지)·삭제 확정(파일 삭제)·보관→보관 보기→되살리기` 통과. `같은 제목 모달` '같은 제목의 예정 카드가 이미 있어요' 통과. `curl /nav-counts` {judge,review,routine,trends,errors} board 키 없음 통과. `레포 셀렉트 직후 지연 원인(코드 읽기)` page/index.html boardOpts click 핸들러가 boardUi.repo 설정 뒤 fetchBoard()를 즉시 호출(디바운스·15초 폴링 대기 없음, 디바운스 boardSchedule은 제목 검색 전용), 실측 클릭→필터 반영 23ms → 15초 폴링 탓 아님, 첫 측정의 1.5초 미반영은 화면 쪽 지연이 아니라 측정 타이밍 또는 응답 대기로 추정(원인 확정 못 함, 고치지 않음). `python3 -m unittest discover -s tests` Ran 877 tests OK. 서버 종료·임시 폴더 삭제 완료.",
       "completed_at": "2026-11-14T22:57:23+0900"
+    },
+    {
+      "step": 13,
+      "name": "board-server-hardening",
+      "status": "pending",
+      "tdd": true
+    },
+    {
+      "step": 14,
+      "name": "board-ui-review-fixes",
+      "status": "pending",
+      "tdd": false
+    },
+    {
+      "step": 15,
+      "name": "board-integration-recheck",
+      "status": "pending",
+      "tdd": false,
+      "kind": "measure"
     }
   ],
   "reviews": [
