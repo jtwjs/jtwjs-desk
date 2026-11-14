@@ -746,6 +746,7 @@
   .kb-opt:hover, .kb-opt[aria-selected="true"] { background: var(--surface-raised); color: var(--text-strong); }
   .kb-hint { margin: 0; font-size: 12px; color: var(--text-muted); }
   .kb-hint.danger { color: var(--danger); }
+  .kb-change[hidden] { display: none; }
   .kb-summary {
     display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-body);
   }
@@ -3003,6 +3004,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     }
     if (c.column === "done" && c.done_at != null) meta.push("merge " + fmtDay(c.done_at));
     if (c.archived && c.archived_at != null) meta.push("보관 " + fmtDay(c.archived_at));
+    if (c.archived && c.column === "doing") meta.push("진행에서 보관");
     if (c.note) meta.push("메모 있음");
     if (meta.length) kids.push(el("div", { class: "kb-meta", text: meta.join(" · ") }));
     var node = el("div", { class: cls, tabindex: "0", role: "button", "data-kb-repo": c.repo, "data-kb-id": c.id }, kids);
@@ -3229,9 +3231,22 @@ const DESK_TOKEN = "__DESK_TOKEN__";
 
     var cancel = button("취소", closeBoardModal);
     var submit = button(m.busy ? "추가하는 중…" : "추가", submitBoardModal, "accent");
-    submit.disabled = m.busy || repos.length === 0;
+    var emptyHint = el("p", { class: "kb-hint", role: "status" });
+    // 레포·제목(공백만이면 빈 것)이 비면 [추가]를 막고 빈 칸 이름을 보인다. 서버 검증은 그대로다
+    function syncRequired() {
+      var missing = [];
+      if (!dr.repo) missing.push("레포");
+      if (!dr.title.trim()) missing.push("제목");
+      submit.disabled = m.busy || repos.length === 0 || missing.length > 0;
+      emptyHint.textContent = missing.length ? "비어 있는 칸: " + missing.join(" · ") : "";
+      emptyHint.hidden = missing.length === 0;
+    }
+    syncRequired();
+    repoSel.addEventListener("change", syncRequired);
+    titleIn.addEventListener("input", syncRequired);
     var foot = [];
     if (errs.form) foot.push(inlineNote(errs.form, "danger"));
+    foot.push(emptyHint);
     foot.push(el("div", { class: "kb-row-actions" }, [cancel, submit]));
 
     var dialog = el("div", { class: "kb-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "kb-modal-title" }, [
@@ -3476,7 +3491,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
           if (p && p.repo === card.repo && p.id === card.id) loadBoardDetail(false);
           return;
         }
-        boardToast("링크를 지우지 못했어요 · " + ref.name, null, null, true);
+        boardToast(status === 409 ? BOARD_REFS_BROKEN : "링크를 지우지 못했어요 · " + ref.name, null, null, true);
         if (p && p.repo === card.repo && p.id === card.id) renderBoardLinks();
       });
     });
@@ -3493,16 +3508,21 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     return errs;
   }
 
+  var BOARD_REFS_BROKEN = "링크 파일이 깨져서 저장하지 못했어요. 홈 폴더 board/ 아래 refs 파일을 고치거나 지워 주세요.";
+
   function saveRef(key) {
     var p = boardPanel;
     var dr = p.drafts[key] || { name: "", url: "" };
     var errs = checkRefInput(dr.name, dr.url);
     if (errs.name || errs.url) { p.errors = errs; renderBoardLinks(); return; }
+    if (p.refBusy) return; // 응답 전 Enter 연타로 POST가 두 번 나가지 않게 한다
+    p.refBusy = true;
     var body = { repo: p.repo, id: p.id, name: dr.name.trim(), url: dr.url.trim() };
     var path = "/board/ref/add";
     if (key !== "add") { path = "/board/ref/update"; body.ref_id = key; }
     boardPost(path, body, function (status) {
       if (boardPanel !== p) return;
+      p.refBusy = false;
       if (status === 200) {
         delete p.drafts[key];
         p.errors = {};
@@ -3511,7 +3531,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         loadBoardDetail(false);
         return;
       }
-      if (status === 409) p.errors = { form: key === "add" ? "링크는 5개까지 붙일 수 있어요" : "이 링크를 바꾸지 못했어요" };
+      if (status === 409) p.errors = { form: BOARD_REFS_BROKEN };
       else if (status === 400) p.errors = { form: "입력을 확인해 주세요. 이름은 1~40자, 주소는 http(s)://로 시작해야 해요" };
       else if (status === 404) p.errors = { form: "카드나 링크를 찾지 못했어요" };
       else p.errors = { form: "저장하지 못했어요. 다시 눌러 주세요" };
@@ -3724,6 +3744,13 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     var d = boardUi.dom;
     clear(d.cols);
     var cols = boardUi.data && boardUi.data.columns;
+    // 보관 보기 제목: N은 응답이 준 열별 count의 합이다(화면이 카드를 세지 않는다)
+    d.archTitle.hidden = !(boardUi.archived && cols);
+    if (!d.archTitle.hidden) {
+      var n = 0;
+      BOARD_COLS.forEach(function (def) { n += cols[def.key].count; });
+      d.archTitle.textContent = "보관한 카드 " + n;
+    }
     BOARD_COLS.forEach(function (def) {
       d.cols.appendChild(boardColumn(def, cols ? cols[def.key] : null));
     });
@@ -3885,12 +3912,13 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     d.rangeHint = el("p", { class: "kb-hint danger", role: "alert", hidden: "" });
     d.rangeHint.hidden = true;
     var periodClear = el("button", { class: "btn sm", type: "button", text: "지우기" });
+    var presets = el("div", { class: "kb-row-actions" });
     d.periodPop = el("div", { class: "kb-pop", hidden: "" }, [
       el("label", { class: "kb-field" }, [el("span", { text: "시작일 (From)" }), d.fromInput]),
       el("label", { class: "kb-field" }, [el("span", { text: "종료일 (To)" }), d.toInput]),
       d.rangeHint,
       el("p", { class: "kb-hint", text: "기준일: 예정은 만든 날 · 진행은 시작일 · 완료는 merge일" }),
-      periodClear
+      presets
     ]);
     d.periodPop.hidden = true;
     d.periodTrigger.addEventListener("click", function () {
@@ -3909,10 +3937,29 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     }
     d.fromInput.addEventListener("change", periodChanged);
     d.toInput.addEventListener("change", periodChanged);
-    periodClear.addEventListener("click", function () {
-      d.fromInput.value = ""; d.toInput.value = "";
+    // 프리셋 날짜는 브라우저 로컬 날짜로 계산한다(화면이 규칙을 다시 계산하는 유일한 예외)
+    function localDay(dt) {
+      function z(n) { return (n < 10 ? "0" : "") + n; }
+      return dt.getFullYear() + "-" + z(dt.getMonth() + 1) + "-" + z(dt.getDate());
+    }
+    function applyPreset(from, to) {
+      d.fromInput.value = from; d.toInput.value = to;
       periodChanged();
+    }
+    [
+      ["오늘", function (t) { return [t, t]; }],
+      ["지난 7일", function (t) { return [new Date(t.getFullYear(), t.getMonth(), t.getDate() - 6), t]; }],
+      ["이번 달", function (t) { return [new Date(t.getFullYear(), t.getMonth(), 1), t]; }]
+    ].forEach(function (pr) {
+      var b = el("button", { class: "btn sm", type: "button", text: pr[0] });
+      b.addEventListener("click", function () {
+        var r = pr[1](new Date());
+        applyPreset(localDay(r[0]), localDay(r[1]));
+      });
+      presets.appendChild(b);
     });
+    presets.appendChild(periodClear);
+    periodClear.addEventListener("click", function () { applyPreset("", ""); });
     d.periodPop.addEventListener("keydown", function (e) {
       if (e.key === "Escape") { boardClosePops(); d.periodTrigger.focus(); }
     });
@@ -3950,8 +3997,11 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     d.summary = el("div", { class: "kb-summary", hidden: "" });
     d.summary.hidden = true;
     d.cols = el("div", { class: "kb-cols" });
+    d.archTitle = el("div", { class: "kb-sec-title", hidden: "" });
+    d.archTitle.hidden = true;
     box.appendChild(d.notes);
     box.appendChild(d.summary);
+    box.appendChild(d.archTitle);
     box.appendChild(d.cols);
 
     // 팝오버 밖을 누르면 닫는다
