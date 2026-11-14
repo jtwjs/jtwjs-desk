@@ -20,6 +20,10 @@
     {
       "id": "comp",
       "name": "컴포넌트"
+    },
+    {
+      "id": "work-kanban",
+      "name": "작업: 칸반"
     }
   ],
   "boards": {
@@ -174,6 +178,54 @@
       "h": 1540,
       "title": "상태 모음",
       "page": "current"
+    },
+    "Kanban1Board.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 932,
+      "title": "보드 (정상)",
+      "page": "work-kanban"
+    },
+    "Kanban2Panel.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 932,
+      "title": "세부 패널 · 예정 카드",
+      "page": "work-kanban"
+    },
+    "Kanban3Doing.dc.html": {
+      "x": 2720,
+      "y": 0,
+      "w": 1280,
+      "h": 932,
+      "title": "세부 패널 · 진행 카드",
+      "page": "work-kanban"
+    },
+    "Kanban4States.dc.html": {
+      "x": 4080,
+      "y": 0,
+      "w": 1280,
+      "h": 1760,
+      "title": "상태 모음",
+      "page": "work-kanban"
+    },
+    "Kanban5Filters.dc.html": {
+      "x": 5440,
+      "y": 0,
+      "w": 1280,
+      "h": 1560,
+      "title": "필터 컴포넌트",
+      "page": "work-kanban"
+    },
+    "Kanban6Others.dc.html": {
+      "x": 6800,
+      "y": 0,
+      "w": 1280,
+      "h": 900,
+      "title": "다른 화면 필터 as-is | to-be",
+      "page": "work-kanban"
     }
   },
   "order": [
@@ -195,7 +247,13 @@
     "Trends3States.dc.html",
     "Trends4Bookmarks.dc.html",
     "Hyp1Normal.dc.html",
-    "Hyp2States.dc.html"
+    "Hyp2States.dc.html",
+    "Kanban1Board.dc.html",
+    "Kanban2Panel.dc.html",
+    "Kanban3Doing.dc.html",
+    "Kanban4States.dc.html",
+    "Kanban5Filters.dc.html",
+    "Kanban6Others.dc.html"
   ],
   "notes": {},
   "designSystems": []
