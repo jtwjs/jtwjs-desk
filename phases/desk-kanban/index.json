@@ -153,8 +153,11 @@
     {
       "step": 17,
       "name": "board-ui-review2-fixes",
-      "status": "pending",
-      "tdd": false
+      "status": "completed",
+      "tdd": false,
+      "started_at": "2026-11-15T01:38:40+0900",
+      "summary": "page/index.html만 수정: boardPost가 콜백에 응답 error 값을 넘김(본문 없으면 빈 값). 링크 추가·수정·삭제 409는 error===\"refs broken\"일 때만 BOARD_REFS_BROKEN, 그 외는 「링크는 5개까지 붙일 수 있어요」·「이 링크를 바꾸지 못했어요」·「링크를 지우지 못했어요 · 이름」. 상세 refs_broken이 true면 링크 영역에 깨짐 안내만 보이고 추가 버튼·폼 숨김. 필터가 걸린 보관 보기 제목은 「보관한 카드 걸린 수 / 전체 수」(total 합). 883개 통과, node --check 통과. 확인필요 — 미실행: 화면은 리뷰 3회차에서",
+      "completed_at": "2026-11-15T01:43:50+0900"
     }
   ],
   "reviews": [
