@@ -1,7 +1,7 @@
 """지휘가 Bash로 직접 부르는 CLI (ADR-006).
 
 `scripts/`는 `desk/`만 import한다 — `hooks/`·`page/`는 import하지 않는다
-(ARCHITECTURE 경계). 서브커맨드 4개: `ask` · `picks --new` · `applied` · `prune`.
+(ARCHITECTURE 경계). 서브커맨드: `ask` · `picks --new` · `applied` · `prune` · `board requests|move|pr|link`.
 
 🔴 CRITICAL(CLAUDE.md): 사람 이름·vault 원문·세션 대화 원문을 질문·선택·반영
 파일에 넣지 않는다. `validate_ask`가 막는 필드 밖에 자유 텍스트 필드(`question`·
@@ -20,7 +20,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, paths, validate  # noqa: E402
+from desk import atomic, board, config, paths, validate  # noqa: E402
 
 
 def _read_raw(raw: str) -> str:
@@ -152,6 +152,61 @@ def cmd_prune(days: int = 7) -> int:
     return 0
 
 
+def _board_fail(name: str, exc: Exception) -> int:
+    """칸반 명령 거절: 경로·스택 없이 한 줄만 stderr, 종료 코드 1."""
+    if isinstance(exc, board.NotFound):
+        reason = "없는 카드예요"
+    elif isinstance(exc, OSError):
+        reason = "파일을 읽거나 쓸 수 없어요"
+    else:
+        reason = str(exc).splitlines()[0] if str(exc) else "거절됐어요"
+    print(f"board {name}: {reason}", file=sys.stderr)
+    return 1
+
+
+def cmd_board_requests(repo) -> int:
+    """요청 파일이 있는 예정 카드를 `<레포> <id> <제목> <요청 시각>` 한 줄씩 낸다."""
+    if repo is not None:
+        repos = [repo]
+    else:
+        repos = [Path(r).name for r in config.load_config()["repos"]]
+    for r in repos:
+        try:
+            cards, _ = board.list_cards(r)
+        except (ValueError, OSError) as e:
+            return _board_fail("requests", e)
+        for c in cards:
+            if c["column"] != "planned" or c["requested_at"] is None:
+                continue
+            title = " ".join(str(c["title"]).split())
+            print(f"{r} {c['id']} {title} {c['requested_at']}")
+    return 0
+
+
+def cmd_board_move(repo: str, id: str, column: str) -> int:
+    try:
+        board.move_card(repo, id, column, time.time())
+    except (ValueError, board.NotFound, OSError) as e:
+        return _board_fail("move", e)
+    return 0
+
+
+def cmd_board_pr(repo: str, id: str) -> int:
+    try:
+        board.mark_pr(repo, id, time.time())
+    except (ValueError, board.NotFound, OSError) as e:
+        return _board_fail("pr", e)
+    return 0
+
+
+def cmd_board_link(repo: str, id: str, task: str) -> int:
+    try:
+        board.set_task(repo, id, task)
+    except (ValueError, board.NotFound, OSError) as e:
+        return _board_fail("link", e)
+    return 0
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="desk.py")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -176,6 +231,22 @@ def _build_parser() -> argparse.ArgumentParser:
     prune_parser = sub.add_parser("prune")
     prune_parser.add_argument("--days", type=int, default=7)
 
+    board_parser = sub.add_parser("board")
+    board_sub = board_parser.add_subparsers(dest="board_command", required=True)
+    requests_parser = board_sub.add_parser("requests")
+    requests_parser.add_argument("--repo", default=None)
+    move_parser = board_sub.add_parser("move")
+    move_parser.add_argument("repo")
+    move_parser.add_argument("id")
+    move_parser.add_argument("column")
+    pr_parser = board_sub.add_parser("pr")
+    pr_parser.add_argument("repo")
+    pr_parser.add_argument("id")
+    link_parser = board_sub.add_parser("link")
+    link_parser.add_argument("repo")
+    link_parser.add_argument("id")
+    link_parser.add_argument("task")
+
     return parser
 
 
@@ -192,6 +263,15 @@ def main(argv: list) -> int:
         return cmd_applied(args.repo, args.id, args.issue, args.follow_up)
     if args.command == "prune":
         return cmd_prune(args.days)
+    if args.command == "board":
+        if args.board_command == "requests":
+            return cmd_board_requests(args.repo)
+        if args.board_command == "move":
+            return cmd_board_move(args.repo, args.id, args.column)
+        if args.board_command == "pr":
+            return cmd_board_pr(args.repo, args.id)
+        if args.board_command == "link":
+            return cmd_board_link(args.repo, args.id, args.task)
     return 2  # pragma: no cover — required=True가 먼저 걸린다
 
 
