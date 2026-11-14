@@ -536,7 +536,10 @@ def build_board(cfg: dict, query: dict) -> dict:
     cards_by_repo, phases_by_repo = {}, {}
     for root in cfg["repos"]:
         name = Path(root).name
-        cards_by_repo[name] = board.list_cards(name)
+        try:
+            cards_by_repo[name] = board.list_cards(name)
+        except (ValueError, OSError):
+            cards_by_repo[name] = ([], 1)
         phases_by_repo[name] = dict(list_phase_indexes(root))
     view = board.build_view(cards_by_repo, phases_by_repo, _today(), time.time(), query)
     return {**view, "config": config_block(cfg), "repos": list(cards_by_repo)}
@@ -1077,6 +1080,8 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
             result = _board_post_action(path, repo, body, time.time())
         except board.DuplicateTitle:
             self._send_json(409, {"error": "duplicate"})
+        except board.RefsBroken:
+            self._send_json(409, {"error": "refs broken"})
         except (board.WrongColumn, board.AlreadyRequested, board.NoRequest, board.TooManyLinks):
             self._send_json(409, {"error": "conflict"})
         except board.NotFound:

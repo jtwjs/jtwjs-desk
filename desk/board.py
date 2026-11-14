@@ -105,6 +105,10 @@ class TooManyLinks(Exception):
     """링크가 이미 최대 개수다(409)."""
 
 
+class RefsBroken(Exception):
+    """링크 파일이 깨져 있어 쓰기를 거절한다(409)."""
+
+
 class NotFound(Exception):
     """없는 카드 · 링크(404)."""
 
@@ -309,6 +313,13 @@ def cancel_request(repo, card_id) -> None:
     path.unlink()
 
 
+def _read_refs_for_write(repo, card_id) -> list:
+    refs, broken = read_refs(repo, card_id)
+    if broken:
+        raise RefsBroken(card_id)
+    return refs
+
+
 def _save_refs(repo, card_id, refs) -> None:
     write_json_atomic(_refs_path(repo, card_id), {"refs": refs})
 
@@ -316,7 +327,7 @@ def _save_refs(repo, card_id, refs) -> None:
 def add_ref(repo, card_id, name, url) -> dict:
     read_card(repo, card_id)
     name, url = check_link(name, url)
-    refs, _ = read_refs(repo, card_id)
+    refs = _read_refs_for_write(repo, card_id)
     if len(refs) >= LINKS_MAX:
         raise TooManyLinks(card_id)
     ref = {"id": _new_ref_id(refs), "name": name, "url": url}
@@ -327,7 +338,7 @@ def add_ref(repo, card_id, name, url) -> dict:
 def update_ref(repo, card_id, ref_id, name, url) -> dict:
     read_card(repo, card_id)
     name, url = check_link(name, url)
-    refs, _ = read_refs(repo, card_id)
+    refs = _read_refs_for_write(repo, card_id)
     for ref in refs:
         if ref["id"] == ref_id:
             ref["name"], ref["url"] = name, url
@@ -338,7 +349,7 @@ def update_ref(repo, card_id, ref_id, name, url) -> dict:
 
 def delete_ref(repo, card_id, ref_id) -> None:
     read_card(repo, card_id)
-    refs, _ = read_refs(repo, card_id)
+    refs = _read_refs_for_write(repo, card_id)
     kept = [r for r in refs if r["id"] != ref_id]
     if len(kept) == len(refs):
         raise NotFound(ref_id)
