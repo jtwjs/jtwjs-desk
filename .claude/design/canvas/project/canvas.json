@@ -242,6 +242,14 @@
       "h": 3280,
       "title": "회차 2 · 제목 검색 · 레퍼런스 링크",
       "page": "work-kanban"
+    },
+    "Kanban9Round2.dc.html": {
+      "x": 10880,
+      "y": 0,
+      "w": 1280,
+      "h": 5680,
+      "title": "회차 2 수정 · as-is | to-be",
+      "page": "work-kanban"
     }
   },
   "order": [
@@ -271,7 +279,8 @@
     "Kanban5Filters.dc.html",
     "Kanban6Others.dc.html",
     "Kanban7Changes.dc.html",
-    "Kanban8Links.dc.html"
+    "Kanban8Links.dc.html",
+    "Kanban9Round2.dc.html"
   ],
   "notes": {},
   "designSystems": []
