@@ -7,8 +7,11 @@
     {
       "step": 1,
       "name": "board-core",
-      "status": "pending",
-      "tdd": true
+      "status": "completed",
+      "tdd": true,
+      "started_at": "2026-11-14T18:12:51+0900",
+      "summary": "desk/board.py(순수 함수: COLUMNS·LINK 상수·check_title/link/links·can_move·elapsed_days·candidate_mark·connection_state·progress)와 tests/test_desk_board.py 추가. 시각·today는 인자로 받음.",
+      "completed_at": "2026-11-14T18:18:16+0900"
     },
     {
       "step": 2,
