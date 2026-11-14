@@ -29,7 +29,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from desk import atomic, config, ledger, paths, rollup, routine, signal, sort, trends, validate  # noqa: E402
+from desk import atomic, board, config, ledger, paths, rollup, routine, signal, sort, trends, validate  # noqa: E402
 
 _DEFAULT_PORT = 47615
 _INDEX_HTML_PATH = Path(__file__).resolve().parent / "index.html"
@@ -531,6 +531,34 @@ def build_trends(cfg: dict) -> dict:
             "broken": i_broken + r_broken + m_broken, "missing": []}
 
 
+def build_board(cfg: dict, query: dict) -> dict:
+    """칸반 화면 응답 — 카드·phases를 읽기만 한다. 계산은 desk/board.py."""
+    cards_by_repo, phases_by_repo = {}, {}
+    for root in cfg["repos"]:
+        name = Path(root).name
+        cards_by_repo[name] = board.list_cards(name)
+        phases_by_repo[name] = dict(list_phase_indexes(root))
+    view = board.build_view(cards_by_repo, phases_by_repo, _today(), time.time(), query)
+    return {**view, "config": config_block(cfg), "repos": list(cards_by_repo)}
+
+
+def build_board_card(cfg: dict, repo: str, card_id: str):
+    """카드 상세. 없는 레포·카드면 None, 이름·id 형식이 틀리면 ValueError."""
+    if not valid_repo_name(repo):
+        raise ValueError("bad repo")
+    board._check_id(card_id)
+    roots = {Path(r).name: r for r in cfg["repos"]}
+    if repo not in roots:
+        return None
+    try:
+        card = board.read_card(repo, card_id)
+    except (board.NotFound, ValueError):
+        return None
+    refs, _ = board.read_refs(repo, card_id)
+    phase = dict(list_phase_indexes(roots[repo])).get(card.get("task")) if card.get("task") else None
+    return board.build_card_detail({**card, "id": card_id}, refs, phase, _today())
+
+
 def build_hypothesis_signal(cfg: dict, repo: str | None = None) -> dict:
     """가설 게이트 신호 띠 응답 — 원장을 열어 읽기만 한다. 계산은 desk/signal.py."""
     path = cfg.get("hypothesis_ledger")
@@ -648,6 +676,36 @@ class _DeskRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(403, {"error": "bad host"})
                 return
             self._send_json(200, build_trends(config.load_config()))
+            return
+
+        if parsed.path == "/board":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            qs = {k: v[0] for k, v in parse_qs(parsed.query).items()}
+            try:
+                payload = build_board(config.load_config(), qs)
+            except board.BadQuery as exc:
+                self._send_json(400, {"error": str(exc)})
+                return
+            self._send_json(200, payload)
+            return
+
+        if parsed.path == "/board/card":
+            if not check_host(self.headers, self._port()):
+                self._send_json(403, {"error": "bad host"})
+                return
+            qs = parse_qs(parsed.query)
+            try:
+                detail = build_board_card(config.load_config(), qs.get("repo", [None])[0],
+                                          qs.get("id", [None])[0])
+            except ValueError:
+                self._send_json(400, {"error": "bad request"})
+                return
+            if detail is None:
+                self._send_json(404, {"error": "not found"})
+                return
+            self._send_json(200, detail)
             return
 
         if parsed.path == "/hypothesis-signal":
