@@ -3342,9 +3342,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         if (res.status === 403) {
           showBanner("토큰이 맞지 않습니다 — 서버가 다시 떠서 토큰이 바뀌었을 수 있습니다. 새로고침 해주세요.", 0);
         }
-        cb(res.status);
+        return res.json().then(function (j) { return j && typeof j.error === "string" ? j.error : ""; }, function () { return ""; })
+          .then(function (err) { cb(res.status, err); });
       })
-      .catch(function () { cb(0); });
+      .catch(function () { cb(0, ""); });
   }
 
   function boardCardSnap(data, repo, id) {
@@ -3485,14 +3486,14 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       delete boardHidden[key];
       if (boardPanel) renderBoardLinks();
     }, function () {
-      boardPost("/board/ref/delete", { repo: card.repo, id: card.id, ref_id: ref.id }, function (status) {
+      boardPost("/board/ref/delete", { repo: card.repo, id: card.id, ref_id: ref.id }, function (status, err) {
         delete boardHidden[key];
         var p = boardPanel;
         if (status === 200) {
           if (p && p.repo === card.repo && p.id === card.id) loadBoardDetail(false);
           return;
         }
-        boardToast(status === 409 ? BOARD_REFS_BROKEN : "링크를 지우지 못했어요 · " + ref.name, null, null, true);
+        boardToast(status === 409 && err === "refs broken" ? BOARD_REFS_BROKEN : "링크를 지우지 못했어요 · " + ref.name, null, null, true);
         if (p && p.repo === card.repo && p.id === card.id) renderBoardLinks();
       });
     });
@@ -3521,7 +3522,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     var body = { repo: p.repo, id: p.id, name: dr.name.trim(), url: dr.url.trim() };
     var path = "/board/ref/add";
     if (key !== "add") { path = "/board/ref/update"; body.ref_id = key; }
-    boardPost(path, body, function (status) {
+    boardPost(path, body, function (status, err) {
       if (boardPanel !== p) return;
       p.refBusy = false;
       if (status === 200) {
@@ -3532,7 +3533,9 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         loadBoardDetail(false);
         return;
       }
-      if (status === 409) p.errors = { form: BOARD_REFS_BROKEN };
+      if (status === 409) {
+        p.errors = { form: err === "refs broken" ? BOARD_REFS_BROKEN : (key === "add" ? "링크는 5개까지 붙일 수 있어요" : "이 링크를 바꾸지 못했어요") };
+      }
       else if (status === 400) p.errors = { form: "입력을 확인해 주세요. 이름은 1~40자, 주소는 http(s)://로 시작해야 해요" };
       else if (status === 404) p.errors = { form: "카드나 링크를 찾지 못했어요" };
       else p.errors = { form: "저장하지 못했어요. 다시 눌러 주세요" };
@@ -3592,6 +3595,10 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     clear(box);
     var refs = p.detail.refs || [];
     box.appendChild(el("div", { class: "kb-sec-title", text: "레퍼런스 링크" }));
+    if (p.detail.refs_broken === true) {
+      box.appendChild(el("p", { class: "kb-hint", text: "링크 파일이 깨져 있어요. 홈 폴더 board/ 아래 refs 파일을 고치거나 지워 주세요" }));
+      return;
+    }
     if (refs.length === 0 && p.editing !== "add") box.appendChild(el("p", { class: "kb-hint", text: "붙인 링크가 없어요" }));
     refs.forEach(function (r) {
       if (boardHidden[p.repo + "/" + p.id + "/" + r.id]) return; // 삭제 대기 중인 링크
@@ -3748,9 +3755,9 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     // 보관 보기 제목: N은 응답이 준 열별 count의 합이다(화면이 카드를 세지 않는다)
     d.archTitle.hidden = !(boardUi.archived && cols);
     if (!d.archTitle.hidden) {
-      var n = 0;
-      BOARD_COLS.forEach(function (def) { n += cols[def.key].count; });
-      d.archTitle.textContent = "보관한 카드 " + n;
+      var n = 0, all = 0;
+      BOARD_COLS.forEach(function (def) { n += cols[def.key].count; all += cols[def.key].total; });
+      d.archTitle.textContent = "보관한 카드 " + (boardFilterOn() ? n + " / " + all : n);
     }
     BOARD_COLS.forEach(function (def) {
       d.cols.appendChild(boardColumn(def, cols ? cols[def.key] : null));
