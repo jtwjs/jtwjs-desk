@@ -832,6 +832,29 @@
   .kb-row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .kb-panel-foot { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--surface-raised); }
 
+  .kb-overlay { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.55); }
+  .kb-overlay[hidden] { display: none; }
+  .kb-modal {
+    box-sizing: border-box; width: 520px; max-width: 100%; max-height: 100%; display: flex; flex-direction: column;
+    background: var(--surface-panel); border: 1px solid var(--surface-raised); border-radius: var(--radius-card);
+  }
+  .kb-modal-head { padding: 16px 16px 8px; font-size: 16px; font-weight: 600; color: var(--text-strong); margin: 0; }
+  .kb-modal-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 8px 16px 16px; }
+  .kb-modal-foot { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--surface-raised); }
+  .kb-modal-foot .kb-row-actions { justify-content: flex-end; }
+  .kb-modal select.kb-input, .kb-modal .kb-input, .kb-modal textarea.kb-input { width: 100%; }
+  .kb-modal textarea.kb-input { height: 80px; padding: 8px 10px; resize: vertical; }
+  .kb-input.bad { border-color: var(--danger); }
+  .kb-modal :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .kb-link-row { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--surface-raised); border-radius: var(--radius-control); }
+  .kb-toasts { position: fixed; left: 16px; bottom: 16px; z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .kb-toast {
+    display: flex; align-items: center; gap: 12px; padding: 8px 12px; font-size: 13px; color: var(--text-strong);
+    background: var(--surface-raised); border: 1px solid var(--kb-input-border, #6B7390); border-radius: var(--radius-control);
+  }
+  .kb-toast.bad { border-color: var(--danger); }
+  .kb-toasts :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
@@ -2953,9 +2976,266 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     } else if (col.cards.length === 0) {
       kids.push(el("p", { class: "kb-empty", text: filtered ? "이 조건에 맞는 카드가 없어요" : def.empty }));
     } else {
-      col.cards.forEach(function (c) { kids.push(boardCard(c)); });
+      col.cards.forEach(function (c) { if (!boardHidden[c.repo + "/" + c.id]) kids.push(boardCard(c)); }); // 삭제 대기 중인 카드만 잠시 숨긴다(되돌리기 5초)
     }
     return el("section", { class: "kb-col", "aria-label": def.name }, kids);
+  }
+
+  // ---- 칸반 토스트 · 새 카드 모달 ----
+  // 토스트: 삭제 · 보관 · 링크 삭제를 5초 동안 되돌릴 수 있다. 서버에 임시 상태는 없다 —
+  // 삭제는 5초 뒤에 POST를 보내고(되돌리면 안 보냄), 새로고침하거나 탭을 닫으면 대기 중 삭제는 보내지 않는다.
+  var BOARD_UNDO_MS = 5000;
+  var boardHidden = {}; // 삭제 대기 중인 카드 · 링크 키 (화면에서만 숨김)
+  var boardToasts = [];
+  var boardToastBox = null;
+
+  function boardToastRender() {
+    if (!boardToastBox) {
+      boardToastBox = el("div", { class: "kb-toasts", role: "status", "aria-live": "polite" });
+      document.body.appendChild(boardToastBox);
+    }
+    clear(boardToastBox);
+    boardToasts.forEach(function (t) { boardToastBox.appendChild(t.node); });
+    if (boardToasts.length >= 2) {
+      var all = el("button", { class: "btn sm", type: "button", text: "모두 지우기" });
+      // 알림만 지운다 — 대기 중인 삭제는 5초 뒤 그대로 나간다
+      all.addEventListener("click", function () { boardToasts.slice().forEach(function (t) { boardToastDrop(t); }); });
+      boardToastBox.appendChild(all);
+    }
+  }
+
+  function boardToastDrop(t) {
+    var i = boardToasts.indexOf(t);
+    if (i >= 0) boardToasts.splice(i, 1);
+    boardToastRender();
+  }
+
+  // undo 있으면 [되돌리기] 버튼, onExpire는 5초가 지난 뒤(되돌리지 않았을 때) 한 번 부른다
+  function boardToast(text, onUndo, onExpire, bad) {
+    var t = { node: null, timer: null };
+    var kids = [el("span", { text: text })];
+    if (onUndo) {
+      var u = el("button", { class: "btn sm", type: "button", text: "되돌리기" });
+      u.addEventListener("click", function () {
+        clearTimeout(t.timer);
+        boardToastDrop(t);
+        onUndo();
+      });
+      kids.push(u);
+    }
+    t.node = el("div", { class: "kb-toast" + (bad ? " bad" : "") }, kids);
+    boardToasts.push(t);
+    boardToastRender();
+    t.timer = setTimeout(function () {
+      boardToastDrop(t);
+      if (onExpire) onExpire();
+    }, BOARD_UNDO_MS);
+  }
+
+  // 카드 삭제: 카드를 숨기고 5초 토스트, 5초 뒤에 POST /board/delete
+  function boardDeleteCard(repo, id, title) {
+    var key = repo + "/" + id;
+    boardHidden[key] = true;
+    renderBoardCols();
+    boardToast("카드를 지웠어요 · " + title, function () {
+      delete boardHidden[key];
+      renderBoardCols();
+    }, function () {
+      boardPost("/board/delete", { repo: repo, id: id }, function (status) {
+        delete boardHidden[key];
+        if (status !== 200) boardToast("삭제하지 못했어요 · " + title + (status === 409 ? " (카드 상태가 이미 바뀌었어요)" : ""), null, null, true);
+        fetchBoard();
+      });
+    });
+  }
+
+  // 보관: 바로 POST, 토스트의 되돌리기가 POST /board/revive
+  function boardArchiveCard(repo, id, title) {
+    boardPost("/board/archive", { repo: repo, id: id }, function (status) {
+      if (status === 200) {
+        var cur = boardPanel;
+        if (cur && cur.repo === repo && cur.id === id) closeBoardPanel();
+        fetchBoard();
+        boardToast("보관했어요 · " + title, function () {
+          boardPost("/board/revive", { repo: repo, id: id }, function (st) {
+            if (st !== 200) boardToast("되살리지 못했어요 · " + title, null, null, true);
+            fetchBoard();
+          });
+        }, null);
+        return;
+      }
+      var p = boardPanel;
+      if (p && p.repo === repo && p.id === id) {
+        p.busy = false;
+        p.saveError = status === 409 ? "카드 상태가 이미 바뀌었어요. 목록을 다시 받아 왔어요."
+          : (status === 404 ? "카드를 찾지 못했어요." : "보관하지 못했어요. 다시 눌러 주세요.");
+        renderBoardPanel();
+      }
+      if (status === 409 || status === 404) fetchBoard();
+    });
+  }
+
+  var boardModal = null; // { opener, errors, busy, node }
+  var boardDraft = null; // 모달을 닫아도(Esc) 입력은 남긴다. 추가에 성공하면 비운다
+
+  function boardDraftNew() {
+    var repos = (boardUi.data && boardUi.data.repos) || [];
+    return { repo: boardUi.repo || repos[0] || "", title: "", note: "", links: [] };
+  }
+
+  function openBoardModal(opener) {
+    if (boardModal) return;
+    if (!boardDraft) boardDraft = boardDraftNew();
+    var overlay = el("div", { class: "kb-overlay" });
+    boardModal = { opener: opener, errors: {}, busy: false, node: overlay };
+    document.body.appendChild(overlay);
+    renderBoardModal("title");
+  }
+
+  function closeBoardModal() {
+    var m = boardModal;
+    if (!m) return;
+    boardModal = null;
+    if (m.node.parentNode) m.node.parentNode.removeChild(m.node);
+    if (m.opener && m.opener.isConnected) m.opener.focus();
+  }
+
+  function boardModalErr(text) {
+    return text ? el("p", { class: "kb-hint danger", role: "alert", text: text }) : null;
+  }
+
+  function renderBoardModal(focusSel) {
+    var m = boardModal;
+    if (!m) return;
+    var dr = boardDraft;
+    var errs = m.errors;
+    var repos = (boardUi.data && boardUi.data.repos) || [];
+    clear(m.node);
+
+    var repoSel = el("select", { class: "kb-input", "aria-label": "레포" });
+    if (repos.length === 0) repoSel.appendChild(el("option", { value: "", text: "레포가 없어요" }));
+    repos.forEach(function (r) {
+      var o = el("option", { value: r, text: r });
+      if (r === dr.repo) o.selected = true;
+      repoSel.appendChild(o);
+    });
+    repoSel.addEventListener("change", function () { dr.repo = repoSel.value; });
+
+    var titleIn = el("input", { class: "kb-input" + (errs.title || errs.dup ? " bad" : ""), type: "text", "aria-label": "제목", "data-kb-focus": "title" });
+    titleIn.value = dr.title;
+    titleIn.addEventListener("input", function () { dr.title = titleIn.value; }); // 입력 중에는 중복 경고를 하지 않는다
+
+    var noteIn = el("textarea", { class: "kb-input", "aria-label": "메모", placeholder: "사람 이름이나 대화 내용은 적지 않아요" });
+    noteIn.value = dr.note;
+    noteIn.addEventListener("input", function () { dr.note = noteIn.value; });
+
+    var body = [
+      el("label", { class: "kb-field" }, [el("span", { text: "레포" }), repoSel]),
+      boardModalErr(errs.repo),
+      el("label", { class: "kb-field" }, [el("span", { text: "제목" }), titleIn]),
+      boardModalErr(errs.title),
+      boardModalErr(errs.dup),
+      el("label", { class: "kb-field" }, [el("span", { text: "메모" }), noteIn]),
+      el("p", { class: "kb-hint", text: "사람 이름이나 대화 내용은 적지 않아요" }),
+      el("div", { class: "kb-sec-title", text: "레퍼런스 링크 (" + dr.links.length + "/" + BOARD_REF_MAX + ")" })
+    ];
+    dr.links.forEach(function (lk, i) {
+      var le = (errs.links && errs.links[i]) || {};
+      var nIn = el("input", { class: "kb-input" + (le.name ? " bad" : ""), type: "text", "aria-label": "링크 " + (i + 1) + " 이름", placeholder: "이름 (40자까지)", maxlength: "200", "data-kb-focus": "ln" + i });
+      var uIn = el("input", { class: "kb-input" + (le.url ? " bad" : ""), type: "text", "aria-label": "링크 " + (i + 1) + " 주소", placeholder: "https://example.com/…", maxlength: "5000" });
+      nIn.value = lk.name;
+      uIn.value = lk.url;
+      nIn.addEventListener("input", function () { lk.name = nIn.value; });
+      uIn.addEventListener("input", function () { lk.url = uIn.value; });
+      var rm = button("링크 빼기", function () {
+        dr.links.splice(i, 1);
+        m.errors.links = null;
+        renderBoardModal("addlink");
+      }, null, true);
+      rm.setAttribute("aria-label", "링크 " + (i + 1) + " 빼기");
+      body.push(el("div", { class: "kb-link-row" }, [nIn, boardModalErr(le.name), uIn, boardModalErr(le.url), el("div", { class: "kb-row-actions" }, [rm])]));
+    });
+    if (dr.links.length >= BOARD_REF_MAX) {
+      body.push(el("p", { class: "kb-hint", text: "링크는 5개까지 붙일 수 있어요" }));
+    } else {
+      var addLink = button("+ 링크 추가", function () {
+        dr.links.push({ name: "", url: "" });
+        renderBoardModal("ln" + (dr.links.length - 1));
+      }, null, true);
+      addLink.setAttribute("data-kb-focus", "addlink");
+      body.push(addLink);
+    }
+
+    var cancel = button("취소", closeBoardModal);
+    var submit = button(m.busy ? "추가하는 중…" : "추가", submitBoardModal, "accent");
+    submit.disabled = m.busy || repos.length === 0;
+    var foot = [];
+    if (errs.form) foot.push(inlineNote(errs.form, "danger"));
+    foot.push(el("div", { class: "kb-row-actions" }, [cancel, submit]));
+
+    var dialog = el("div", { class: "kb-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "kb-modal-title" }, [
+      el("h2", { class: "kb-modal-head", id: "kb-modal-title", text: "새 카드" }),
+      el("div", { class: "kb-modal-body" }, body),
+      el("div", { class: "kb-modal-foot" }, foot)
+    ]);
+    dialog.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeBoardModal(); return; }
+      if (e.key === "Tab") { // 포커스를 모달 안에 가둔다
+        var f = Array.prototype.slice.call(dialog.querySelectorAll("button:not(:disabled), input, select, textarea"));
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+    m.node.appendChild(dialog);
+    if (focusSel) {
+      var target = dialog.querySelector('[data-kb-focus="' + focusSel + '"]');
+      if (target) target.focus();
+    }
+  }
+
+  function submitBoardModal() {
+    var m = boardModal;
+    if (!m || m.busy) return;
+    var dr = boardDraft;
+    var errs = {};
+    if (!dr.repo) errs.repo = "레포를 골라 주세요";
+    if (!dr.title.trim()) errs.title = "제목을 적어 주세요";
+    var links = [];
+    var linkErrs = [];
+    var bad = false;
+    dr.links.forEach(function (lk, i) {
+      if (!lk.name.trim() && !lk.url.trim()) { linkErrs[i] = {}; return; } // 빈 줄은 보내지 않는다
+      var le = checkRefInput(lk.name, lk.url);
+      linkErrs[i] = le;
+      if (le.name || le.url) bad = true;
+      links.push({ name: lk.name.trim(), url: lk.url.trim() });
+    });
+    if (bad) errs.links = linkErrs;
+    if (errs.repo || errs.title || errs.links) {
+      m.errors = errs;
+      renderBoardModal(errs.title ? "title" : null);
+      return;
+    }
+    m.errors = {};
+    m.busy = true;
+    renderBoardModal(null);
+    boardPost("/board/add", { repo: dr.repo, title: dr.title.trim(), note: dr.note, links: links }, function (status) {
+      if (boardModal !== m) return;
+      m.busy = false;
+      if (status === 200) {
+        boardDraft = null;
+        closeBoardModal();
+        fetchBoard();
+        return;
+      }
+      // 입력은 그대로 둔다
+      if (status === 409) m.errors = { dup: "같은 제목의 예정 카드가 이미 있어요" };
+      else if (status === 400) m.errors = { form: "입력을 확인해 주세요. 제목은 비면 안 되고, 링크는 이름과 http(s):// 주소가 맞아야 해요" };
+      else m.errors = { form: "서버에 닿지 못했어요. 입력은 그대로예요. 다시 눌러 주세요" };
+      renderBoardModal(status === 409 ? "title" : null);
+    });
   }
 
   // ---- 칸반 세부 패널 ----
@@ -3118,15 +3398,26 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     });
   }
 
-  // 링크 삭제 한 곳 — step 9가 이 함수 안을 5초 되돌리기로 바꾼다
+  // 링크 삭제 한 곳 — 줄을 숨기고 5초 토스트를 보인 뒤, 5초가 지나야 POST를 보낸다(되돌리면 보내지 않는다)
   function deleteRef(card, ref) {
-    var p = boardPanel;
-    if (!p) return;
-    boardPost("/board/ref/delete", { repo: card.repo, id: card.id, ref_id: ref.id }, function (status) {
-      if (boardPanel !== p) return;
-      if (status === 200) { p.saveError = ""; loadBoardDetail(false); return; }
-      p.saveError = "링크를 지우지 못했어요. 다시 눌러 주세요.";
-      renderBoardPanel();
+    var key = card.repo + "/" + card.id + "/" + ref.id;
+    if (boardHidden[key]) return;
+    boardHidden[key] = true;
+    if (boardPanel) renderBoardLinks();
+    boardToast("링크를 지웠어요 · " + ref.name, function () {
+      delete boardHidden[key];
+      if (boardPanel) renderBoardLinks();
+    }, function () {
+      boardPost("/board/ref/delete", { repo: card.repo, id: card.id, ref_id: ref.id }, function (status) {
+        delete boardHidden[key];
+        var p = boardPanel;
+        if (status === 200) {
+          if (p && p.repo === card.repo && p.id === card.id) loadBoardDetail(false);
+          return;
+        }
+        boardToast("링크를 지우지 못했어요 · " + ref.name, null, null, true);
+        if (p && p.repo === card.repo && p.id === card.id) renderBoardLinks();
+      });
     });
   }
 
@@ -3221,6 +3512,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     box.appendChild(el("div", { class: "kb-sec-title", text: "레퍼런스 링크" }));
     if (refs.length === 0 && p.editing !== "add") box.appendChild(el("p", { class: "kb-hint", text: "붙인 링크가 없어요" }));
     refs.forEach(function (r) {
+      if (boardHidden[p.repo + "/" + p.id + "/" + r.id]) return; // 삭제 대기 중인 링크
       if (p.editing === r.id) { box.appendChild(refForm(r.id)); return; }
       var href = safeHref(r.url);
       var nameNode;
@@ -3349,11 +3641,15 @@ const DESK_TOKEN = "__DESK_TOKEN__";
         }));
       }
       acts.push(button("삭제", function () {
-        boardAction("/board/delete", { repo: p.repo, id: p.id }, true, "삭제하지 못했어요. 다시 눌러 주세요.");
+        var t = d.title, r = p.repo, i = p.id;
+        closeBoardPanel();
+        boardDeleteCard(r, i, t);
       }));
     } else {
       acts.push(button("보관", function () {
-        boardAction("/board/archive", { repo: p.repo, id: p.id }, true, "보관하지 못했어요. 다시 눌러 주세요.");
+        if (p.busy) return;
+        p.busy = true;
+        boardArchiveCard(p.repo, p.id, d.title);
       }));
     }
     var foot = [];
@@ -3575,12 +3871,16 @@ const DESK_TOKEN = "__DESK_TOKEN__";
       fetchBoard();
     });
 
+    d.newBtn = el("button", { class: "btn accent", type: "button", text: "+ 새 카드" });
+    d.newBtn.addEventListener("click", function () { openBoardModal(d.newBtn); });
+
     d.bar = el("div", { class: "kb-bar" }, [
       el("div", { class: "kb-pop-wrap" }, [d.repoTrigger, d.repoPop]),
       el("div", { class: "kb-pop-wrap" }, [d.periodTrigger, d.periodPop]),
       d.searchInput,
       el("span", { class: "kb-spacer" }),
-      d.archiveBtn
+      d.archiveBtn,
+      d.newBtn
     ]);
     box.appendChild(d.bar);
 
@@ -3602,7 +3902,7 @@ const DESK_TOKEN = "__DESK_TOKEN__";
     box.appendChild(d.panel);
     // Esc: 열린 것 중 가장 안쪽 하나만 닫는다(링크 입력 폼 → 패널). 입력한 글자는 drafts에 남는다
     document.addEventListener("keydown", function (e) {
-      if (e.key !== "Escape" || !boardPanel || activeTab !== "board") return;
+      if (e.key !== "Escape" || !boardPanel || activeTab !== "board" || boardModal) return;
       if (!d.repoPop.hidden || !d.periodPop.hidden) return; // 팝오버가 먼저 닫힌다
       if (boardPanel.editing) { endBoardEdit(); return; }
       closeBoardPanel();
