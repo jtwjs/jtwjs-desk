@@ -13,7 +13,7 @@
 
 ## 검증
 
-- 아직 없음 — `verify.test`는 첫 테스트가 생길 때 `python3 -m unittest discover -s tests`로 채운다(빈 레포에서는 exit 5)
+- 테스트: `python3 -m unittest discover -s tests` — 로컬에서 돌리고, CI(`.github/workflows/ci.yml`)도 PR · main push마다 같은 명령을 돌린다
 - 런타임: Python 표준 라이브러리만 (3.14 실측). 외부 패키지를 들이지 않는다
 
 > 정본은 [.claude/harness.json](.claude/harness.json)의 `verify`다. 여기와 어긋나면 `harness-doctor` 검사 1이 잡는다.

@@ -2,7 +2,7 @@
   "$comment": "harness-init 이 실제로 돌려보고 통과한 것만 채운다. 없는 키는 비워 둔다 — 지어내지 않는다.",
   "harness": {
     "$comment": "이 파일을 만든 플러그인 버전. harness-init 이 ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json 의 version 으로 채우고, harness-doctor 검사 0 이 현재 플러그인과 비교해 스키마 표류를 잡는다. (2026-10-08 — 실레포 9개의 키 모양이 4종으로 갈라져 있었는데 어느 버전으로 깔렸는지 알 길이 없었다.)",
-    "version": "0.34.0"
+    "version": "0.37.0"
   },
   "stacks": {
     "$comment": "harness-init 이 빌드 파일로 판정한 스택 팩. 예: [{ \"pack\": \"kotlin-spring\", \"root\": \".\" }]. 비어 있으면 팩 없음. kitRef 는 project-new 가 degit 한 kit 과 고정 ref(예: \"jtwjs/stack-kits/fullstack#v0.2.1\"). kit 없이 깔았으면 비운다.",
@@ -34,7 +34,7 @@
   },
   "ci": {
     "$comment": "test 게이트가 없으면 'deferred'. 비워 두지 말고 deferred 라고 적어야 매번 보고된다.",
-    "test": "deferred"
+    "test": "python3 -m unittest discover -s tests"
   },
   "tdd": {
     "$comment": "exclude 는 .claude/rules/testing.md §0 과 같은 내용을 가리켜야 한다. 어긋나면 막는 것과 적힌 것이 달라진다. — 이 레포: enabled false. tdd-guard 훅은 짝 테스트를 foo.test.py 로만 찾는데 Python unittest 는 그 이름을 import 못 한다(2026-11-02 harness-init). RED/GREEN 판정은 sdd_runner judge 가 git 기록으로 따로 한다.",

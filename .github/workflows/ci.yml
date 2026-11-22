@@ -25,11 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 🔴 test 는 건너뛰지 않는다.
-      #    harness.json 의 ci.test 가 "deferred" 면 이 단계를 넣되 아래처럼 사실을 남긴다.
-      #    조용히 빼면 "테스트가 없다"가 아니라 "테스트가 있는 줄" 알게 된다.
-      #    deferred 일 때 harness-init 이 넣는 줄:
-      #      run: echo "test deferred — .claude/harness.json ci.test 참고"
+      # 런타임: Python 표준 라이브러리만(CLAUDE.md 「검증」). 설치할 의존성이 없다.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      # 🔴 test 는 건너뛰지 않는다. 명령은 harness.json verify.test 와 같아야 한다(harness-doctor 1-b).
       - name: test
-        run: echo "test deferred — .claude/harness.json ci.test 참고"
+        run: python3 -m unittest discover -s tests
 
